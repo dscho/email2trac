@@ -53,14 +53,15 @@ How to use
 	reply_address: 1             # OPTIONAL, if set then fill in ticket CC field
         umask: 022                   # OPTIONAL, if set then use this umask for creation of the attachments
 	mailto_link: 1               # OPTIONAL, if set then [mailto:<CC>] in description 
+	trac_version: 0.8            # OPTIONAL, default is 0.9
         
- * Configure script as a mail (pipe) filter with your MTA
-    typically, this involves adding a line like this to /etc/aliases:
-       somename: | /usr/sara/sbin/run_email2trac
-
-    Check your MTA's documentation for specifics.
-
  * default config file is : /etc/email2trac.conf
+
+ * Commandline opions:
+                -h | --help
+                -c <value> | --component=<value>
+                -f <config file> | --file=<config file>
+                -p <project name> | --project=<project name>
 
 SVN Info:
         $Id: email2trac.py 1523 2005-11-01 09:27:51Z bas $
