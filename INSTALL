@@ -16,6 +16,7 @@ The email2trac package contains the following utilities:
     umask: 022              # OPTIONAL, Use this umask for saving attachments
     mailto_link: 1          # OPTIONAL, if set then [mailto:<CC>] in description
     email_header: 1         # OPTIONAL, if set then show TO/CC fields in description
+    trac_version: 0.8	    # OPTIONAL, if set use this as trac version
 
 
 SETUP
@@ -23,19 +24,15 @@ SETUP
 
 It depends on your MTA how the setup is. Below is an example of the SARA setup
 that uses postfix as our MTA.  
+  - Edit Makefile, adjust the variables
+  - make
+  - make install
   - Copy email2trac.conf to /etc  (default location for email2trac.py)
-    If different location use the -f <filename> option for email2trac.py
-  - Postfix run as user 'nobody' and the apache as user 'www-data'. To enable
-    saving of attachments we must use 'run_email2trac.c'. We do not have to 
-    adjust the values. If you use other accounts then adjust the c-file:
-       gcc -o run_email2trac run_email2trac.c
+    If different location use the "-f <config file> or --file=<config file>" to run_email2trac
 
-    default path for email2trac.py is /usr/sbin
-  - cp run_email2trac /usr/sbin
-  - chmod 4111 run_email2trac
-  - cp email2trac.py /usr/sbin
   - vi /etc/aliases
-     bas: |/usr/sbin/run_email2trac
+     bas: |/usr/sbin/run_email2trac [-f <config file>| --file=<config file>]
+
   - newaliases
   - Test
      mail bas < test7.eml

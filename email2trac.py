@@ -51,10 +51,8 @@ How to use
 	debug: 1                     # OPTIONAL, if set print some DEBUG info
 	spam_level: 4                # OPTIONAL, if set check for SPAM mail 
 	reply_address: 1             # OPTIONAL, if set then fill in ticket CC field
-    umask: 022                   # OPTIONAL, if set then use this umask for
-												creation of the attachments
-	mailto_link: 1               # OPTIONAL, if set then [mailto:<CC>] in 
-												description 
+        umask: 022                   # OPTIONAL, if set then use this umask for creation of the attachments
+	mailto_link: 1               # OPTIONAL, if set then [mailto:<CC>] in description 
         
  * Configure script as a mail (pipe) filter with your MTA
     typically, this involves adding a line like this to /etc/aliases:

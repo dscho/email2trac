@@ -5,13 +5,15 @@
 # MTA_USER "nobody"
 # TRAC_USER "www-data"
 # TRAC_SCRIPT_NAME "email2trac.py"
-# INSTALL_DIR "/usr/bin"
 #
 #MTA_USER=daemon
 #TRAC_USER=apache
 #TRAC_SCRIPT_NAME=email2trac.py
 #INSTALL_DIR=/www/Web/servers/trac/site-config/scripts
 #PYTHON_BIN=/usr/local/Python/pro/bin/python
+
+INSTALL_DIR=/usr/bin
+PYTHON_BIN=/usr/bin/python
 
 CC=gcc
 DEBUG=0
@@ -34,3 +36,6 @@ install: all
 	  sed -e "s%^\#\!/usr/bin/python%\#\!$(PYTHON_BIN)%" $$script > $(INSTALL_DIR)/$$script ; \
 	  chmod a+x $(INSTALL_DIR)/$$script ; \
 	done
+
+clean:
+	rm run_email2trac
