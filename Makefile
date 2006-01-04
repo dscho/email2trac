@@ -1,5 +1,12 @@
 # email2trac Makefile
-
+#
+# defaullt values are:
+#
+# MTA_USER "nobody"
+# TRAC_USER "www-data"
+# TRAC_SCRIPT_NAME "email2trac.py"
+# INSTALL_DIR "/usr/bin"
+#
 MTA_USER=daemon
 TRAC_USER=apache
 TRAC_SCRIPT_NAME=email2trac.py
