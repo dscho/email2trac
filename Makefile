@@ -7,15 +7,15 @@
 # TRAC_SCRIPT_NAME "email2trac.py"
 # INSTALL_DIR "/usr/bin"
 #
-MTA_USER=daemon
-TRAC_USER=apache
-TRAC_SCRIPT_NAME=email2trac.py
-INSTALL_DIR=/www/Web/servers/trac/site-config/scripts
-PYTHON_BIN=/usr/local/Python/pro/bin/python
+#MTA_USER=daemon
+#TRAC_USER=apache
+#TRAC_SCRIPT_NAME=email2trac.py
+#INSTALL_DIR=/www/Web/servers/trac/site-config/scripts
+#PYTHON_BIN=/usr/local/Python/pro/bin/python
 
-CC=cc
+CC=gcc
 DEBUG=0
-CFLAGS=-c99 -DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(INSTALL_DIR)\" -DDEBUG=$(DEBUG)
+CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(INSTALL_DIR)\" -DDEBUG=$(DEBUG)
 
 PYTHON_FILES=delete_spam.py email2trac.py
 WRAPPER_SRC=run_email2trac.c run_email2trac.h
