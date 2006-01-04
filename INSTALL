@@ -1,0 +1,41 @@
+The email2trac package contains the following utilities:
+ - email2trac.py:
+    Converts an email to ticket. Reads a config file email2trac.conf
+ - run_email2trac.c:
+    Suid program that changes the MTA-user to the TRAC-user so that we can 
+    save attachments
+ - delete_spam.py:
+    A small program that deletes the SPAM tickets from the database
+ - email2trac.conf:
+    Is read by email2trac.py to set the various options. This are the options:
+    [DEFAULT]               # REQUIRED
+    project: /data/trac/bas # REQUIRED
+    debug: 1                # OPTIONAL, if set print some DEBUG info 
+    spam_level: 4           # OPTIONAL, if set check for SPAM mail 
+    reply_address: 1        # OPTIONAL, if set then fill in ticket CC field
+    umask: 022              # OPTIONAL, Use this umask for saving attachments
+    mailto_link: 1          # OPTIONAL, if set then [mailto:<CC>] in description
+    email_header: 1         # OPTIONAL, if set then show TO/CC fields in description
+
+
+SETUP
+=====
+
+It depends on your MTA how the setup is. Below is an example of the SARA setup
+that uses postfix as our MTA.  
+  - Copy email2trac.conf to /etc  (default location for email2trac.py)
+    If different location use the -f <filename> option for email2trac.py
+  - Postfix run as user 'nobody' and the apache as user 'www-data'. To enable
+    saving of attachments we must use 'run_email2trac.c'. We do not have to 
+    adjust the values. If you use other accounts then adjust the c-file:
+       gcc -o run_email2trac run_email2trac.c
+
+    default path for email2trac.py is /usr/sbin
+  - cp run_email2trac /usr/sbin
+  - chmod 4111 run_email2trac
+  - cp email2trac.py /usr/sbin
+  - vi /etc/aliases
+     bas: |/usr/sbin/run_email2trac
+  - newaliases
+  - Test
+     mail bas < test7.eml
