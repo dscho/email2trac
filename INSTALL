@@ -1,47 +1,60 @@
 = Installation and Configuration of email2trac =
 
 The email2trac package contains the following utilities:
- * '''email2trac.py''' : converts an email to ticket. Reads a config file email2trac.conf
- * '''run_email2trac.c''' : suid program that changes the MTA-user to the TRAC-user so that we can save attachments
- * '''delete_spam.py''' : small program that deletes the SPAM tickets from the database
- * '''email2trac.conf''' : read by email2trac.py to set the various options. This are the options:
+ email2trac.py   : converts an email to ticket. Reads a config file 
+                   email2trac.conf
+ run_email2trac.c: suid program that changes the MTA-user to the TRAC-user so 
+                   that we can save attachments
+ delete_spam.py  : small program that deletes the SPAM tickets from the database
+ email2trac.conf : read by email2trac.py to set the various options. This are 
+                   the options:
 {{{
-    [DEFAULT]			# REQUIRED
-    project_root: /data/trac	# REQUIRED if project: doesn't specify a project 
-				# full path, else OPTIONAL
-    project: bas 		# OPTIONAL if project_root: present, 
-				# else REQUIRED and MUST specify a project full path
-    debug: 1			# OPTIONAL, if set print some DEBUG info
-    spam_level: 4		# OPTIONAL, if set check for SPAM mail 
-    reply_address: 1		# OPTIONAL, if set then fill in ticket CC field
-    umask: 022			# OPTIONAL, Use this umask for saving attachments
-    mailto_link: 1		# OPTIONAL, if set then [mailto:<CC>] in description
-    email_header: 1		# OPTIONAL, if set then show TO/CC fields in description
-    trac_version: 0.8		# OPTIONAL, if set use this as trac version (D: 0.9)
+ [DEFAULT]                  # REQUIRED
+ project: /data/trac/jouvin # REQUIRED
+ debug: 1                   # OPTIONAL, if set print some DEBUG info
+ spam_level: 4              # OPTIONAL, if set check for SPAM mail 
+ reply_address: 1           # OPTIONAL, if set then fill in ticket CC field
+ umask: 022                 # OPTIONAL, Use this umask for saving attachments
+ mailto_link: 1             # OPTIONAL, if set then [mailto:<CC>] in description
+ email_header: 1            # OPTIONAL, if set then show TO/CC fields in description
+ trac_version: 0.8          # OPTIONAL, if set use this as trac version (D: 0.9)
+
+ [bas]                     # OPTIONAL project declaration, if set project option
+ project: /data/trac/bas   # necessary, use -p|--project bas. 
+ spam_level: 2             # Override DEFAULT spam_level, can also be 
+                           # done for other options
 }}}
 
 == Installation and Configuration ==
 
 First build, install email2trac :
 
-  * Edit Makefile, adjust the variables (in particular INSTALL_DIR, MTA_USER and TRAC_USER)
+  * Edit Makefile, adjust the variables (in particular INSTALL_DIR, MTA_USER 
+    and TRAC_USER)
   * make
   * make install
-  * Define a symlink /etc/email2trac.conf referencing $INSTALL_DIR/email2trac.conf
+  * Define a symlink /etc/email2trac.conf referencing 
+    $INSTALL_DIR/email2trac.conf
 
- After installatin, edit email2trac.conf for your site. Most important parameters are project_root: and project:. project: defines a default project, when project_root: is specified.
+ After installation, edit email2trac.conf for your site. Most important 
+ parameter is project, see above
 
 == Usage ==
 
-It depends on your MTA how the setup is. For Sendmail and Postfix, the procedure is the same :
-
- * Edit your alias definition file (default : /etc/aliases for Postfix, /etc/mail/aliases for Sendmail) and add one line per project/component you want to allow ticket submission from email to. For each alias, you can specify option --project to specify a project other than the default configured inside the configuration file (project must be located below ''project_root'') and option ''--component'' to specify a component other than the default component for the project. Line must have the following format :
+It depends on your MTA how the setup is. For Sendmail and Postfix, the p
+rocedure is the same :
+ * Edit your alias definition file (default : /etc/aliases for Postfix, 
+   /etc/mail/aliases for Sendmail) and add one line per project/component you 
+   want to allow ticket submission from email to. For each alias, you can 
+   specify option --project. This option selects a configuration stanza in the 
+   config file and ''--component'' to specify a component other than the 
+   default component for the project. Line must have the following format :
 {{{
      tracproj: |/usr/sbin/run_email2trac [--project=<project_name>] [--component=<project_component>]
 }}}
 
   * Update your alias database with command ''newaliases''
-  *  Test with a command like :
+  * Test with a command like :
 {{{
      mail tracproj < test7.eml
 }}}
