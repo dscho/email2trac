@@ -1,3 +1,12 @@
+2006-01-10  Bas van der Vlies <basv@sara.nl>:
+	* Removed project_root from source and config file
+	* Adjust code so we can use mulitple stanza's in config file, eg:
+	  [bas]
+	  project: /data/trac/bas
+	  spam_level: 3
+
+	  use option "-p|--project bas" to select the stanza
+
 2006-01-04  Bas van der Vlies <basv@sara.nl>:
 
 	* Fixed getopt for -f option

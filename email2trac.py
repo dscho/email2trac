@@ -46,14 +46,17 @@ MIME headers are mapped as follows:
 How to use
 ----------
  * Create an config file:
-	[DEFAULT]                    # REQUIRED
-	project: /data/trac/test     # REQUIRED
-	debug: 1                     # OPTIONAL, if set print some DEBUG info
-	spam_level: 4                # OPTIONAL, if set check for SPAM mail 
-	reply_address: 1             # OPTIONAL, if set then fill in ticket CC field
-        umask: 022                   # OPTIONAL, if set then use this umask for creation of the attachments
-	mailto_link: 1               # OPTIONAL, if set then [mailto:<CC>] in description 
-	trac_version: 0.8            # OPTIONAL, default is 0.9
+	[DEFAULT]                        # REQUIRED
+	project      : /data/trac/test   # REQUIRED
+	debug        : 1                 # OPTIONAL, if set print some DEBUG info
+	spam_level   : 4                 # OPTIONAL, if set check for SPAM mail 
+	reply_address: 1                 # OPTIONAL, if set then fill in ticket CC field
+        umask        : 022               # OPTIONAL, if set then use this umask for creation of the attachments
+	mailto_link  : 1                 # OPTIONAL, if set then [mailto:<CC>] in description 
+	trac_version : 0.8               # OPTIONAL, default is 0.9
+
+	[jouvin]                         # OPTIONAL project declaration, if set both fields necessary
+	project      : /data/trac/jouvin # use -p|--project jouvin.  
         
  * default config file is : /etc/email2trac.conf
 
@@ -448,7 +451,7 @@ def mkdir_p(dir, mode):
 			os.mkdir(path, mode)
 
 
-def ReadConfig(file):
+def ReadConfig(file, name):
 	"""
 	Parse the config file
 	"""
@@ -458,28 +461,35 @@ def ReadConfig(file):
 		sys.exit(1)
 
 	config = ConfigParser.ConfigParser()
-
 	try:
-	  config.read(file)
+		config.read(file)
 	except ConfigParser.MissingSectionHeaderError,detail:
-	  print detail
-	  sys.exit(1)
+		print detail
+	  	sys.exit(1)
 
-	defaults = config.defaults()
-	if not defaults.has_key('project') and  not defaults.has_key('project_root'):
-		print 'You have to define the location of your trac project'
-		print 'or the root of your projects, eg:'
-		print '\t project: /var/trac/<projectname>'
-		print '\t project_root: /var/trac'
-		sys.exit(1)
-	  
-	return defaults
 
+  	# Use given project name else use defaults
+  	#
+	if name:
+		if not config.has_section(name):
+			print "Not an valid project name: %s" %name
+			print "Valid names: %s" %config.sections()
+			sys.exit(1)
+
+		project =  dict()
+		for option in  config.options(name):
+			project[option] = config.get(name, option) 
+
+	else:
+		project = config.defaults()
+
+	return project
 
 if __name__ == '__main__':
 	# Default config file
 	#
 	configfile = '/etc/email2trac.conf'
+	configfile = './email2trac.conf'
 	project = ''
 	component = ''
 	
@@ -490,6 +500,7 @@ if __name__ == '__main__':
 		print detail
 		sys.exit(1)
 
+	project_name = None
 	for opt,value in opts:
 		if opt in [ '-h', '--help']:
 			print __doc__
@@ -499,30 +510,13 @@ if __name__ == '__main__':
 		elif opt in ['-f', '--file']:
 			configfile = value
 		elif opt in ['-p', '--project']:
-			project = value
+			project_name = value
 
-	settings = ReadConfig(configfile)
-
-	if not settings.has_key('project') and not project:
-		print 'You must specify a project either in configuration file'
-		print 'or with option --project'
+	settings = ReadConfig(configfile, project_name)
+	if not settings.has_key('project'):
+		print __doc__
+		print 'No project defined in config file, eg:\n\t project: /data/trac/bas'
 		sys.exit(1)
-		
-	if project:
-		if settings.has_key('project_root') :
-			settings['project'] = os.path.join(settings['project_root'], project)
-		else:
-			print 'You must specify a project root in configuration file'
-			print 'in order to use option --project'
-			sys.exit(1)
-	else:
-		if not re.search("/",settings['project']):
-			if settings.has_key('project_root') :
-				settings['project'] = os.path.join(settings['project_root'], settings['project'])
-			else:
-				print 'You must specify a project root in configuration file'
-				print 'or specify the project full path'
-				sys.exit(1)
 
 	if component:
 		settings['component'] = component
@@ -531,6 +525,9 @@ if __name__ == '__main__':
 		version = float(settings['trac_version'])
 	else:
 		version = trac_default_version
+
+	#debug HvB
+	#print settings
 
 	if version > 0.8:
 		from trac import attachment, config, env, ticket
