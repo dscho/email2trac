@@ -19,8 +19,9 @@ The email2trac package contains the following utilities:
  email_header: 1            # OPTIONAL, if set then show TO/CC fields in description
  trac_version: 0.8          # OPTIONAL, if set use this as trac version (D: 0.9)
 
- [bas]                     # OPTIONAL project declaration, if set project option
- project: /data/trac/bas   # necessary, use -p|--project bas. 
+ [bas]                     # OPTIONAL project declaration, also set 
+                           # project option, use -p|--project
+ project: /data/trac/bas   # 
  spam_level: 2             # Override DEFAULT spam_level, can also be 
                            # done for other options
 }}}
