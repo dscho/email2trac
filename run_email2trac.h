@@ -16,7 +16,7 @@ See Makefile.
 
 /* email2trac script name and path */
 #ifndef TRAC_SCRIPT_NAME
-#define TRAC_SCRIPT_NAME "email2trac.py"
+#define TRAC_SCRIPT_NAME "email2trac"
 #endif
 #ifndef TRAC_SCRIPT_PATH
 #define TRAC_SCRIPT_PATH "/usr/bin"

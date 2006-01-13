@@ -1,0 +1,40 @@
+# Authors: Bas van der Vlies & Michel Jouvin
+# Date   : 13 Jan 2005
+# Desc.  : Simple Makefile
+#
+# SVN INFO:
+#      $Id$
+#
+# defaullt values are:
+#
+# MTA_USER "nobody"
+# TRAC_USER "www-data"
+# TRAC_SCRIPT_NAME "email2trac"
+#
+PREFIX=@prefix@
+INSTALL_BIN=$(PREFIX)/bin
+PYTHON_BIN=@PYTHON@
+
+CC=gcc
+DEBUG=0
+CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(INSTALL_BIN)\" -DDEBUG=$(DEBUG)
+
+PYTHON_FILES=delete_spam.py email2trac.py
+WRAPPER_SRC=run_email2trac.c run_email2trac.h
+
+all: run_email2trac
+
+run_email2trac: $(WRAPPER_SRC)
+	$(CC) $(CFLAGS) -o $@ run_email2trac.c
+
+install: all
+	install --mode=4700 --owner=root run_email2trac $(INSTALL_BIN)
+	for script in $(PYTHON_FILES) ; \
+	do \
+          name=`basename email2trac.py '.py'`
+	  sed -e "s%^\#\!/usr/bin/python%\#\!$(PYTHON_BIN)%" $$script > $(INSTALL_BIN)/$$name ; \
+	  chmod a+x $(INSTALL_BIN)/$$name ; \
+	done
+
+clean:
+	rm run_email2trac

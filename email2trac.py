@@ -489,7 +489,7 @@ if __name__ == '__main__':
 	# Default config file
 	#
 	configfile = '/etc/email2trac.conf'
-	configfile = './email2trac.conf'
+	# configfile = './email2trac.conf'
 	project = ''
 	component = ''
 	
