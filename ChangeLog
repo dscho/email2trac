@@ -1,3 +1,6 @@
+2006-01-15  Bas van der Vlies <basv@sara.nl>:
+	* Added configure script.
+
 2006-01-10  Bas van der Vlies <basv@sara.nl>:
 	* Removed project_root from source and config file
 	* Adjust code so we can use mulitple stanza's in config file, eg:

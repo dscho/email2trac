@@ -1,4 +1,4 @@
-AC_INIT(email2trac.py)
+AC_INIT(email2trac.py.in)
 AC_SUBST(prefix)
 AC_SUBST(exec_prefix)
 AC_SUBST(pyexecdir)

@@ -38,4 +38,4 @@ install: all
 	done
 
 clean:
-	rm run_email2trac 
+	rm run_email2trac email2trac.py delete_spam.py config.log config.status 
