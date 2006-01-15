@@ -1,4 +1,9 @@
 /*
+
+AUTHOR: Michel Jouvin
+SVN Info:
+	$Id$
+
 Local site configuration
 Value defined here are just default values than can be overriden at compile time
 See Makefile.

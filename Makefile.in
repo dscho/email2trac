@@ -5,12 +5,11 @@
 # SVN INFO:
 #      $Id$
 #
-# defaullt values are:
-#
 #
 PREFIX=@prefix@
-INSTALL_BIN=$(PREFIX)/bin
+EXEC_PREFIX=@exec_prefix@/bin
 PYTHON_BIN=@PYTHON@
+CONFIG=@sysconfdir@
 
 # User names 
 #
@@ -19,23 +18,26 @@ MTA_USER=@mta_user@
 
 CC=@CC@
 DEBUG=0
-CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(INSTALL_BIN)\" -DDEBUG=$(DEBUG)
+CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(EXEC_PREFIX)\" -DDEBUG=$(DEBUG)
 
 PYTHON_FILES=delete_spam.py email2trac.py
 WRAPPER_SRC=run_email2trac.c run_email2trac.h
 
 all: run_email2trac
 
-run_email2trac: $(WRAPPER_SRC)
+run_email2trac: $(WRAPPER_SRC) Makefile
 	$(CC) $(CFLAGS) -o $@ run_email2trac.c
 
 install: all
-	install --mode=4700 --owner=root run_email2trac $(INSTALL_BIN)
+	install --mode=4700 --owner=root run_email2trac $(EXEC_PREFIX)
 	for script in $(PYTHON_FILES) ; \
 	do \
           name=`basename $$script '.py'` ; \
-	  install --mode=755 --owner=root $$script  $(INSTALL_BIN)/$$name 
+	  install --mode=755 --owner=root $$script  $(EXEC_PREFIX)/$$name 
 	done
 
 clean:
-	rm run_email2trac email2trac.py delete_spam.py config.log config.status 
+	rm run_email2trac
+
+distclean:
+	rm run_email2trac email2trac.py delete_spam.py config.log config.status Makefile

@@ -30,12 +30,18 @@ The email2trac package contains the following utilities:
 
 First build, install email2trac :
 
-  * Edit Makefile, adjust the variables (in particular INSTALL_DIR, MTA_USER 
-    and TRAC_USER)
+  * ./configure (see --help)
+    {{{
+    default values for:
+       prefix=/usr/local        --> --prefix=<path> 
+       exec_prefix=$prefix/bin  --> --exec_prefix=<path>
+       sysconfdir=$prefix/etc   --> --sysconfdir=<path>
+       MTA_USER=nobody          --> --with-mta_user=<name>
+       TRAC_USER=www-data       --> --with-trac_user=<name>
+    }}}
   * make
   * make install
-  * Define a symlink /etc/email2trac.conf referencing 
-    $INSTALL_DIR/email2trac.conf
+  * First install copy emailtrac.conf to $sysconfdir
 
  After installation, edit email2trac.conf for your site. Most important 
  parameter is project, see above

@@ -1,6 +1,8 @@
 /*
 	run_email2trac.c
-	Authors: Bas van der Vlies and Walter de Jong
+	Authors: Bas van der Vlies, Walter de Jong and Michel Jouvin
+	SVN Info:
+		$Id$
 
 	Only nobody can become the user www-data. Postfix uses this
 	user to start an program
@@ -24,7 +26,6 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 #
 */
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <pwd.h>
