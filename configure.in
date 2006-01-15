@@ -2,9 +2,38 @@ AC_INIT(email2trac.py)
 AC_SUBST(prefix)
 AC_SUBST(exec_prefix)
 AC_SUBST(pyexecdir)
+AC_SUBST(trac_user)
+AC_SUBST(mta_user)
 
 AM_PATH_PYTHON
+AC_PROG_GCC_TRADITIONAL
 
+
+AC_ARG_WITH(trac_user,
+[
+  --with-trac_user=USER    Specify the name of the user that trac use,
+                          default=www-data],
+
+  [case "${withval}" in
+        *) trac_user="${withval}" ;;
+  esac],
+
+  [trac_user="www-data"]
+)dnl            
+
+AC_ARG_WITH(mta_user,
+[
+  --with-mta_user=USER    Specify the name of the user that your MTA use,
+                          default=nobody],
+
+  [case "${withval}" in
+        *) mta_user="${withval}" ;;
+  esac],
+
+  [mta_user="nobody"]
+)dnl            
 AC_OUTPUT(
         Makefile
+	email2trac.py
+	delete_spam.py
 	)

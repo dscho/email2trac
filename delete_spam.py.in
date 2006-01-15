@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!@PYTHON@
 #
 # Copyright (C) 2002
 #
@@ -31,7 +31,7 @@ defaults:
 	configfile = /etc/email2trac.conf
 
 SVN Info:
-        $Id: delete_spam.py 1512 2005-10-26 09:20:37Z jaap $
+        $Id$
 """
 from trac import Environment, Ticket
 

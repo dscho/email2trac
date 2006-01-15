@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!@PYTHON@
 # Copyright (C) 2002
 #
 # This file is part of the email2trac utils
@@ -67,7 +67,7 @@ How to use
                 -p <project name> | --project=<project name>
 
 SVN Info:
-        $Id: email2trac.py 1523 2005-11-01 09:27:51Z bas $
+        $Id$
 """
 
 import os

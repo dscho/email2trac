@@ -7,15 +7,17 @@
 #
 # defaullt values are:
 #
-# MTA_USER "nobody"
-# TRAC_USER "www-data"
-# TRAC_SCRIPT_NAME "email2trac"
 #
 PREFIX=@prefix@
 INSTALL_BIN=$(PREFIX)/bin
 PYTHON_BIN=@PYTHON@
 
-CC=gcc
+# User names 
+#
+TRAC_USER=@trac_user@
+MTA_USER=@mta_user@
+
+CC=@CC@
 DEBUG=0
 CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(INSTALL_BIN)\" -DDEBUG=$(DEBUG)
 
@@ -31,10 +33,9 @@ install: all
 	install --mode=4700 --owner=root run_email2trac $(INSTALL_BIN)
 	for script in $(PYTHON_FILES) ; \
 	do \
-          name=`basename email2trac.py '.py'`
-	  sed -e "s%^\#\!/usr/bin/python%\#\!$(PYTHON_BIN)%" $$script > $(INSTALL_BIN)/$$name ; \
-	  chmod a+x $(INSTALL_BIN)/$$name ; \
+          name=`basename $$script '.py'` ; \
+	  install --mode=755 --owner=root $$script  $(INSTALL_BIN)/$$name 
 	done
 
 clean:
-	rm run_email2trac
+	rm run_email2trac 
