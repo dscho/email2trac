@@ -6,7 +6,7 @@
 #      $Id$
 #
 #
-PREFIX=@prefix@
+prefix=@prefix@
 EXEC_PREFIX=@exec_prefix@/bin
 PYTHON_BIN=@PYTHON@
 CONFIG=@sysconfdir@
@@ -32,8 +32,8 @@ install: all
 	install --mode=4700 --owner=root run_email2trac $(EXEC_PREFIX)
 	for script in $(PYTHON_FILES) ; \
 	do \
-          name=`basename $$script '.py'` ; \
-	  install --mode=755 --owner=root $$script  $(EXEC_PREFIX)/$$name 
+          name=`basename $$script '.py'` ;\
+	  install --mode=755 --owner=root $$script  $(EXEC_PREFIX)/$$name ;\
 	done
 
 clean:
