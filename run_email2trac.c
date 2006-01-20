@@ -32,6 +32,7 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
+#include <limits.h>
 
 #include "run_email2trac.h"
 
@@ -44,15 +45,23 @@ int main(int argc, char** argv) {
   int i,j;
   int caller = getuid();
   int status;
-  char trac_script[255];
-  char** trac_script_args;
+
+  char   *trac_script;
+  char   **trac_script_args;
   struct passwd *TRAC; 
   struct passwd *MTA;
   struct stat script_attrs;
-  
-  strcat(trac_script,TRAC_SCRIPT_PATH);
+ 
+  trac_script = malloc((strlen(TRAC_SCRIPT_PATH) 
+	+ strlen(TRAC_SCRIPT_NAME) + 10) * sizeof(char));
+
+  strncat(trac_script,TRAC_SCRIPT_PATH, strlen(TRAC_SCRIPT_PATH));
   strcat(trac_script,"/");
-  strcat(trac_script,TRAC_SCRIPT_NAME);
+  strncat(trac_script,TRAC_SCRIPT_NAME, strlen(TRAC_SCRIPT_NAME));
+
+  /*
+  printf("trac_script = %s\n", trac_script);
+  */
 
   /* First copy arguments passed to the wrapper as scripts arguments
      after filtering out some of the possible script options */

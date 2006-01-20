@@ -16,6 +16,8 @@ CONFIG=@sysconfdir@
 TRAC_USER=@trac_user@
 MTA_USER=@mta_user@
 
+TRAC_SCRIPT_NAME=email2trac
+
 CC=@CC@
 DEBUG=0
 CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(EXEC_PREFIX)\" -DDEBUG=$(DEBUG)
@@ -29,7 +31,7 @@ run_email2trac: $(WRAPPER_SRC) Makefile
 	$(CC) $(CFLAGS) -o $@ run_email2trac.c
 
 install: all
-	install --mode=4700 --owner=root run_email2trac $(EXEC_PREFIX)
+	install --mode=4111 --owner=root run_email2trac $(EXEC_PREFIX)
 	for script in $(PYTHON_FILES) ; \
 	do \
           name=`basename $$script '.py'` ;\
