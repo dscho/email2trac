@@ -1,3 +1,10 @@
+2006-01-21  Bas van der Vlies <basv@sara.nl>:
+	* Fixed run_email2trac.c, did not work
+	* Added TRAC_SCRIPT_NAME to Makefile.in to 
+	  solve run_email2trac problem
+
+	Both errors reported by: kilian.cavalotti@lip6.fr
+
 2006-01-20  Bas van der Vlies <basv@sara.nl>:
 	* A warning error is fixed by kilian.cavalotti@lip6.fr
 	* Several errors in make install ;-(, reported by
