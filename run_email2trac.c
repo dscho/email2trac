@@ -31,6 +31,8 @@
 #include <pwd.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <stdio.h>
+
 #include "run_email2trac.h"
 
 #ifndef DEBUG
