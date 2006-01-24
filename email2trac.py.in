@@ -260,14 +260,20 @@ class TicketEmailParser(object):
 		else:
 			tkt['summary'] = self.to_unicode(msg['Subject'])
 
-		if self.SPAM_LEVEL and self.spam(msg):
-			print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
-			sys.exit(1)
 
-		if settings.has_key('component'):
+		if self.SPAM_LEVEL:
+			tkt['component'] = self.spam(msg)
+		elif settings.has_key('component'):
 			tkt['component'] = settings['component']
 		else:
 			tkt['component'] = self.get_config('ticket', 'default_component')
+
+		# Must make this an option or so, discard SPAM messages or save then
+		# and delete later
+		#
+		#if self.SPAM_LEVEL and self.spam(msg):
+		#	print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
+		#	sys.exit(1)
 
 		# Get default owner for component
 		#
