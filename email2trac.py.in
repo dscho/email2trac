@@ -283,10 +283,14 @@ class TicketEmailParser(object):
 		tkt['owner'] = cursor.fetchone()[0]
 
 		author, email_addr  = email.Utils.parseaddr(msg['from'])
-		from_str = self.to_unicode(msg['from'])
-		tkt['reporter'] = from_str
+		email_str = self.to_unicode(email_addr)
+		if author:
+			tkt['reporter'] = self.to_unicode(author)
+		else
+			tkt['reporter'] = self.to_unicode(email_str)
+
 		if self.CC:
-			tkt['cc'] = email_addr
+			tkt['cc'] = email_str
 
 # produce e-mail like header
 		head = ''
