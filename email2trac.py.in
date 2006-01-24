@@ -282,10 +282,11 @@ class TicketEmailParser(object):
 		cursor.execute(sql)
 		tkt['owner'] = cursor.fetchone()[0]
 
+		author, email_addr  = email.Utils.parseaddr(msg['from'])
 		from_str = self.to_unicode(msg['from'])
 		tkt['reporter'] = from_str
 		if self.CC:
-			tkt['cc'] = from_str
+			tkt['cc'] = email_addr
 
 # produce e-mail like header
 		head = ''
@@ -326,7 +327,6 @@ class TicketEmailParser(object):
 			tkt['description'] = '%s\n\n(no plain text message, see attachments)' % head
 			has_description = 1
 
-		author, email_addr  = email.Utils.parseaddr(msg['from'])
 		if self.MAILTO:
 			mailto = self.html_mailto_link(author, email_addr, self.to_unicode(msg['subject']), body_text)
 			tkt['description'] = '%s\n%s %s' %(head, mailto, tkt['description'])
