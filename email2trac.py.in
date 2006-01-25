@@ -100,10 +100,8 @@ class TicketEmailParser(object):
 
 		self.VERSION = version
 		if self.VERSION > 0.8:
-			self.new_ticket = ticket.Ticket
 			self.get_config = self.env.config.get
 		else:
-			self.new_ticket = Ticket.Ticket
 			self.get_config = self.env.get_config
 
 		if parameters.has_key('umask'):
@@ -146,9 +144,9 @@ class TicketEmailParser(object):
 			number = spam_l[0].count('*')
 
 			if number >= self.SPAM_LEVEL:
-				return number
+				return 'Spam'
 
-		return 0
+		return self.get_config('ticket', 'default_component') 
 
 	def to_unicode(self, str):
 		"""
@@ -245,7 +243,7 @@ class TicketEmailParser(object):
 				pass
 
 		self.db = self.env.get_db_cnx()
-		tkt = self.new_ticket(self.env)
+		tkt = Ticket(self.env)
 		tkt['status'] = 'new'
 
 		# Some defaults
@@ -261,12 +259,10 @@ class TicketEmailParser(object):
 			tkt['summary'] = self.to_unicode(msg['Subject'])
 
 
-		if self.SPAM_LEVEL:
-			tkt['component'] = self.spam(msg)
-		elif settings.has_key('component'):
+		if settings.has_key('component'):
 			tkt['component'] = settings['component']
 		else:
-			tkt['component'] = self.get_config('ticket', 'default_component')
+			tkt['component'] = self.spam(msg)
 
 		# Must make this an option or so, discard SPAM messages or save then
 		# and delete later
@@ -278,7 +274,7 @@ class TicketEmailParser(object):
 		# Get default owner for component
 		#
 		cursor = self.db.cursor()
-		sql = 'SELECT owner FROM component WHERE name=\'%s\'' % tkt['component']
+		sql = "SELECT owner FROM component WHERE name='%s'" % tkt['component']
 		cursor.execute(sql)
 		tkt['owner'] = cursor.fetchone()[0]
 
@@ -286,7 +282,7 @@ class TicketEmailParser(object):
 		email_str = self.to_unicode(email_addr)
 		if author:
 			tkt['reporter'] = self.to_unicode(author)
-		else
+		else:
 			tkt['reporter'] = self.to_unicode(email_str)
 
 		if self.CC:
@@ -346,8 +342,23 @@ class TicketEmailParser(object):
 		#tkt['description'] = '\n{{{\n\n Bas is op nieuw bezig\n\n }}}\n' 
 		#tkt.save_changes(self.db, author, "Lekker bezig")
 		#
-		self.attachments(msg, tkt, author)
 
+		self.attachments(msg, tkt, author)
+		if self.get_config('notification', 'smtp_enabled') in ['true']:
+			self.notify(tkt)
+
+	def notify(self, tkt):
+		try:
+			# create false {abs_}href properties, to trick Notify()
+			#
+			self.env.abs_href = Href(self.get_config('project', 'url'))
+			self.env.href = Href(self.get_config('project', 'url'))
+
+			tn = TicketNotifyEmail(self.env)
+			tn.notify(tkt, newticket=True) 
+
+		except Exception, e:
+			print "TD: Failure sending notification on creation of ticket #%s: %s" % (tkt.id, e)
 
 	def mail_line(self, str):
 		return '%s %s' % (self.comment, str)
@@ -539,14 +550,18 @@ if __name__ == '__main__':
 	#print settings
 
 	if version > 0.8:
-		from trac import attachment, config, env, ticket
-		env = env.Environment(settings['project'], create=0)
-		ticket_mod = ticket
+		from trac import attachment 
+		from trac.env import Environment
+		from trac.ticket import Ticket
+		from trac.Notify import TicketNotifyEmail
+		from trac.web.href import Href
 	else:
-		from trac import Environment, Ticket
-		env = Environment.Environment(settings['project'], create=0)
-		ticket_mod = Ticket
-		
+		from trac.Environment import Environment
+		from trac.Ticket import Ticket
+		from trac.Notify import TicketNotifyEmail
+		from trac.Href import Href
+
+	env = Environment(settings['project'], create=0)
 	tktparser = TicketEmailParser(env, settings, version)
 	tktparser.parse(sys.stdin)
 
