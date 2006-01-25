@@ -135,6 +135,11 @@ class TicketEmailParser(object):
 		else:
 			self.EMAIL_HEADER = 0
 
+		if parameters.has_key('alternate_notify_template'):
+			self.notify_template = str(parameters['alternate_notify_template'])
+		else:
+			self.notify_template = None
+
 
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
@@ -279,11 +284,11 @@ class TicketEmailParser(object):
 		tkt['owner'] = cursor.fetchone()[0]
 
 		author, email_addr  = email.Utils.parseaddr(msg['from'])
-		email_str = self.to_unicode(email_addr)
+		email_str = self.to_unicode(msg['from'])
 		if author:
-			tkt['reporter'] = self.to_unicode(author)
+			tkt['reporter'] = email_str
 		else:
-			tkt['reporter'] = self.to_unicode(email_str)
+			tkt['reporter'] = email_str
 
 		if self.CC:
 			tkt['cc'] = email_str
@@ -355,10 +360,14 @@ class TicketEmailParser(object):
 			self.env.href = Href(self.get_config('project', 'url'))
 
 			tn = TicketNotifyEmail(self.env)
+			if self.notify_template:
+				tn.template_name = self.notify_template;
+
 			tn.notify(tkt, newticket=True) 
 
 		except Exception, e:
-			print "TD: Failure sending notification on creation of ticket #%s: %s" % (tkt.id, e)
+			print 'TD: Failure sending notification on creation of ticket #%s: %s' \
+				% (tkt['id'], e)
 
 	def mail_line(self, str):
 		return '%s %s' % (self.comment, str)
