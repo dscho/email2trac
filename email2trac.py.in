@@ -244,6 +244,7 @@ class TicketEmailParser(object):
 
 
 	def set_reply_fields(self, ticket, message):
+
 		author, email_addr  = email.Utils.parseaddr(message['from'])
 		email_str = self.to_unicode(message['from'])
 
@@ -280,21 +281,25 @@ class TicketEmailParser(object):
 
 		return author, email_addr
 
+	def save_email_for_debug(self, message):
+
+		msg_file = '/var/tmp/msg.txt' 
+		print 'TD: saving email to %s' % msg_file
+		fx = open(msg_file, 'wb')
+		fx.write('%s' % message)
+		fx.close()
+		try:
+			os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
+		except OSError:
+			pass
+
 	def parse(self, fp):
 		msg = email.message_from_file(fp)
 		if not msg:
 			return
 
 		if self.DEBUG > 1:	  # save the entire e-mail message text
-			msg_file = '/var/tmp/msg.txt' 
-			print 'TD: saving email to %s' % msg_file
-			fx = open(msg_file, 'wb')
-			fx.write('%s' % msg)
-			fx.close()
-			try:
-				os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
-			except OSError:
-				pass
+			self.save_email_for_debug(msg)
 
 		self.db = self.env.get_db_cnx()
 		tkt = Ticket(self.env)
