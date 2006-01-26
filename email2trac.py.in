@@ -140,6 +140,11 @@ class TicketEmailParser(object):
 		else:
 			self.notify_template = None
 
+		if parameters.has_key('reply_all'):
+			self.REPLY_ALL = int(parameters['reply_all'])
+		else:
+			self.REPLY_ALL = 0
+
 
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
@@ -231,6 +236,50 @@ class TicketEmailParser(object):
 
 		return str
 
+	def set_owner(self, ticket):
+		cursor = self.db.cursor()
+		sql = "SELECT owner FROM component WHERE name='%s'" % ticket['component']
+		cursor.execute(sql)
+		ticket['owner'] = cursor.fetchone()[0]
+
+
+	def set_reply_fields(self, ticket, message):
+		author, email_addr  = email.Utils.parseaddr(message['from'])
+		email_str = self.to_unicode(message['from'])
+
+		ticket['reporter'] = email_str
+		ticket['cc'] = None
+
+		# Put all addresses in ticket CC field
+		#
+		if self.REPLY_ALL:
+			tos = message.get_all('to', [])
+			ccs = message.get_all('cc', [])
+
+			addrs = email.Utils.getaddresses(tos + ccs)
+
+			# Remove reporter email address if notification is 
+			# on
+			#
+			if self.notification:
+				try:
+					addrs.remove((author, email_addr))
+				except ValueError, detail:
+					pass
+
+			for a,m in addrs:
+					if not ticket['cc']:
+						ticket['cc'] = m
+					else:
+						ticket['cc'] = '%s,%s' %(ticket['cc'], m)
+
+		# Put authors email addess in CC field only if notification is off
+		#
+		elif self.CC and not self.notification:
+			ticket['cc'] = email_str
+
+		return author, email_addr
+
 	def parse(self, fp):
 		msg = email.message_from_file(fp)
 		if not msg:
@@ -250,6 +299,9 @@ class TicketEmailParser(object):
 		self.db = self.env.get_db_cnx()
 		tkt = Ticket(self.env)
 		tkt['status'] = 'new'
+
+		if self.get_config('notification', 'smtp_enabled') in ['true']:
+			self.notification = 1
 
 		# Some defaults
 		#
@@ -276,22 +328,10 @@ class TicketEmailParser(object):
 		#	print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
 		#	sys.exit(1)
 
-		# Get default owner for component
+		# Set default owner for component
 		#
-		cursor = self.db.cursor()
-		sql = "SELECT owner FROM component WHERE name='%s'" % tkt['component']
-		cursor.execute(sql)
-		tkt['owner'] = cursor.fetchone()[0]
-
-		author, email_addr  = email.Utils.parseaddr(msg['from'])
-		email_str = self.to_unicode(msg['from'])
-		if author:
-			tkt['reporter'] = email_str
-		else:
-			tkt['reporter'] = email_str
-
-		if self.CC:
-			tkt['cc'] = email_str
+		self.set_owner(tkt)
+		author, email_addr = self.set_reply_fields(tkt, msg)
 
 # produce e-mail like header
 		head = ''
@@ -349,7 +389,7 @@ class TicketEmailParser(object):
 		#
 
 		self.attachments(msg, tkt, author)
-		if self.get_config('notification', 'smtp_enabled') in ['true']:
+		if self.notification:
 			self.notify(tkt)
 
 	def notify(self, tkt):
