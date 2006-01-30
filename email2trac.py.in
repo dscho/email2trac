@@ -237,6 +237,9 @@ class TicketEmailParser(object):
 		return str
 
 	def set_owner(self, ticket):
+		"""
+		Select default owner for ticket component
+		"""
 		cursor = self.db.cursor()
 		sql = "SELECT owner FROM component WHERE name='%s'" % ticket['component']
 		cursor.execute(sql)
@@ -244,20 +247,32 @@ class TicketEmailParser(object):
 
 
 	def set_reply_fields(self, ticket, message):
-
+		"""
+		Bla Bla
+		"""
 		author, email_addr  = email.Utils.parseaddr(message['from'])
 		email_str = self.to_unicode(message['from'])
 
-		ticket['reporter'] = email_str
-		ticket['cc'] = None
+		# Look for email address in registered trac users
+		#
+		if self.VERSION > 0.8:
+			users = [ u for (u, n, e) in self.env.get_known_users(self.db)
+				if e == email_addr ]
+		else:
+			users = []
 
-		# Put all addresses in ticket CC field
+		if len(users) == 1:
+			ticket['reporter'] = users[0]
+		else:
+			ticket['reporter'] = email_str
+
+		# Put all CC-addresses in ticket CC field
 		#
 		if self.REPLY_ALL:
-			tos = message.get_all('to', [])
+			#tos = message.get_all('to', [])
 			ccs = message.get_all('cc', [])
 
-			addrs = email.Utils.getaddresses(tos + ccs)
+			addrs = email.Utils.getaddresses(ccs)
 
 			# Remove reporter email address if notification is 
 			# on
@@ -268,17 +283,11 @@ class TicketEmailParser(object):
 				except ValueError, detail:
 					pass
 
-			for a,m in addrs:
-					if not ticket['cc']:
-						ticket['cc'] = m
-					else:
-						ticket['cc'] = '%s,%s' %(ticket['cc'], m)
-
-		# Put authors email addess in CC field only if notification is off
-		#
-		elif self.CC and not self.notification:
-			ticket['cc'] = email_str
-
+			for name,mail in addrs:
+					try:
+						ticket['cc'] = '%s,%s' %(ticket['cc'], mail)
+					except:
+						ticket['cc'] = mail
 		return author, email_addr
 
 	def save_email_for_debug(self, message):
@@ -338,7 +347,8 @@ class TicketEmailParser(object):
 		self.set_owner(tkt)
 		author, email_addr = self.set_reply_fields(tkt, msg)
 
-# produce e-mail like header
+		# produce e-mail like header
+		#
 		head = ''
 		if self.EMAIL_HEADER > 0:
 			head = self.email_header_txt(msg)
@@ -346,41 +356,10 @@ class TicketEmailParser(object):
 		if self.DEBUG > 0:
 			self.debug_attachments(msg)
 
-#
-#	put the message text in the ticket description
-#	message text can be plain text or html or something else
-#
-		has_description = 0
-		for part in msg.walk():
-			if part.get_content_maintype() == 'multipart':			# 'multipart/*' is a container for multipart messages
-				continue
+		self.description(msg,tkt, head, author, email_addr)
 
-			if part.get_content_type() == 'text/plain':
-				body_text = part.get_payload(decode=1)			# try to decode
-				if not body_text:					# decode failed
-					body_text = part.get_payload(decode=0)		# do not decode
-
-				tkt['description'] = '\n{{{\n\n%s\n}}}\n' % body_text
-
-			elif part.get_content_type() == 'text/html':
-				tkt['description'] = '%s\n\n(see attachment for HTML mail message)\n' % head
-				body_text = tkt['description']
-
-			else:
-				tkt['description'] = '%s\n\n(see attachment for message)\n' % head
-				body_text = tkt['description']
-
-			has_description = 1
-			break		# we have the description, so break
-
-		if not has_description:
-			tkt['description'] = '%s\n\n(no plain text message, see attachments)' % head
-			has_description = 1
-
-		if self.MAILTO:
-			mailto = self.html_mailto_link(author, email_addr, self.to_unicode(msg['subject']), body_text)
-			tkt['description'] = '%s\n%s %s' %(head, mailto, tkt['description'])
-
+		# Insert ticket in database
+		#
 		if self.VERSION > 0.8:
 			tkt['id'] = tkt.insert()
 		else:
@@ -396,6 +375,56 @@ class TicketEmailParser(object):
 		self.attachments(msg, tkt, author)
 		if self.notification:
 			self.notify(tkt)
+
+
+	def description(self, msg, tkt, head, author, email):
+		"""
+		put the message text in the ticket description
+		message text can be plain text or html or something else
+		"""
+		has_description = 0
+		for part in msg.walk():
+
+			# 'multipart/*' is a container for multipart messages
+			#
+			if part.get_content_maintype() == 'multipart':
+				continue
+
+			if part.get_content_type() == 'text/plain':
+				# Try to decode, if fails then do not decode
+				#
+				body_text = part.get_payload(decode=1)		
+				if not body_text:			
+					body_text = part.get_payload(decode=0)	
+
+				# Get contents charset (iso-8859-15 if not defined in mail headers)
+				# UTF-8 encode body_text
+				#
+				charset = msg.get_content_charset('iso-8859-15')
+				ubody_text = unicode(body_text, charset).encode('utf-8')
+
+				tkt['description'] = '\n{{{\n\n%s\n}}}\n' %(ubody_text)
+
+			elif part.get_content_type() == 'text/html':
+				tkt['description'] = '%s\n\n(see attachment for HTML mail message)\n' \
+					%(head)
+				body_text = tkt['description']
+
+			else:
+				tkt['description'] = '%s\n\n(see attachment for message)\n' %(head)
+				body_text = tkt['description']
+
+			has_description = 1
+			break		# we have the description, so break
+
+		if not has_description:
+			tkt['description'] = '%s\n\n(no plain text message, see attachments)' % head
+			has_description = 1
+
+		if self.MAILTO:
+			mailto = self.html_mailto_link(author, email, self.to_unicode(msg['subject']), ubody_text)
+			tkt['description'] = '%s\n%s %s' %(head, mailto, tkt['description'])
+
 
 	def notify(self, tkt):
 		try:
@@ -428,20 +457,12 @@ class TicketEmailParser(object):
 		#
 		#arr = string.split(body, '\n')
 		#arr = map(self.mail_line, arr)
-
 		#body = string.join(arr, '\n')
 		#body = '%s wrote:\n%s' %(author, body)
 
-		# Obsolete for reference
-		#
-		#body = self.to_unicode(body)
-		#body = urllib.quote(body)
-		#body = Header.encode(body)
-		#
-
 		# Temporary fix
 		body = '> Type your reply'
-		str = 'mailto:%s?subject=%s&body=%s' % (urllib.quote(mail_addr), urllib.quote('Re: %s' % subject), urllib.quote(body))
+		str = 'mailto:%s?subject=%s&body=%s' %(urllib.quote(mail_addr), urllib.quote('Re: %s' % subject), urllib.quote(body))
 		str = '\n{{{\n#!html\n<a href="%s">Reply to: %s</a>\n}}}\n' %(str, author)
 
 		return str
