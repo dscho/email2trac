@@ -13,7 +13,8 @@ The email2trac package contains the following utilities:
  project: /data/trac/jouvin # REQUIRED
  debug: 1                   # OPTIONAL, if set print some DEBUG info
  spam_level: 4              # OPTIONAL, if set check for SPAM mail 
- reply_address: 1           # OPTIONAL, if set then fill in ticket CC field
+ reply_address: 1           # OBSOLETE, see trac.ini notification section
+ reply_all: 1 	            # OPTIONAL, if set then put all CC-addresses in ticket CC-field
  umask: 022                 # OPTIONAL, Use this umask for saving attachments
  mailto_link: 1             # OPTIONAL, if set then [mailto:<CC>] in description
  email_header: 1            # OPTIONAL, if set then show TO/CC fields in description
