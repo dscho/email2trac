@@ -112,11 +112,6 @@ class TicketEmailParser(object):
 		else:
 			self.DEBUG = 0
 
-		if parameters.has_key('reply_address'):
-			self.CC = int(parameters['reply_address'])
-		else:
-			self.CC = 0
-
 		if parameters.has_key('mailto_link'):
 			self.MAILTO = int(parameters['mailto_link'])
 		else:

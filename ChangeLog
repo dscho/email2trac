@@ -1,3 +1,21 @@
+2006-02-01  Bas van der Vlies <basv@sara.nl>:
+	* Added Tikcet notification, send email when there is
+	  a new ticket. Depends on notification setting in
+	  trac.ini. 
+	  Implemented by: Kilian Cavalotti 
+	* Added reply_all config parameter. If set put all
+	  CC-addresses from orginal mail in ticket CC-field.
+	  Suggested by: Kilian Cavalotti
+	* Text in ticket description is also properly UTF-8
+	  encoded
+	  Implemented by: Kilian Cavalotti 
+	* Removed reply_address from config file. Is not
+	  necessary anymore. See Ticket notification.
+	* Added support for known users. If email address is
+	  known then use the trac known username instead
+	  of the email-address (only for trac version > 0.9)
+	  Implemented by: Kilian Cavalotti 
+
 2006-01-21  Bas van der Vlies <basv@sara.nl>:
 	* Fixed run_email2trac.c, did not work
 	* Added TRAC_SCRIPT_NAME to Makefile.in to 
