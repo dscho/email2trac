@@ -18,6 +18,8 @@
 	* Fixed an error in saving attachments for version < 0.9.
 	  Sometimes we got bogus attachments.
 	  Fixed by: Walter de Jong
+	* Added support to make an debian package
+	  Implemented by: Bas van der Vlies
 
 2006-01-21  Bas van der Vlies <basv@sara.nl>:
 	* Fixed run_email2trac.c, did not work
