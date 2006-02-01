@@ -31,11 +31,12 @@ run_email2trac: $(WRAPPER_SRC) Makefile
 	$(CC) $(CFLAGS) -o $@ run_email2trac.c
 
 install: all
-	install --mode=4111 --owner=root run_email2trac $(EXEC_PREFIX)
+	install -d $(DESTDIR)$(EXEC_PREFIX)
+	install --mode=4111 --owner=root run_email2trac $(DESTDIR)$(EXEC_PREFIX)
 	for script in $(PYTHON_FILES) ; \
 	do \
           name=`basename $$script '.py'` ;\
-	  install --mode=755 --owner=root $$script  $(EXEC_PREFIX)/$$name ;\
+	  install --mode=755 --owner=root $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
 	done
 
 clean:

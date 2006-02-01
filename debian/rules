@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+# Copyrignt 2006 Bas van der Vlies <bas@sara.nl>
+#
+#
+# DEB_AUTO_UPDATE_DEBIAN_CONTROL := yes
+#
+#
+include /usr/share/cdbs/1/rules/buildcore.mk
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+include /usr/share/cdbs/1/class/makefile.mk
+#include /usr/share/cdbs/1/class/makefile-vars.mk
+
+DEB_CONFIGURE_EXTRA_FLAGS := --enable-python
+
+# does on package by package bases so doesn't work :-/
+# #DEB_DH_INSTALL_ARGS := --list-missing
+#
+# #DEB_CONFIGURE_EXTRA_FLAGS := --enable-debug
+#
+# # tight versioning
+# #DEB_DH_MAKESHLIBS_ARGS := -V
+# ~
