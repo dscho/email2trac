@@ -31,7 +31,8 @@ The email2trac package contains the following utilities:
 
 First build, install email2trac :
 
-  * ./configure (see --help)
+option 1:
+  * ./configure (see --help) 
     {{{
     default values for:
        prefix=/usr/local        --> --prefix=<path> 
@@ -44,8 +45,12 @@ First build, install email2trac :
   * make install
   * First install copy emailtrac.conf to $sysconfdir
 
- After installation, edit email2trac.conf for your site. Most important 
- parameter is project, see above
+option 2:
+  * debian/rules binary
+  * First install copy emailtrac.conf to /etc
+
+After installation, edit email2trac.conf for your site. Most important 
+parameter is project, see above
 
 == Usage ==
 
