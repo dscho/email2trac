@@ -15,6 +15,9 @@
 	  known then use the trac known username instead
 	  of the email-address (only for trac version > 0.9)
 	  Implemented by: Kilian Cavalotti 
+	* Fixed an error in saving attachments for version < 0.9.
+	  Sometimes we got bogus attachments.
+	  Fixed by: Walter de Jong
 
 2006-01-21  Bas van der Vlies <basv@sara.nl>:
 	* Fixed run_email2trac.c, did not work
