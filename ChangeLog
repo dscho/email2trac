@@ -3,6 +3,9 @@
 	  a new ticket. Depends on notification setting in
 	  trac.ini. 
 	  Implemented by: Kilian Cavalotti 
+	* Can use different template for ticket notification,
+	  eg: alternate_notify_template: "a_tkt.css" 
+	  Implemented by: Kilian Cavalotti 
 	* Added reply_all config parameter. If set put all
 	  CC-addresses from orginal mail in ticket CC-field.
 	  Suggested by: Kilian Cavalotti
