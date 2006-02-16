@@ -18,7 +18,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 #
 """
-emailfilter.py -- Email tickets to Trac.
+email2trac.py -- Email tickets to Trac.
 
 A simple MTA filter to create Trac tickets from inbound emails.
 
@@ -456,8 +456,7 @@ class TicketEmailParser(object):
 		#body = '%s wrote:\n%s' %(author, body)
 
 		# Temporary fix
-		body = '> Type your reply'
-		str = 'mailto:%s?subject=%s&body=%s' %(urllib.quote(mail_addr), urllib.quote('Re: %s' % subject), urllib.quote(body))
+		str = 'mailto:%s?subject=%s' %(urllib.quote(mail_addr), urllib.quote('Re: %s' % subject))
 		str = '\n{{{\n#!html\n<a href="%s">Reply to: %s</a>\n}}}\n' %(str, author)
 
 		return str

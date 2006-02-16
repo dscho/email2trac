@@ -1,3 +1,9 @@
+email2trac (0.5.0-2) stable; urgency=low
+
+  * leave out the body tag for email urls
+
+ -- root <root@subtrac.sara.nl>  Thu, 16 Feb 2006 16:01:02 +0100
+
 email2trac (0.5.0-1) stable; urgency=low
 
   *  First package
