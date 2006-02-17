@@ -85,7 +85,11 @@ def delete_spam(project, debug):
 				if os.path.exists(attachment_dir):
 					if debug:
 						print 'delete %s : %s' %(spam_id, attachment_dir)
-					shutil.rmtree(attachment_dir)
+					try:
+						shutil.rmtree(attachment_dir)
+					except OSError, detail:
+						print 'Contact system-administrator: %s' %detail
+						continue
 
 			cursor.execute("DELETE FROM ticket WHERE  component = 'Spam';") 
 			db.commit()
