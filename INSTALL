@@ -69,5 +69,5 @@ rocedure is the same :
   * Update your alias database with command ''newaliases''
   * Test with a command like :
 {{{
-     mail tracproj < test7.eml
+     mail tracproj
 }}}
