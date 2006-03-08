@@ -1,0 +1,51 @@
+From basv@sara.nl  Wed Mar  8 15:29:17 2006
+Return-Path: <basv@sara.nl>
+X-Original-To: test@subtrac.sara.nl
+Delivered-To: test@subtrac.sara.nl
+Received: from surfboard.ka.sara.nl (surfboard.ka.sara.nl [145.100.6.3])
+	by localhost.localdomain (Postfix) with ESMTP id 506702800682
+	for <test@subtrac.sara.nl>; Wed,  8 Mar 2006 15:29:17 +0100 (CET)
+Received: from [145.100.6.134] ([145.100.6.134] RDNS failed) by
+	surfboard.ka.sara.nl with Microsoft SMTPSVC(6.0.3790.1830); 
+	Wed, 8 Mar 2006 15:29:17 +0100
+Message-ID: <440EEA39.6070200@sara.nl>
+Date: Wed, 08 Mar 2006 15:29:13 +0100
+From: Bas van der Vlies <basv@sara.nl>
+User-Agent: Thunderbird 1.5 (Windows/20051201)
+MIME-Version: 1.0
+To: test@subtrac.sara.nl
+Subject: Test123
+Content-Type: multipart/mixed; boundary="------------070800080005060203060809"
+X-OriginalArrivalTime: 08 Mar 2006 14:29:17.0140 (UTC)
+	FILETIME=[AE40B940:01C642BC]
+
+This is a multi-part message in MIME format.
+--------------070800080005060203060809
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+
+Test1234
+Test1234
+
+-- 
+--
+********************************************************************
+*                                                                  *
+*  Bas van der Vlies                     e-mail: basv@sara.nl      *
+*  SARA - Academic Computing Services    phone:  +31 20 592 8012   *
+*  Kruislaan 415                         fax:    +31 20 6683167    *
+*  1098 SJ Amsterdam                                               *
+*                                                                  *
+********************************************************************
+
+--------------070800080005060203060809
+Content-Type: text/plain;
+ name="basje.txt"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="basje.txt"
+
+test123
+test1234
+
+--------------070800080005060203060809--

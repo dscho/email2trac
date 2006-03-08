@@ -1,3 +1,19 @@
+2006-03-08
+        - Fixed an bug for 0.9, there was a space in front of the ' ticket' directory.
+	  removed it.
+	  Reported by: mi-trachacks@moensolutions.com	
+	  Fixed by: Bas van der Vlies
+	- Fixed an exception error in delete_spam.py
+	  when shutil has not enough priveledges to remove the
+	  attachments it is reported
+	  Fixed by: Bas van der Vlies
+	- email2trac.py: When you include the body tag, some 
+	  mailers (like Thunderbird) will leave out the signature.
+          Therefore this version leaves out the body tag.
+	  Fixed by: Walter de Jong
+	- Added msg.txt for testing
+	  Fixed by: Bas van der Vlies
+
 2006-02-01  Bas van der Vlies <basv@sara.nl>:
 	* Added Tikcet notification, send email when there is
 	  a new ticket. Depends on notification setting in
