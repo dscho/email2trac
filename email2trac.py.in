@@ -530,7 +530,7 @@ class TicketEmailParser(object):
 			#
 			if self.VERSION > 0.8:
 				fd = open(path)
-				att = attachment.Attachment(self.env,' ticket', ticket['id'])
+				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
 				att.insert(url_filename, fd, filesize)
 				fd.close()
 			else:
