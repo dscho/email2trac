@@ -500,9 +500,7 @@ class TicketEmailParser(object):
 				filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
 
 			url_filename = urllib.quote(filename)
-
 			if self.VERSION > 0.8:
-				#tmpfile = '/tmp/email2trac-ticket%sattachment' % str(ticket['id'])
 				dir = '/tmp'
 			else:
 				dir = os.path.join(self.env.get_attachments_dir(), 'ticket', 
@@ -510,10 +508,7 @@ class TicketEmailParser(object):
 				if not os.path.exists(dir):
 					mkdir_p(dir, 0755)
 
-				#tmpfile = os.path.join(dir, url_filename)
-
 			path, fd =  util.create_unique_file(os.path.join(dir, url_filename))
-			#f = open(tmpfile, 'wb')
 			text = part.get_payload(decode=1)
 			if not text:
 				text = '(None)'
@@ -522,7 +517,6 @@ class TicketEmailParser(object):
 
 			# get the filesize
 			#
-			#stats = os.lstat(tmpfile) 
 			stats = os.lstat(path) 
 			filesize = stats[stat.ST_SIZE]
 
