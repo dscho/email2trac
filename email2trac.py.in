@@ -238,8 +238,10 @@ class TicketEmailParser(object):
 		cursor = self.db.cursor()
 		sql = "SELECT owner FROM component WHERE name='%s'" % ticket['component']
 		cursor.execute(sql)
-		ticket['owner'] = cursor.fetchone()[0]
-
+		try:
+			ticket['owner'] = cursor.fetchone()[0]
+		except TypeError, detail:
+			ticket['owner'] = "UNKNOWN"
 
 	def set_reply_fields(self, ticket, message):
 		"""
