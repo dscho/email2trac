@@ -1,3 +1,9 @@
+2006-04-??
+	- Fixed a bug when there was no plain text body.
+	  Reported by: Greg Deakyne
+	- Fixed a small bug if default component owner is unknown.
+	  Just fill in some bogus info.
+
 2006-03-08
         - Fixed an bug for 0.9, there was a space in front of the ' ticket' directory.
 	  removed it.
