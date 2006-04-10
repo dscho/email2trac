@@ -380,6 +380,7 @@ class TicketEmailParser(object):
 		message text can be plain text or html or something else
 		"""
 		has_description = 0
+		ubody_text = '\n{{{\nNo plain text message\n}}}\n'
 		for part in msg.walk():
 
 			# 'multipart/*' is a container for multipart messages
