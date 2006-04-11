@@ -36,7 +36,7 @@ install: all
 	for script in $(PYTHON_FILES) ; \
 	do \
           name=`basename $$script '.py'` ;\
-	  install --mode=755 --owner=root $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
+	  install -m 755 -o root $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
 	done
 
 clean:

@@ -3,6 +3,10 @@
 	  Reported by: Greg Deakyne
 	- Fixed a small bug if default component owner is unknown.
 	  Just fill in some bogus info.
+	- Use the short options for the install command. S it works for
+	  MacOSx
+	  Reported by: Nathaniel Irons
+
 
 2006-03-08
         - Fixed an bug for 0.9, there was a space in front of the ' ticket' directory.
