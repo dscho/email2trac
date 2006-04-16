@@ -313,6 +313,8 @@ class TicketEmailParser(object):
 
 		if self.get_config('notification', 'smtp_enabled') in ['true']:
 			self.notification = 1
+		else:
+			self.notification = 0
 
 		# Some defaults
 		#
