@@ -1,3 +1,9 @@
+email2trac (0.5.7-1) stable; urgency=low
+
+  * New version that fixes serveral bugs 
+
+ -- root <root@subtrac.sara.nl>  Wed, 12 Apr 2006 15:54:30 +0200
+
 email2trac (0.5.0-4) stable; urgency=low
 
   *  Continue instead of going on
