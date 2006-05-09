@@ -151,6 +151,9 @@ class TicketEmailParser(object):
 			if number >= self.SPAM_LEVEL:
 				return 'Spam'
 
+		elif message.has_key('X-Virus-found'):			# treat virus mails as spam
+			return 'Spam'
+
 		return self.get_config('ticket', 'default_component') 
 
 	def to_unicode(self, str):
