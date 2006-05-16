@@ -10,6 +10,8 @@
 	  Implemented by: Walter de Jong
 	- Some modules are changed for version 0.10, Added and made some
 	  minor changes: Patch supplied by: Markus Tacker  
+	- Ported delete_spam.py to version 0.9 and higher:
+	  Reported by: Nathaniel Irons
 
 
 2006-03-08

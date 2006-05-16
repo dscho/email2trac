@@ -25,7 +25,7 @@ Desc. : Delete Spam tickets from database. Else we get an lot of
         tickets
 
 Usage :
-	delete_spam [ -f <configfile> ]
+	delete_spam [ -f/--file <configfile> -p/--project <name>]
 
 defaults:
 	configfile = /etc/email2trac.conf
@@ -33,7 +33,6 @@ defaults:
 SVN Info:
         $Id$
 """
-from trac import Environment, Ticket
 
 import os
 import sys
@@ -41,7 +40,9 @@ import getopt
 import shutil
 import ConfigParser
 
-def ReadConfig(file):
+trac_default_version = 0.9
+
+def ReadConfig(file, name):
 	"""
 	Parse the config file
 	"""
@@ -51,24 +52,31 @@ def ReadConfig(file):
 		sys.exit(1)
 
 	config = ConfigParser.ConfigParser()
-
 	try:
-	  config.read(file)
+		config.read(file)
 	except ConfigParser.MissingSectionHeaderError,detail:
-	  print detail
-	  sys.exit(1)
+		print detail
+	  	sys.exit(1)
 
-	defaults = config.defaults()
-	if not defaults.has_key('project'):
-		print 'You have define the location of your trac project, eg:'
-		print '\t project: /var/trac/<projectname>'
-		sys.exit(1)
-	  
-	return defaults
+  	# Use given project name else use defaults
+  	#
+	if name:
+		if not config.has_section(name):
+			print "Not an valid project name: %s" %name
+			print "Valid names: %s" %config.sections()
+			sys.exit(1)
 
+		project =  dict()
+		for option in  config.options(name):
+			project[option] = config.get(name, option) 
+
+	else:
+		project = config.defaults()
+
+	return project
 
 def delete_spam(project, debug):
-			env = Environment.Environment(project, create=0)
+			env = Environment(project, create=0)
 			db = env.get_db_cnx()
 			
 			cursor = db.cursor()
@@ -97,23 +105,42 @@ def delete_spam(project, debug):
 if __name__ == '__main__':
 	# Default config file
 	#
-	configfile = '/etc/email2trac.conf'
+	configfile = '@email2trac_conf@'
 
 	try:
-		 opts, args = getopt.getopt(sys.argv[1:], 'hf:', ['help', 'file='])
+		 opts, args = getopt.getopt(sys.argv[1:], 'hf:p:', ['help', 'file=', 'project='])
 	except getopt.error,detail:
 		print __doc__
 		print detail
 		sys.exit(1)
 
+	project_name = None
 	for opt,value in opts:
 		if opt in [ '-h', '--help']:
 			print __doc__ 
 			sys.exit(0) 
 		elif opt in ['-f', '--file']:
 			configfile = value
+		elif opt in ['-p', '--project']:
+			project_name = value
 	
-	settings = ReadConfig(configfile)
+	settings = ReadConfig(configfile, project_name)
+	if not settings.has_key('project'):
+		print __doc__
+		print 'No project defined in config file, eg:\n\t project: /data/trac/bas'
+		sys.exit(1)
+
+	if settings.has_key('trac_version'):
+		version = float(settings['trac_version'])
+	else:
+		version = trac_default_version
+
+
+	if version == 0.8:
+		from trac.Environment import Environment
+	else:
+		from trac.env import Environment
+
 	delete_spam(settings['project'], int(settings['debug']))
 	print 'Spam is deleted succesfully..' 
 
