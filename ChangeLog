@@ -1,11 +1,15 @@
-2006-04-??
+2006-05-16
 	- Fixed a bug when there was no plain text body.
 	  Reported by: Greg Deakyne
 	- Fixed a small bug if default component owner is unknown.
 	  Just fill in some bogus info.
-	- Use the short options for the install command. S it works for
+	- Use the short options for the install command. So it works for
 	  MacOSx
 	  Reported by: Nathaniel Irons
+	- Messages that has X-Virus-found in header are marked as SPAM
+	  Implemented by: Walter de Jong
+	- Some modules are changed for version 0.10, Added and made some
+	  minor changes: Patch supplied by: Markus Tacker  
 
 
 2006-03-08

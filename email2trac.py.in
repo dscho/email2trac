@@ -51,7 +51,7 @@ How to use
 	debug        : 1                 # OPTIONAL, if set print some DEBUG info
 	spam_level   : 4                 # OPTIONAL, if set check for SPAM mail 
 	reply_address: 1                 # OPTIONAL, if set then fill in ticket CC field
-        umask        : 022               # OPTIONAL, if set then use this umask for creation of the attachments
+    umask        : 022               # OPTIONAL, if set then use this umask for creation of the attachments
 	mailto_link  : 1                 # OPTIONAL, if set then [mailto:<CC>] in description 
 	trac_version : 0.8               # OPTIONAL, default is 0.9
 
@@ -99,10 +99,10 @@ class TicketEmailParser(object):
 		self.db = None
 
 		self.VERSION = version
-		if self.VERSION > 0.8:
-			self.get_config = self.env.config.get
-		else:
+		if self.VERSION == 0.8:
 			self.get_config = self.env.get_config
+		else:
+			self.get_config = self.env.config.get
 
 		if parameters.has_key('umask'):
 			os.umask(int(parameters['umask'], 8))
@@ -255,11 +255,11 @@ class TicketEmailParser(object):
 
 		# Look for email address in registered trac users
 		#
-		if self.VERSION > 0.8:
+		if self.VERSION == 0.8:
+			users = []
+		else:
 			users = [ u for (u, n, e) in self.env.get_known_users(self.db)
 				if e == email_addr ]
-		else:
-			users = []
 
 		if len(users) == 1:
 			ticket['reporter'] = users[0]
@@ -362,10 +362,10 @@ class TicketEmailParser(object):
 
 		# Insert ticket in database
 		#
-		if self.VERSION > 0.8:
-			tkt['id'] = tkt.insert()
-		else:
+		if self.VERSION == 0.8:
 			tkt['id'] = tkt.insert(self.db)
+		else:
+			tkt['id'] = tkt.insert()
 
 		#
 		# Just how to show to update description
@@ -508,13 +508,13 @@ class TicketEmailParser(object):
 				filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
 
 			url_filename = urllib.quote(filename)
-			if self.VERSION > 0.8:
-				dir = '/tmp'
-			else:
+			if self.VERSION == 0.8:
 				dir = os.path.join(self.env.get_attachments_dir(), 'ticket', 
 				                    	urllib.quote(str(ticket['id'])))
 				if not os.path.exists(dir):
 					mkdir_p(dir, 0755)
+			else:
+				dir = '/tmp'
 
 			path, fd =  util.create_unique_file(os.path.join(dir, url_filename))
 			text = part.get_payload(decode=1)
@@ -530,17 +530,17 @@ class TicketEmailParser(object):
 
 			# Insert the attachment it differs for the different TRAC versions
 			#
-			if self.VERSION > 0.8:
-				fd = open(path)
-				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
-				att.insert(url_filename, fd, filesize)
-				fd.close()
-			else:
+			if self.VERSION == 0.8:
 				cursor = self.db.cursor()
 				cursor.execute('INSERT INTO attachment VALUES("%s","%s","%s",%d,%d,"%s","%s","%s")' 
 					%('ticket', urllib.quote(str(ticket['id'])), filename + '?format=raw', filesize, 
 					  int(time.time()),'', user, 'e-mail') ) 
 				self.db.commit()
+			else:
+				fd = open(path)
+				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
+				att.insert(url_filename, fd, filesize)
+				fd.close()
 
 
 def mkdir_p(dir, mode):
@@ -633,19 +633,27 @@ if __name__ == '__main__':
 	#debug HvB
 	#print settings
 
-	if version > 0.8:
-		from trac import attachment 
-		from trac.env import Environment
-		from trac.ticket import Ticket
-		from trac.Notify import TicketNotifyEmail
-		from trac.web.href import Href
-		from trac import util
-	else:
+	if version == 0.8:
 		from trac.Environment import Environment
 		from trac.Ticket import Ticket
 		from trac.Notify import TicketNotifyEmail
 		from trac.Href import Href
 		from trac import util
+	elif version == 0.9:
+		from trac import attachment 
+		from trac.env import Environment
+		from trac.ticket import Ticket
+		from trac.web.href import Href
+		from trac import util
+		from trac.Notify import TicketNotifyEmail
+	elif version == 0.10:
+		from trac import attachment 
+		from trac.env import Environment
+		from trac.ticket import Ticket
+		from trac.web.href import Href
+		from trac import util
+		# see http://projects.edgewall.com/trac/changeset/2799
+		from trac.ticket.notification import TicketNotifyEmail
 
 	env = Environment(settings['project'], create=0)
 	tktparser = TicketEmailParser(env, settings, version)
