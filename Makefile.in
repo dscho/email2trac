@@ -32,7 +32,7 @@ run_email2trac: $(WRAPPER_SRC) Makefile
 
 install: all
 	install -d $(DESTDIR)$(EXEC_PREFIX)
-	install --mode=4111 --owner=root run_email2trac $(DESTDIR)$(EXEC_PREFIX)
+	install -m 4111 -o root run_email2trac $(DESTDIR)$(EXEC_PREFIX)
 	for script in $(PYTHON_FILES) ; \
 	do \
           name=`basename $$script '.py'` ;\

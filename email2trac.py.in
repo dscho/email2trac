@@ -302,6 +302,32 @@ class TicketEmailParser(object):
 		except OSError:
 			pass
 
+	def ticket_update(self, m):
+
+		if not m['Subject']:
+			return False
+		else:
+			subject  = self.to_unicode(m['Subject'])
+		print subject
+
+		TICKET_RE = re.compile(r"""
+					(?P<ticketnr>[#][0-9]+:)
+					""", re.VERBOSE)
+
+		result =  TICKET_RE.search(subject)
+		if not result:
+			return False
+
+		# Strip # and : frim ticket_id
+		ticket_id = result.group('ticketnr')
+		ticket_id = int(ticket_id[1:-1])
+		print ticket_id
+
+		tkt = Ticket(self.db, ticket_id)
+		print tkt
+		return True
+
+
 	def parse(self, fp):
 		msg = email.message_from_file(fp)
 		if not msg:
@@ -311,6 +337,14 @@ class TicketEmailParser(object):
 			self.save_email_for_debug(msg)
 
 		self.db = self.env.get_db_cnx()
+		if self.ticket_update(msg):
+			print 'Ticket has been updated now new one'
+			sys.exit(0)
+		else:
+			print 'New ticket'
+
+		sys.exit(0)
+		
 		tkt = Ticket(self.env)
 		tkt['status'] = 'new'
 
@@ -358,7 +392,7 @@ class TicketEmailParser(object):
 		if self.DEBUG > 0:
 			self.debug_attachments(msg)
 
-		self.description(msg,tkt, head, author, email_addr)
+		self.description(msg, tkt, head, author, email_addr)
 
 		# Insert ticket in database
 		#
@@ -370,9 +404,8 @@ class TicketEmailParser(object):
 		#
 		# Just how to show to update description
 		#
-		#tkt['description'] = '\n{{{\n\n Bas is op nieuw bezig\n\n }}}\n' 
-		#tkt.save_changes(self.db, author, "Lekker bezig")
-		#
+		#tkt['summary'] = '#%s: %s' %(tkt['id'], tkt['summary'])
+		#tkt.save_changes(self.db, author, "")
 
 		self.attachments(msg, tkt, author)
 		if self.notification:
