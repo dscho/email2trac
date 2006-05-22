@@ -46,14 +46,16 @@ MIME headers are mapped as follows:
 How to use
 ----------
  * Create an config file:
-	[DEFAULT]                        # REQUIRED
-	project      : /data/trac/test   # REQUIRED
-	debug        : 1                 # OPTIONAL, if set print some DEBUG info
-	spam_level   : 4                 # OPTIONAL, if set check for SPAM mail 
-	reply_address: 1                 # OPTIONAL, if set then fill in ticket CC field
-    umask        : 022               # OPTIONAL, if set then use this umask for creation of the attachments
-	mailto_link  : 1                 # OPTIONAL, if set then [mailto:<CC>] in description 
-	trac_version : 0.8               # OPTIONAL, default is 0.9
+	[DEFAULT]                      # REQUIRED
+	project      : /data/trac/test # REQUIRED
+	debug        : 1               # OPTIONAL, if set print some DEBUG info
+	spam_level   : 4               # OPTIONAL, if set check for SPAM mail 
+	reply_address: 1               # OPTIONAL, if set then fill in ticket CC field
+    umask        : 022             # OPTIONAL, if set then use this umask for creation of the attachments
+	mailto_link  : 1               # OPTIONAL, if set then [mailto:<>] in description 
+	mailto_cc    : basv@sara.nl    # OPTIONAL, Use this address as CC in mailto line
+	ticket_update: 1               # OPTIONAL, if set then check if this is an update for a ticket
+	trac_version : 0.8             # OPTIONAL, default is 0.9
 
 	[jouvin]                         # OPTIONAL project declaration, if set both fields necessary
 	project      : /data/trac/jouvin # use -p|--project jouvin.  
@@ -81,6 +83,7 @@ import re
 import urllib
 import unicodedata
 import ConfigParser
+import sqlite
 from email import Header
 from stat import *
 import mimetypes
@@ -120,6 +123,10 @@ class TicketEmailParser(object):
 
 		if parameters.has_key('mailto_link'):
 			self.MAILTO = int(parameters['mailto_link'])
+			if parameters.has_key('mailto_cc'):
+				self.MAILTO_CC = parameters['mailto_cc']
+			else:
+				self.MAILTO_CC = ''
 		else:
 			self.MAILTO = 0
 
@@ -145,6 +152,11 @@ class TicketEmailParser(object):
 			self.REPLY_ALL = int(parameters['reply_all'])
 		else:
 			self.REPLY_ALL = 0
+
+		if parameters.has_key('ticket_update'):
+			self.TICKET_UPDATE = int(parameters['ticket_update'])
+		else:
+			self.TICKET_UPDATE = 0
 
 
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
@@ -354,10 +366,11 @@ class TicketEmailParser(object):
 		else:
 			self.notification = 0
 
-		# Is this a previous ticket
+		# Must we update existing tickets
 		#
-		if self.ticket_update(msg):
-			return True
+		if self.TICKET_UPDATE > 0:
+			if self.ticket_update(msg):
+				return True
 		
 		tkt = Ticket(self.env)
 		tkt['status'] = 'new'
@@ -497,7 +510,12 @@ class TicketEmailParser(object):
 		#body = '%s wrote:\n%s' %(author, body)
 
 		# Temporary fix
-		str = 'mailto:%s?subject=%s' %(urllib.quote(self.email_addr), urllib.quote('Re: #%s: %s' %(id, subject)))
+		str = 'mailto:%s?Subject=%s&Cc=%s' %( 
+		       urllib.quote(self.email_addr), 
+			   urllib.quote('Re: #%s: %s' %(id, subject)),
+			   urllib.quote(self.MAILTO_CC)
+			   )
+
 		str = '\n{{{\n#!html\n<a href="%s">Reply to: %s</a>\n}}}\n' %(str, author)
 
 		return str
@@ -681,7 +699,6 @@ if __name__ == '__main__':
 		from trac.Notify import TicketNotifyEmail
 		from trac.Href import Href
 		from trac import util
-		import sqlite
 	elif version == 0.9:
 		from trac import attachment 
 		from trac.env import Environment
