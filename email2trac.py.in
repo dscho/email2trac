@@ -562,13 +562,22 @@ class TicketEmailParser(object):
 			filesize = stats[stat.ST_SIZE]
 
 			# Insert the attachment it differs for the different TRAC versions
-			#
+			# 
 			if self.VERSION == 0.8:
 				cursor = self.db.cursor()
-				cursor.execute('INSERT INTO attachment VALUES("%s","%s","%s",%d,%d,"%s","%s","%s")' 
-					%('ticket', urllib.quote(str(ticket['id'])), filename + '?format=raw', filesize, 
-					  int(time.time()),'', self.author, 'e-mail') ) 
+				try:
+					cursor.execute('INSERT INTO attachment VALUES("%s","%s","%s",%d,%d,"%s","%s","%s")' 
+						%('ticket', urllib.quote(str(ticket['id'])), filename + '?format=raw', filesize, 
+						int(time.time()),'', self.author, 'e-mail') ) 
+
+				# Attachment is already known
+				#
+				except sqlite.IntegrityError:	
+					self.db.close()
+					return 
+
 				self.db.commit()
+
 			else:
 				fd = open(path)
 				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
@@ -672,6 +681,7 @@ if __name__ == '__main__':
 		from trac.Notify import TicketNotifyEmail
 		from trac.Href import Href
 		from trac import util
+		import sqlite
 	elif version == 0.9:
 		from trac import attachment 
 		from trac.env import Environment
