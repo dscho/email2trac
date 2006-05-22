@@ -98,6 +98,12 @@ class TicketEmailParser(object):
 		#
 		self.db = None
 
+		# Some useful mail constants
+		#
+		self.author = None
+		self.email_addr = None
+		self.email_field = None
+
 		self.VERSION = version
 		if self.VERSION == 0.8:
 			self.get_config = self.env.get_config
@@ -215,17 +221,9 @@ class TicketEmailParser(object):
 				pass
 
 	def email_header_txt(self, m):
-#		if not m['Subject']:
-#			subject = '(geen subject)'
-#		else:
-#			subject = self.to_unicode(m['Subject'])
-#
-#		head = "'''Subject:''' %s [[BR]]" % subject
-#		if m['From'] and len(m['From']) > 0:
-#			head = "%s'''From:''' %s [[BR]]" % (head, m['From'])
-#		if m['Date'] and len(m['Date']) > 0:
-#			head = "%s'''Date:''' %s [[BR]]" %(head, m['Date'])
-
+		"""
+		Display To and CC addresses in description field
+		"""
 		str = ''
 		if m['To'] and len(m['To']) > 0 and m['To'] != 'hic@sara.nl':
 			str = "'''To:''' %s [[BR]]" %(m['To'])
@@ -246,12 +244,11 @@ class TicketEmailParser(object):
 		except TypeError, detail:
 			ticket['owner'] = "UNKNOWN"
 
-	def set_reply_fields(self, ticket, message):
+	def get_author_emailaddrs(self, message):
 		"""
-		Bla Bla
+		Get the default author name and email address from the message
 		"""
-		author, email_addr  = email.Utils.parseaddr(message['from'])
-		email_str = self.to_unicode(message['from'])
+		self.author, self.email_addr  = email.Utils.parseaddr(message['from'])
 
 		# Look for email address in registered trac users
 		#
@@ -259,12 +256,18 @@ class TicketEmailParser(object):
 			users = []
 		else:
 			users = [ u for (u, n, e) in self.env.get_known_users(self.db)
-				if e == email_addr ]
+				if e == self.email_addr ]
 
 		if len(users) == 1:
-			ticket['reporter'] = users[0]
+			self.email_field = users[0]
 		else:
-			ticket['reporter'] = email_str
+			self.email_field =  self.to_unicode(message['from'])
+
+	def set_reply_fields(self, ticket, message):
+		"""
+		Set all the right fields for a new ticket
+		"""
+		ticket['reporter'] = self.email_field
 
 		# Put all CC-addresses in ticket CC field
 		#
@@ -279,7 +282,7 @@ class TicketEmailParser(object):
 			#
 			if self.notification:
 				try:
-					addrs.remove((author, email_addr))
+					addrs.remove((self.author, self.email_addr))
 				except ValueError, detail:
 					pass
 
@@ -288,7 +291,6 @@ class TicketEmailParser(object):
 						ticket['cc'] = '%s,%s' %(ticket['cc'], mail)
 					except:
 						ticket['cc'] = mail
-		return author, email_addr
 
 	def save_email_for_debug(self, message):
 
@@ -318,13 +320,20 @@ class TicketEmailParser(object):
 		if not result:
 			return False
 
-		# Strip # and : frim ticket_id
+		# Strip '#' and ':' from ticket_id
 		ticket_id = result.group('ticketnr')
 		ticket_id = int(ticket_id[1:-1])
-		print ticket_id
 
 		tkt = Ticket(self.db, ticket_id)
-		print tkt
+
+		body_text = self.get_body_text(m)
+		body_text = '{{{\n%s\n}}}' %body_text
+		tkt.save_changes(self.db, self.author, body_text)
+
+		self.attachments(m, tkt)
+		if self.notification:
+			self.notify(tkt, False)
+
 		return True
 
 
@@ -335,23 +344,23 @@ class TicketEmailParser(object):
 
 		if self.DEBUG > 1:	  # save the entire e-mail message text
 			self.save_email_for_debug(msg)
+			self.debug_attachments(msg)
 
 		self.db = self.env.get_db_cnx()
-		if self.ticket_update(msg):
-			print 'Ticket has been updated now new one'
-			sys.exit(0)
-		else:
-			print 'New ticket'
-
-		sys.exit(0)
-		
-		tkt = Ticket(self.env)
-		tkt['status'] = 'new'
+ 		self.get_author_emailaddrs(msg) 
 
 		if self.get_config('notification', 'smtp_enabled') in ['true']:
 			self.notification = 1
 		else:
 			self.notification = 0
+
+		# Is this a previous ticket
+		#
+		if self.ticket_update(msg):
+			return True
+		
+		tkt = Ticket(self.env)
+		tkt['status'] = 'new'
 
 		# Some defaults
 		#
@@ -381,7 +390,7 @@ class TicketEmailParser(object):
 		# Set default owner for component
 		#
 		self.set_owner(tkt)
-		author, email_addr = self.set_reply_fields(tkt, msg)
+		self.set_reply_fields(tkt, msg)
 
 		# produce e-mail like header
 		#
@@ -389,10 +398,9 @@ class TicketEmailParser(object):
 		if self.EMAIL_HEADER > 0:
 			head = self.email_header_txt(msg)
 
-		if self.DEBUG > 0:
-			self.debug_attachments(msg)
 
-		self.description(msg, tkt, head, author, email_addr)
+		body_text = self.get_body_text(msg)
+		tkt['description'] = '\n{{{\n%s\n}}}\n' %(body_text)
 
 		# Insert ticket in database
 		#
@@ -401,20 +409,21 @@ class TicketEmailParser(object):
 		else:
 			tkt['id'] = tkt.insert()
 
+		# Else we do no have a ticket id for the subject line
 		#
-		# Just how to show to update description
-		#
-		#tkt['summary'] = '#%s: %s' %(tkt['id'], tkt['summary'])
-		#tkt.save_changes(self.db, author, "")
+		mailto = ''
+		if self.MAILTO:
+			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), tkt['id'], body_text)
+			tkt['description'] = '%s%s\n{{{\n%s\n}}}\n' %(head, mailto, body_text)
+			tkt.save_changes(self.db, self.author, "")
 
-		self.attachments(msg, tkt, author)
+		self.attachments(msg, tkt)
 		if self.notification:
 			self.notify(tkt)
 
-
-	def description(self, msg, tkt, head, author, email):
+	def get_body_text(self, msg):
 		"""
-		put the message text in the ticket description
+		put the message text in the ticket description or in the changes field 
 		message text can be plain text or html or something else
 		"""
 		has_description = 0
@@ -439,30 +448,21 @@ class TicketEmailParser(object):
 				charset = msg.get_content_charset('iso-8859-15')
 				ubody_text = unicode(body_text, charset).encode('utf-8')
 
-				tkt['description'] = '\n{{{\n\n%s\n}}}\n' %(ubody_text)
-
 			elif part.get_content_type() == 'text/html':
-				tkt['description'] = '%s\n\n(see attachment for HTML mail message)\n' \
-					%(head)
-				body_text = tkt['description']
+				ubody_text = '\n\n(see attachment for HTML mail message)\n'
 
 			else:
-				tkt['description'] = '%s\n\n(see attachment for message)\n' %(head)
-				body_text = tkt['description']
+				ubody_text = '\n\n(see attachment for message)\n'
 
 			has_description = 1
 			break		# we have the description, so break
 
 		if not has_description:
-			tkt['description'] = '%s\n\n(no plain text message, see attachments)' % head
-			has_description = 1
+			ubody_text = '\n\n(see attachment for message)\n'
 
-		if self.MAILTO:
-			mailto = self.html_mailto_link(author, email, self.to_unicode(msg['subject']), ubody_text)
-			tkt['description'] = '%s\n%s %s' %(head, mailto, tkt['description'])
+		return ubody_text
 
-
-	def notify(self, tkt):
+	def notify(self, tkt , new=True):
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
@@ -473,7 +473,7 @@ class TicketEmailParser(object):
 			if self.notify_template:
 				tn.template_name = self.notify_template;
 
-			tn.notify(tkt, newticket=True) 
+			tn.notify(tkt, new) 
 
 		except Exception, e:
 			print 'TD: Failure sending notification on creation of ticket #%s: %s' \
@@ -483,11 +483,11 @@ class TicketEmailParser(object):
 		return '%s %s' % (self.comment, str)
 
 
-	def html_mailto_link(self, author, mail_addr, subject, body):
-		if not author:
-			author = mail_addr
+	def html_mailto_link(self, subject, id, body):
+		if not self.author:
+			author = self.mail_addr
 		else:	
-			author = self.to_unicode(author)
+			author = self.to_unicode(self.author)
 
 		# Must find a fix
 		#
@@ -497,12 +497,12 @@ class TicketEmailParser(object):
 		#body = '%s wrote:\n%s' %(author, body)
 
 		# Temporary fix
-		str = 'mailto:%s?subject=%s' %(urllib.quote(mail_addr), urllib.quote('Re: %s' % subject))
+		str = 'mailto:%s?subject=%s' %(urllib.quote(self.email_addr), urllib.quote('Re: #%s: %s' %(id, subject)))
 		str = '\n{{{\n#!html\n<a href="%s">Reply to: %s</a>\n}}}\n' %(str, author)
 
 		return str
 
-	def attachments(self, message, ticket, user):
+	def attachments(self, message, ticket):
 		'''save any attachments as file in the ticket's directory'''
 
 		count = 0
@@ -521,7 +521,7 @@ class TicketEmailParser(object):
 				count = count + 1
 				filename = 'part%04d' % count
 
-				ext = mimetypes.guess_extension(part.get_type())
+				ext = mimetypes.guess_extension(part.get_content_type())
 				if not ext:
 					ext = '.bin'
 
@@ -567,7 +567,7 @@ class TicketEmailParser(object):
 				cursor = self.db.cursor()
 				cursor.execute('INSERT INTO attachment VALUES("%s","%s","%s",%d,%d,"%s","%s","%s")' 
 					%('ticket', urllib.quote(str(ticket['id'])), filename + '?format=raw', filesize, 
-					  int(time.time()),'', user, 'e-mail') ) 
+					  int(time.time()),'', self.author, 'e-mail') ) 
 				self.db.commit()
 			else:
 				fd = open(path)

@@ -14,7 +14,7 @@ From: Bas van der Vlies <basv@sara.nl>
 User-Agent: Thunderbird 1.5 (Windows/20051201)
 MIME-Version: 1.0
 To: test@subtrac.sara.nl
-Subject: Test123 #153:
+Subject: Test123
 Content-Type: multipart/mixed; boundary="------------070800080005060203060809"
 X-OriginalArrivalTime: 08 Mar 2006 14:29:17.0140 (UTC)
 	FILETIME=[AE40B940:01C642BC]
