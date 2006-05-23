@@ -53,7 +53,7 @@ How to use
 	reply_address: 1               # OPTIONAL, if set then fill in ticket CC field
     umask        : 022             # OPTIONAL, if set then use this umask for creation of the attachments
 	mailto_link  : 1               # OPTIONAL, if set then [mailto:<>] in description 
-	mailto_cc    : basv@sara.nl    # OPTIONAL, Use this address as CC in mailto line
+	mailto_cc    : basv@sara.nl    # OPTIONAL, use this address as CC in mailto line
 	ticket_update: 1               # OPTIONAL, if set then check if this is an update for a ticket
 	trac_version : 0.8             # OPTIONAL, default is 0.9
 
@@ -83,7 +83,6 @@ import re
 import urllib
 import unicodedata
 import ConfigParser
-import sqlite
 from email import Header
 from stat import *
 import mimetypes
@@ -322,7 +321,6 @@ class TicketEmailParser(object):
 			return False
 		else:
 			subject  = self.to_unicode(m['Subject'])
-		print subject
 
 		TICKET_RE = re.compile(r"""
 					(?P<ticketnr>[#][0-9]+:)
@@ -333,6 +331,7 @@ class TicketEmailParser(object):
 			return False
 
 		# Strip '#' and ':' from ticket_id
+		#
 		ticket_id = result.group('ticketnr')
 		ticket_id = int(ticket_id[1:-1])
 
@@ -699,6 +698,7 @@ if __name__ == '__main__':
 		from trac.Notify import TicketNotifyEmail
 		from trac.Href import Href
 		from trac import util
+		import sqlite
 	elif version == 0.9:
 		from trac import attachment 
 		from trac.env import Environment
