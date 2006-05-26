@@ -340,43 +340,27 @@ class TicketEmailParser(object):
 		body_text = self.get_body_text(m)
 		body_text = '{{{\n%s\n}}}' %body_text
 
-		if self.VERSION  == 0.8:
-			tkt.save_changes(self.db, self.author, body_text)
-		else:
-			# def save_changes(self, author, comment, when=0, self.db=None):
-			tkt.save_changes(self.author, body_text)
+		# Get current time
+		#
+		when = int(time.time())
 
+		if self.VERSION  == 0.8:
+			tkt.save_changes(self.db, self.author, body_text, when)
+		else:
+			tkt.save_changes(self.author, body_text, when)
 
 		self.attachments(m, tkt)
+
 		if self.notification:
-			self.notify(tkt, False)
+			self.notify(tkt, False, when)
 
 		return True
 
 
-	def parse(self, fp):
-		msg = email.message_from_file(fp)
-		if not msg:
-			return
-
-		if self.DEBUG > 1:	  # save the entire e-mail message text
-			self.save_email_for_debug(msg)
-			self.debug_attachments(msg)
-
-		self.db = self.env.get_db_cnx()
- 		self.get_author_emailaddrs(msg) 
-
-		if self.get_config('notification', 'smtp_enabled') in ['true']:
-			self.notification = 1
-		else:
-			self.notification = 0
-
-		# Must we update existing tickets
-		#
-		if self.TICKET_UPDATE > 0:
-			if self.ticket_update(msg):
-				return True
-		
+	def new(self, msg):
+		"""
+		Create a new ticket
+		"""
 		tkt = Ticket(self.env)
 		tkt['status'] = 'new'
 
@@ -418,26 +402,69 @@ class TicketEmailParser(object):
 
 
 		body_text = self.get_body_text(msg)
-		tkt['description'] = '\n{{{\n%s\n}}}\n' %(body_text)
+		tkt['description'] = ''
 
-		# Insert ticket in database
+		# Insert ticket in database with empty description
 		#
+		when = int(time.time())
 		if self.VERSION == 0.8:
 			tkt['id'] = tkt.insert(self.db)
 		else:
 			tkt['id'] = tkt.insert()
 
-		# Else we do no have a ticket id for the subject line
+		n =  self.attachments(msg, tkt)
+		if n:
+			attach_str = '\nThis message has %d attachment(s)\n' %(n)
+		else:
+			attach_str = ''
+
+		# Always update the description else we get two emails one for the new ticket
+		# and for the attachments. It is an ugly hack but with trac you can not add
+		# attachments without an ticket id
 		#
 		mailto = ''
 		if self.MAILTO:
 			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), tkt['id'], body_text)
-			tkt['description'] = '%s%s\n{{{\n%s\n}}}\n' %(head, mailto, body_text)
-			tkt.save_changes(self.db, self.author, "")
+			tkt['description'] = '%s%s%s\n{{{\n%s\n}}}\n' %(head, attach_str, mailto, body_text)
+			comment = 'Added mailto: link + description'
+		else:
+			tkt['description'] = '%s%s\n{{{\n%s\n}}}\n' %(head, attach_str, body_text)
+			comment = 'Added description'
 
-		self.attachments(msg, tkt)
+		# Save the real description and other changes
+		#
+		if self.VERSION  == 0.8:
+			tkt.save_changes(self.db, self.author, comment, when)
+		else:
+			tkt.save_changes(self.author, comment, when)
+
 		if self.notification:
-			self.notify(tkt)
+			self.notify(tkt, True, when)
+
+	def parse(self, fp):
+		m = email.message_from_file(fp)
+		if not m:
+			return
+
+		if self.DEBUG > 1:	  # save the entire e-mail message text
+			self.save_email_for_debug(m)
+			self.debug_attachments(m)
+
+		self.db = self.env.get_db_cnx()
+ 		self.get_author_emailaddrs(m) 
+
+		if self.get_config('notification', 'smtp_enabled') in ['true']:
+			self.notification = 1
+		else:
+			self.notification = 0
+
+		# Must we update existing tickets
+		#
+		if self.TICKET_UPDATE > 0:
+			if self.ticket_update(m):
+				return True
+
+		self.new(m)
 
 	def get_body_text(self, msg):
 		"""
@@ -480,7 +507,7 @@ class TicketEmailParser(object):
 
 		return ubody_text
 
-	def notify(self, tkt , new=True):
+	def notify(self, tkt , new=True, modtime=0):
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
@@ -491,7 +518,7 @@ class TicketEmailParser(object):
 			if self.notify_template:
 				tn.template_name = self.notify_template;
 
-			tn.notify(tkt, new) 
+			tn.notify(tkt, new, modtime) 
 
 		except Exception, e:
 			print 'TD: Failure sending notification on creation of ticket #%s: %s' \
@@ -529,7 +556,8 @@ class TicketEmailParser(object):
 		'''save any attachments as file in the ticket's directory'''
 
 		count = 0
-		first = 0
+		first = 0 
+		number = 0 
 		for part in message.walk():
 			if part.get_content_maintype() == 'multipart':		# multipart/* is just a container
 				continue
@@ -540,9 +568,10 @@ class TicketEmailParser(object):
 					continue
 
 			filename = part.get_filename() 
+			count = count + 1
 			if not filename:
-				count = count + 1
-				filename = 'part%04d' % count
+				number = number + 1
+				filename = 'part%04d' % number
 
 				ext = mimetypes.guess_extension(part.get_content_type())
 				if not ext:
@@ -606,6 +635,10 @@ class TicketEmailParser(object):
 				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
 				att.insert(url_filename, fd, filesize)
 				fd.close()
+
+		# Return how many attachments
+		#
+		return count
 
 
 def mkdir_p(dir, mode):
