@@ -1,3 +1,17 @@
+2006-???
+	- Added ticketing merging. To enable it there are two options for
+	  both options enable 'ticket_update' in email2trac.conf
+	  1 - Configure trac notification, eg:
+	  	always_notify_reporter = true
+
+	  2 - Use the mailto_cc in email2trac.conf if you want to sent
+	      an email to the user and the trac email address.
+
+	  With both options you get the right format of the subject line.
+
+	- Use the short options for the install command. So it works for
+	  MacOSx Reported by: Nathaniel Irons.
+	  	 
 2006-05-16
 	- Fixed a bug when there was no plain text body.
 	  Reported by: Greg Deakyne

@@ -339,7 +339,13 @@ class TicketEmailParser(object):
 
 		body_text = self.get_body_text(m)
 		body_text = '{{{\n%s\n}}}' %body_text
-		tkt.save_changes(self.db, self.author, body_text)
+
+		if self.VERSION  == 0.8:
+			tkt.save_changes(self.db, self.author, body_text)
+		else:
+			# def save_changes(self, author, comment, when=0, self.db=None):
+			tkt.save_changes(self.author, body_text)
+
 
 		self.attachments(m, tkt)
 		if self.notification:
