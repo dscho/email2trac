@@ -316,7 +316,10 @@ class TicketEmailParser(object):
 			pass
 
 	def ticket_update(self, m):
-
+		"""
+		This function checks if this is an update of an existing ticket.
+		If yes it will update the ticket information
+		"""
 		if not m['Subject']:
 			return False
 		else:
@@ -330,23 +333,23 @@ class TicketEmailParser(object):
 		if not result:
 			return False
 
+		body_text = self.get_body_text(m)
+		body_text = '{{{\n%s\n}}}' %body_text
+
 		# Strip '#' and ':' from ticket_id
 		#
 		ticket_id = result.group('ticketnr')
 		ticket_id = int(ticket_id[1:-1])
-
-		tkt = Ticket(self.db, ticket_id)
-
-		body_text = self.get_body_text(m)
-		body_text = '{{{\n%s\n}}}' %body_text
 
 		# Get current time
 		#
 		when = int(time.time())
 
 		if self.VERSION  == 0.8:
+			tkt = Ticket(self.db, ticket_id)
 			tkt.save_changes(self.db, self.author, body_text, when)
 		else:
+			tkt = Ticket(self.env, ticket_id, self.db)
 			tkt.save_changes(self.author, body_text, when)
 
 		self.attachments(m, tkt)
@@ -355,7 +358,6 @@ class TicketEmailParser(object):
 			self.notify(tkt, False, when)
 
 		return True
-
 
 	def new(self, msg):
 		"""

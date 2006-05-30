@@ -1,3 +1,9 @@
+email2trac (0.7.0-1) stable; urgency=low
+
+  * Added Ticket merging
+
+ -- root <root@subtrac.sara.nl>  Fri, 26 May 2006 15:01:03 +0200
+
 email2trac (0.6.0-1) stable; urgency=low
 
   * New Version 0.6
