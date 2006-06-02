@@ -1,3 +1,9 @@
+email2trac (0.7.0-2) stable; urgency=low
+
+  * Fixed some language errors by Nathaniel Irons 
+
+ -- root <root@subtrac.sara.nl>  Fri,  2 Jun 2006 09:27:22 +0200
+
 email2trac (0.7.0-1) stable; urgency=low
 
   * Added Ticket merging
