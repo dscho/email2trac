@@ -176,7 +176,7 @@ class TicketEmailParser(object):
 	def to_unicode(self, str):
 		"""
 		Email has 7 bit ASCII code, convert it to unicode with the charset
-		that is encoded in 7-bit ASCII code and encode it as utf-8 so TRAC 
+        that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
 		understands it.
 		"""
 		results =  Header.decode_header(str)
@@ -304,7 +304,6 @@ class TicketEmailParser(object):
 						ticket['cc'] = mail
 
 	def save_email_for_debug(self, message):
-
 		msg_file = '/var/tmp/msg.txt' 
 		print 'TD: saving email to %s' % msg_file
 		fx = open(msg_file, 'wb')
@@ -317,8 +316,9 @@ class TicketEmailParser(object):
 
 	def ticket_update(self, m):
 		"""
-		This function checks if this is an update of an existing ticket.
-		If yes it will update the ticket information
+		If the current email is a reply to an existing ticket, this function
+		will append the contents of this email to that ticket, instead of 
+		creating a new one.
 		"""
 		if not m['Subject']:
 			return False
@@ -470,7 +470,7 @@ class TicketEmailParser(object):
 
 	def get_body_text(self, msg):
 		"""
-		put the message text in the ticket description or in the changes field 
+		put the message text in the ticket description or in the changes field.
 		message text can be plain text or html or something else
 		"""
 		has_description = 0
@@ -510,6 +510,9 @@ class TicketEmailParser(object):
 		return ubody_text
 
 	def notify(self, tkt , new=True, modtime=0):
+		"""
+		A wrapper for the TRAC notify function. So we can use templates
+		"""
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
@@ -523,8 +526,7 @@ class TicketEmailParser(object):
 			tn.notify(tkt, new, modtime) 
 
 		except Exception, e:
-			print 'TD: Failure sending notification on creation of ticket #%s: %s' \
-				% (tkt['id'], e)
+			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(tkt['id'], e)
 
 	def mail_line(self, str):
 		return '%s %s' % (self.comment, str)
@@ -555,8 +557,9 @@ class TicketEmailParser(object):
 		return str
 
 	def attachments(self, message, ticket):
-		'''save any attachments as file in the ticket's directory'''
-
+		'''
+		save any attachments as files in the ticket's directory
+		'''
 		count = 0
 		first = 0 
 		number = 0 
@@ -662,7 +665,7 @@ def ReadConfig(file, name):
 	"""
 
 	if not os.path.isfile(file):
-		print 'File %s does not exists' %file
+		print 'File %s does not exist' %file
 		sys.exit(1)
 
 	config = ConfigParser.ConfigParser()
@@ -677,7 +680,7 @@ def ReadConfig(file, name):
   	#
 	if name:
 		if not config.has_section(name):
-			print "Not an valid project name: %s" %name
+			print "Not a valid project name: %s" %name
 			print "Valid names: %s" %config.sections()
 			sys.exit(1)
 
@@ -719,7 +722,7 @@ if __name__ == '__main__':
 	settings = ReadConfig(configfile, project_name)
 	if not settings.has_key('project'):
 		print __doc__
-		print 'No project defined in config file, eg:\n\t project: /data/trac/bas'
+		print 'No Trac project is defined in the email2trac config file.'
 		sys.exit(1)
 
 	if component:
