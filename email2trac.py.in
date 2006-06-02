@@ -17,6 +17,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 #
+# For vi/emacs or other use tabstop=4 (vi: set ts=4)
+#
 """
 email2trac.py -- Email tickets to Trac.
 
@@ -71,7 +73,6 @@ How to use
 SVN Info:
         $Id$
 """
-
 import os
 import sys
 import string
