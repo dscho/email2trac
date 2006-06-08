@@ -2,12 +2,12 @@
 	- Added ticketing merging. To enable it there are two options for
 	  both options enable 'ticket_update' in email2trac.conf
 	  1 - Configure trac notification, eg: 
-	  	- (ticket address: test-ticket@test.nl)
+	  	- (ticket address: ticket@test.nl)
 	  	[notification]
 		smtp_enabled = true
 		smtp_always_cc = test@test.nl
 		smtp_server = localhost
-		smtp_from =  test-ticket@test.nl
+		smtp_from =  ticket@test.nl
 	  	always_notify_reporter = true
 
 	  2 - Use the mailto_cc in email2trac.conf if you want to sent
@@ -18,7 +18,7 @@
 	- Use the short options for the install command. So it works for
 	  MacOSx Reported by: Nathaniel Irons.
 
-	- Update inline documentation by Nathaniel Irons.
+	- Updated inline documentation by Nathaniel Irons.
 	  	 
 2006-05-16
 	- Fixed a bug when there was no plain text body.

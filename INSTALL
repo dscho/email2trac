@@ -17,7 +17,7 @@ The email2trac package contains the following utilities:
  reply_all: 1 	            # OPTIONAL, if set then put all CC-addresses in ticket CC-field
  umask: 022                 # OPTIONAL, Use this umask for saving attachments
  mailto_link: 1             # OPTIONAL, if set then [mailto:<CC>] in description
- mailto_cc: ticket@test.nl  # OPTIONAL, Use ths address as CC in mailto line
+ mailto_cc: ticket@test.nl  # OPTIONAL, Use this address as CC in mailto line
  ticket_update: 1           # OPTIONAL, if set then check if this is an update for a ticket
  email_header: 1            # OPTIONAL, if set then show TO/CC fields in description
  trac_version: 0.8          # OPTIONAL, if set use this as trac version (D: 0.9)
@@ -55,7 +55,7 @@ After installation, edit email2trac.conf for your site. Most important
 parameter is project, see above
 
 If you have enabled 'ticket_update' in email2trac.conf then you have 
-to choose one of this options to make it work:
+to choose one of these options to make it work:
   1 - Configure trac notification, eg:
       - (ticket address: ticket@test.nl)
       [notification]
@@ -66,7 +66,8 @@ to choose one of this options to make it work:
       always_notify_reporter = true
 
   2 - Use the mailto_cc in email2trac.conf if you want to sent
-      an email to the user and the trac ticket email address.
+      an email to the user and the trac ticket email address via
+      the mailto link
 
 == Usage ==
 
