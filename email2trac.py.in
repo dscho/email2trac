@@ -360,7 +360,7 @@ class TicketEmailParser(object):
 
 		return True
 
-	def new(self, msg):
+	def new_ticket(self, msg):
 		"""
 		Create a new ticket
 		"""
@@ -467,7 +467,7 @@ class TicketEmailParser(object):
 			if self.ticket_update(m):
 				return True
 
-		self.new(m)
+		self.new_ticket(m)
 
 	def get_body_text(self, msg):
 		"""
@@ -631,8 +631,8 @@ class TicketEmailParser(object):
 				# Attachment is already known
 				#
 				except sqlite.IntegrityError:	
-					self.db.close()
-					return 
+					#self.db.close()
+					return count
 
 				self.db.commit()
 
