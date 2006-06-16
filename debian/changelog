@@ -1,3 +1,10 @@
+email2trac (0.7.1-3) stable; urgency=low
+
+  * Fixed an error for already added attachments. Do not close the 
+    database connection 
+
+ -- root <root@subtrac.sara.nl>  Fri, 16 Jun 2006 13:52:26 +0200
+
 email2trac (0.7.0-2) stable; urgency=low
 
   * Fixed some language errors by Nathaniel Irons 

@@ -1,3 +1,8 @@
+2006-
+	- Fixed an error in already added attachments. Do not close
+	  the database connection.
+	  Fixed by: Walter de Jong en Bas van der Vlies
+
 2006-06-02
 	- Added ticketing merging. To enable it there are two options for
 	  both options enable 'ticket_update' in email2trac.conf
