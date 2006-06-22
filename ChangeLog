@@ -13,6 +13,10 @@
 	  ticket is fetched (Error = KeyError: 'id')
 	  Fixed By: See tickets #258 and #449 on trac-hacks
 
+	- Fixed and spell error, self.mail_addr must be self.email_addr
+	  Fixed by: Bas van der Vlies
+	  
+
 2006-06-02
 	- Added ticketing merging. To enable it there are two options for
 	  both options enable 'ticket_update' in email2trac.conf

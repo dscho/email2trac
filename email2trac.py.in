@@ -537,7 +537,7 @@ class TicketEmailParser(object):
 
 	def html_mailto_link(self, subject, id, body):
 		if not self.author:
-			author = self.mail_addr
+			author = self.email_addr
 		else:	
 			author = self.to_unicode(self.author)
 
