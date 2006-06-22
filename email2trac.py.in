@@ -53,7 +53,7 @@ How to use
 	debug        : 1               # OPTIONAL, if set print some DEBUG info
 	spam_level   : 4               # OPTIONAL, if set check for SPAM mail 
 	reply_address: 1               # OPTIONAL, if set then fill in ticket CC field
-    umask        : 022             # OPTIONAL, if set then use this umask for creation of the attachments
+	umask        : 022             # OPTIONAL, if set then use this umask for creation of the attachments
 	mailto_link  : 1               # OPTIONAL, if set then [mailto:<>] in description 
 	mailto_cc    : basv@sara.nl    # OPTIONAL, use this address as CC in mailto line
 	ticket_update: 1               # OPTIONAL, if set then check if this is an update for a ticket
@@ -186,10 +186,11 @@ class TicketEmailParser(object):
 			if format:
 				try:
 					temp = unicode(text, format)
-				except UnicodeError:
+				except (UnicodeError,LookupError):
 					# This always works 
 					#
 					temp = unicode(text, 'iso-8859-15')
+					
 				temp =  temp.encode('utf-8')
 			else:
 				temp = string.strip(text)
@@ -494,7 +495,7 @@ class TicketEmailParser(object):
 				# Get contents charset (iso-8859-15 if not defined in mail headers)
 				# UTF-8 encode body_text
 				#
-				charset = msg.get_content_charset('iso-8859-15')
+				charset = part.get_content_charset('iso-8859-15')
 				ubody_text = unicode(body_text, charset).encode('utf-8')
 
 			elif part.get_content_type() == 'text/html':
@@ -695,20 +696,22 @@ def ReadConfig(file, name):
 
 	return project
 
+
 if __name__ == '__main__':
 	# Default config file
 	#
 	configfile = '@email2trac_conf@'
 	project = ''
 	component = ''
-	
+	ENABLE_SYSLOG = 0
+		
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], 'chf:p:', ['component=','help', 'file=', 'project='])
 	except getopt.error,detail:
 		print __doc__
 		print detail
 		sys.exit(1)
-
+	
 	project_name = None
 	for opt,value in opts:
 		if opt in [ '-h', '--help']:
@@ -720,49 +723,68 @@ if __name__ == '__main__':
 			configfile = value
 		elif opt in ['-p', '--project']:
 			project_name = value
-
+	
 	settings = ReadConfig(configfile, project_name)
 	if not settings.has_key('project'):
 		print __doc__
 		print 'No Trac project is defined in the email2trac config file.'
 		sys.exit(1)
-
+	
 	if component:
 		settings['component'] = component
-
+	
 	if settings.has_key('trac_version'):
 		version = float(settings['trac_version'])
 	else:
 		version = trac_default_version
 
+	if settings.has_key('enable_syslog'):
+		ENABLE_SYSLOG =  float(settings['enable_syslog']) 
+			
 	#debug HvB
 	#print settings
+	
+	try:
+		if version == 0.8:
+			from trac.Environment import Environment
+			from trac.Ticket import Ticket
+			from trac.Notify import TicketNotifyEmail
+			from trac.Href import Href
+			from trac import util
+			import sqlite
+		elif version == 0.9:
+			from trac import attachment 
+			from trac.env import Environment
+			from trac.ticket import Ticket
+			from trac.web.href import Href
+			from trac import util
+			from trac.Notify import TicketNotifyEmail
+		elif version == 0.10:
+			from trac import attachment 
+			from trac.env import Environment
+			from trac.ticket import Ticket
+			from trac.web.href import Href
+			from trac import util
+			# see http://projects.edgewall.com/trac/changeset/2799
+			from trac.ticket.notification import TicketNotifyEmail
+	
+		env = Environment(settings['project'], create=0)
+		tktparser = TicketEmailParser(env, settings, version)
+		tktparser.parse(sys.stdin)
 
-	if version == 0.8:
-		from trac.Environment import Environment
-		from trac.Ticket import Ticket
-		from trac.Notify import TicketNotifyEmail
-		from trac.Href import Href
-		from trac import util
-		import sqlite
-	elif version == 0.9:
-		from trac import attachment 
-		from trac.env import Environment
-		from trac.ticket import Ticket
-		from trac.web.href import Href
-		from trac import util
-		from trac.Notify import TicketNotifyEmail
-	elif version == 0.10:
-		from trac import attachment 
-		from trac.env import Environment
-		from trac.ticket import Ticket
-		from trac.web.href import Href
-		from trac import util
-		# see http://projects.edgewall.com/trac/changeset/2799
-		from trac.ticket.notification import TicketNotifyEmail
+	# Catch all errors ans log to SYSLOG if we have enabled this
+	# else stdout
+	#
+	except Exception, error:
+		import syslog, traceback
 
-	env = Environment(settings['project'], create=0)
-	tktparser = TicketEmailParser(env, settings, version)
-	tktparser.parse(sys.stdin)
+		if ENABLE_SYSLOG:
+			syslog.openlog('email2trac', syslog.LOG_NOWAIT)
+			etype, evalue, etb = sys.exc_info()
+			for e in traceback.format_exception(etype, evalue, etb):
+				syslog.syslog(e)
+			syslog.closelog()
+		else:
+			traceback.print_exc()
 
 # EOB

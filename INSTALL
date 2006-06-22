@@ -21,6 +21,7 @@ The email2trac package contains the following utilities:
  ticket_update: 1           # OPTIONAL, if set then check if this is an update for a ticket
  email_header: 1            # OPTIONAL, if set then show TO/CC fields in description
  trac_version: 0.8          # OPTIONAL, if set use this as trac version (D: 0.9)
+ enable_syslog: 1           # OPTIONAL, if set log errors to syslog
 
  [bas]                     # OPTIONAL project declaration, also set 
                            # project option, use -p|--project

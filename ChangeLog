@@ -3,6 +3,16 @@
 	  the database connection.
 	  Fixed by: Walter de Jong en Bas van der Vlies
 
+	- Added enable_syslog option. If enabled log errors
+	  to syslog instead of stderr. If enabled no errors are
+	  send back to the user.
+	  Implemented by: Bas van der Vlies
+
+	- Fixed an error with updating tickets with attachments for trac 
+	  versions 0.9 and 0.10. Field "id" is not known when a existing
+	  ticket is fetched (Error = KeyError: 'id')
+	  Fixed By: See tickets #258 and #449 on trac-hacks
+
 2006-06-02
 	- Added ticketing merging. To enable it there are two options for
 	  both options enable 'ticket_update' in email2trac.conf
