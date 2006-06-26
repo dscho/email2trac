@@ -3,9 +3,9 @@
 	  the database connection.
 	  Fixed by: Walter de Jong en Bas van der Vlies
 
-	- Added enable_syslog option. If enabled log errors
-	  to syslog instead of stderr. If enabled no errors are
-	  send back to the user.
+	- Added enable_syslog option. If enabled log errors to syslog
+	  instead of stderr. If enabled no errors are send back to the 
+	  user.
 	  Implemented by: Bas van der Vlies
 
 	- Fixed an error with updating tickets with attachments for trac 
@@ -15,7 +15,9 @@
 
 	- Fixed and spell error, self.mail_addr must be self.email_addr
 	  Fixed by: Bas van der Vlies
-	  
+
+	- Catch a LookupError in unicode/encode conversion
+	  Fixed by: Bas van der Vlies
 
 2006-06-02
 	- Added ticketing merging. To enable it there are two options for

@@ -496,7 +496,14 @@ class TicketEmailParser(object):
 				# UTF-8 encode body_text
 				#
 				charset = part.get_content_charset('iso-8859-15')
-				ubody_text = unicode(body_text, charset).encode('utf-8')
+
+				try:
+					temp = unicode(body_text, charset)
+				except (UnicodeError,LookupError):
+					temp = unicode(body_text, 'iso-8859-15')
+
+				#ubody_text = unicode(body_text, charset).encode('utf-8')
+				ubody_text = temp.encode('utf-8')
 
 			elif part.get_content_type() == 'text/html':
 				ubody_text = '\n\n(see attachment for HTML mail message)\n'
