@@ -1,3 +1,10 @@
+email2trac (0.7.3-5) stable; urgency=low
+
+  *  Description always changed when accesing the ticket via the web.
+     Suggestion/Patch by: Christian Boos
+
+ -- root <root@subtrac.sara.nl>  Fri, 30 Jun 2006 09:50:32 +0200
+
 email2trac (0.7.3-4) stable; urgency=low
 
   * Fixed a LookupError  

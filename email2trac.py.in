@@ -407,44 +407,47 @@ class TicketEmailParser(object):
 
 
 		body_text = self.get_body_text(msg)
-		tkt['description'] = ''
+		body_text = ('\r\n'.join(body_text.splitlines()))
 
-		# Insert ticket in database with empty description
+		# A patch so that the web-interface will not update the description
+		# field of a ticket
 		#
+		tkt['description'] = u'email2trac:%s\r\n{{{\r\n%s\r\n}}}' \
+			%(head, body_text)
+
 		when = int(time.time())
 		if self.VERSION == 0.8:
-			tkt['id'] = tkt.insert(self.db)
+			ticket_id = tkt.insert(self.db)
 		else:
-			tkt['id'] = tkt.insert()
+			ticket_id = tkt.insert()
+
+		changed = False
+		comment = ''
+
+		# Rewrite the description if we have mailto enabled
+		#
+		if self.MAILTO:
+			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
+			tkt['description'] = u'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
+			comment = '\nadded mailto line\n'
+			changed = True
 
 		n =  self.attachments(msg, tkt)
 		if n:
-			attach_str = '\nThis message has %d attachment(s)\n' %(n)
-		else:
-			attach_str = ''
+			comment = '%s\nThis message has %d attachment(s)\n' %(comment, n)
+			changed = True
 
-		# Always update the description else we get two emails one for the new ticket
-		# and for the attachments. It is an ugly hack but with trac you can not add
-		# attachments without an ticket id
-		#
-		mailto = ''
-		if self.MAILTO:
-			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), tkt['id'], body_text)
-			tkt['description'] = '%s%s%s\n{{{\n%s\n}}}\n' %(head, attach_str, mailto, body_text)
-			comment = 'Added mailto: link + description'
-		else:
-			tkt['description'] = '%s%s\n{{{\n%s\n}}}\n' %(head, attach_str, body_text)
-			comment = 'Added description'
+		if changed:
+			if self.VERSION  == 0.8:
+				tkt.save_changes(self.db, self.author, comment)
+			else:
+				tkt.save_changes(self.author, comment)
 
-		# Save the real description and other changes
-		#
-		if self.VERSION  == 0.8:
-			tkt.save_changes(self.db, self.author, comment, when)
-		else:
-			tkt.save_changes(self.author, comment, when)
+		#print tkt.get_changelog(self.db, when)
 
 		if self.notification:
-			self.notify(tkt, True, when)
+			self.notify(tkt, True)
+			#self.notify(tkt, False)
 
 	def parse(self, fp):
 		m = email.message_from_file(fp)
@@ -477,7 +480,7 @@ class TicketEmailParser(object):
 		message text can be plain text or html or something else
 		"""
 		has_description = 0
-		ubody_text = '\n{{{\nNo plain text message\n}}}\n'
+		ubody_text = '\r\n{{{\nNo plain text message\n}}}\r\n'
 		for part in msg.walk():
 
 			# 'multipart/*' is a container for multipart messages
@@ -488,34 +491,32 @@ class TicketEmailParser(object):
 			if part.get_content_type() == 'text/plain':
 				# Try to decode, if fails then do not decode
 				#
-				body_text = part.get_payload(decode=1)		
+				body_text = part.get_payload(decode=1)
 				if not body_text:			
-					body_text = part.get_payload(decode=0)	
+					body_text = part.get_payload(decode=0)
 
 				# Get contents charset (iso-8859-15 if not defined in mail headers)
 				# UTF-8 encode body_text
 				#
 				charset = part.get_content_charset('iso-8859-15')
-
 				try:
 					temp = unicode(body_text, charset)
 				except (UnicodeError,LookupError):
 					temp = unicode(body_text, 'iso-8859-15')
 
-				#ubody_text = unicode(body_text, charset).encode('utf-8')
 				ubody_text = temp.encode('utf-8')
 
 			elif part.get_content_type() == 'text/html':
-				ubody_text = '\n\n(see attachment for HTML mail message)\n'
+				ubody_text = '\r\n(see attachment for HTML mail message)\r\n'
 
 			else:
-				ubody_text = '\n\n(see attachment for message)\n'
+				ubody_text = '\r\n(see attachment for message)\r\n'
 
 			has_description = 1
 			break		# we have the description, so break
 
 		if not has_description:
-			ubody_text = '\n\n(see attachment for message)\n'
+			ubody_text = '\r\n(see attachment for message)\r\n'
 
 		return ubody_text
 
@@ -562,7 +563,7 @@ class TicketEmailParser(object):
 			   urllib.quote(self.MAILTO_CC)
 			   )
 
-		str = '\n{{{\n#!html\n<a href="%s">Reply to: %s</a>\n}}}\n' %(str, author)
+		str = '\r\n{{{\r\n#!html\r\n<a href="%s">Reply to: %s</a>\r\n}}}\r\n' %(str, author)
 
 		return str
 

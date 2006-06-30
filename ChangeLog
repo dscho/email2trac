@@ -19,6 +19,12 @@
 	- Catch a LookupError in unicode/encode conversion
 	  Fixed by: Bas van der Vlies
 
+	- Description field was always changed when updating the ticket 
+	  via the web. Asked the mailing list for a solution and got one
+	  ;-)
+	  Patch/Suggestion by: Christian Boos
+	  Applied by: Bas van der Vlies
+
 2006-06-02
 	- Added ticketing merging. To enable it there are two options for
 	  both options enable 'ticket_update' in email2trac.conf
