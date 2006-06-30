@@ -1,3 +1,9 @@
+email2trac (0.7.3-6) stable; urgency=low
+
+  * Fixed an encoding problem when email_header is set to 1
+
+ -- root <root@subtrac.sara.nl>  Fri, 30 Jun 2006 13:42:38 +0200
+
 email2trac (0.7.3-5) stable; urgency=low
 
   *  Description always changed when accesing the ticket via the web.

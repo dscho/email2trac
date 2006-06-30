@@ -88,6 +88,9 @@ from email import Header
 from stat import *
 import mimetypes
 
+# Fix some errors
+#import codecs
+
 trac_default_version = 0.9
 
 class TicketEmailParser(object):
@@ -243,7 +246,7 @@ class TicketEmailParser(object):
 		if m['Cc'] and len(m['Cc']) > 0:
 			str = "%s'''Cc:''' %s [[BR]]" % (str, m['Cc'])
 
-		return str
+		return  self.to_unicode(str)
 
 	def set_owner(self, ticket):
 		"""

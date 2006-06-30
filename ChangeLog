@@ -16,7 +16,8 @@
 	- Fixed and spell error, self.mail_addr must be self.email_addr
 	  Fixed by: Bas van der Vlies
 
-	- Catch a LookupError in unicode/encode conversion
+	- Catch a LookupError in unicode/encode conversion in function 
+	  get_body_text()
 	  Fixed by: Bas van der Vlies
 
 	- Description field was always changed when updating the ticket 
@@ -24,6 +25,9 @@
 	  ;-)
 	  Patch/Suggestion by: Christian Boos
 	  Applied by: Bas van der Vlies
+
+	- Fixed an encoding problem when email_header is set to 1
+	  Fixed by: Bas van der Vlies
 
 2006-06-02
 	- Added ticketing merging. To enable it there are two options for
