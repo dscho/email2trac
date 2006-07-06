@@ -1,4 +1,4 @@
-2006-
+2006-07-06
 	- Fixed an error in already added attachments. Do not close
 	  the database connection.
 	  Fixed by: Walter de Jong en Bas van der Vlies
@@ -28,6 +28,14 @@
 
 	- Fixed an encoding problem when email_header is set to 1
 	  Fixed by: Bas van der Vlies
+
+	- Fixed a bug in to_unicode() function.
+	  Fixed by: Bas van der Vlies
+
+	- Fixed an unicodedata.normalize TypeError bug for filenames in the 
+	  attachment function
+	  Fixed by: Bas van der Vlies
+
 
 2006-06-02
 	- Added ticketing merging. To enable it there are two options for
