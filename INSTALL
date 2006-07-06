@@ -82,11 +82,40 @@ rocedure is the same :
    config file and ''--component'' to specify a component other than the 
    default component for the project. Line must have the following format :
 {{{
-     tracproj: |/usr/sbin/run_email2trac [--project=<project_name>] [--component=<project_component>]
+     tracproj: |"/usr/sbin/run_email2trac [--project=<project_name>] [--component=<project_component>]"
 }}}
 
   * Update your alias database with command ''newaliases''
   * Test with a command like :
 {{{
      mail tracproj
+}}}
+
+===  Note for Sendmail ===
+This is a message from emailtotrac tickets archive:
+{{{
+Sendmail limits the executables that can be run via aliases to those in a
+special directory, and runs them using a restricted shell called smrsh.
+On RH, the default location for the allowed programs is /etc/smrsh.
+
+I tried both a link in that dir to the run_email2trac file and a little
+shell script that simply calls run_email2trac and passes the params. Both
+should work, but neither did yet. Majordomo works the same way, and it
+set up on the machine already so I'll check on that later today.
+
+I found a pretty good walk-through of the problem/solution at
+http://archives.free.net.ph/message/20030605.105120.74c3bfa8.html
+
+Well, I was in fact doing the right thing. Here's all the steps to follow
+post make install
+
+ln -s /usr/local/bin/run_email2trac /etc/smrsh/run_email2trac
+
+in aliases use:
+
+"|run_email2trac -project=bas"
+
+Note: Include the quotes, they are necessary. That got me past the
+sendmail problem. No ticket appeared in the project, but I'll look into
+that next. Is there a log generated anywhere?
 }}}
