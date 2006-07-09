@@ -19,6 +19,7 @@ MTA_USER=@mta_user@
 TRAC_SCRIPT_NAME=email2trac
 
 CC=@CC@
+INSTALL=./install-sh
 DEBUG=0
 CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(EXEC_PREFIX)\" -DDEBUG=$(DEBUG)
 
@@ -31,12 +32,12 @@ run_email2trac: $(WRAPPER_SRC) Makefile
 	$(CC) $(CFLAGS) -o $@ run_email2trac.c
 
 install: all
-	install -d $(DESTDIR)$(EXEC_PREFIX)
-	install -m 4111 -o root run_email2trac $(DESTDIR)$(EXEC_PREFIX)
+	$(INSTALL) -d $(DESTDIR)$(EXEC_PREFIX)
+	$(INSTALL) -m 4111 -o root run_email2trac $(DESTDIR)$(EXEC_PREFIX)
 	for script in $(PYTHON_FILES) ; \
 	do \
           name=`basename $$script '.py'` ;\
-	  install -m 755 -o root $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
+	  $(INSTALL) -m 755 -o root $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
 	done
 
 clean:

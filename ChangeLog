@@ -1,47 +1,51 @@
+2006-07-09	Michel Jouvin <jouvin@lal.in2p3.fr>
+	* Use X11R5 install-sh to install email2trac components to hide
+          native install program differences
+
 2006-07-06
-	- Fixed an error in already added attachments. Do not close
+	* Fixed an error in already added attachments. Do not close
 	  the database connection.
 	  Fixed by: Walter de Jong en Bas van der Vlies
 
-	- Added enable_syslog option. If enabled log errors to syslog
+	* Added enable_syslog option. If enabled log errors to syslog
 	  instead of stderr. If enabled no errors are send back to the 
 	  user.
 	  Implemented by: Bas van der Vlies
 
-	- Fixed an error with updating tickets with attachments for trac 
+	* Fixed an error with updating tickets with attachments for trac 
 	  versions 0.9 and 0.10. Field "id" is not known when a existing
 	  ticket is fetched (Error = KeyError: 'id')
 	  Fixed By: See tickets #258 and #449 on trac-hacks
 
-	- Fixed and spell error, self.mail_addr must be self.email_addr
+	* Fixed and spell error, self.mail_addr must be self.email_addr
 	  Fixed by: Bas van der Vlies
 
-	- Catch a LookupError in unicode/encode conversion in function 
+	* Catch a LookupError in unicode/encode conversion in function 
 	  get_body_text()
 	  Fixed by: Bas van der Vlies
 
-	- Description field was always changed when updating the ticket 
+	* Description field was always changed when updating the ticket 
 	  via the web. Asked the mailing list for a solution and got one
 	  ;-)
 	  Patch/Suggestion by: Christian Boos
 	  Applied by: Bas van der Vlies
 
-	- Fixed an encoding problem when email_header is set to 1
+	* Fixed an encoding problem when email_header is set to 1
 	  Fixed by: Bas van der Vlies
 
-	- Fixed a bug in to_unicode() function.
+	* Fixed a bug in to_unicode() function.
 	  Fixed by: Bas van der Vlies
 
-	- Fixed an unicodedata.normalize TypeError bug for filenames in the 
+	* Fixed an unicodedata.normalize TypeError bug for filenames in the 
 	  attachment function
 	  Fixed by: Bas van der Vlies
 
 
 2006-06-02
-	- Added ticketing merging. To enable it there are two options for
+	* Added ticketing merging. To enable it there are two options for
 	  both options enable 'ticket_update' in email2trac.conf
 	  1 - Configure trac notification, eg: 
-	  	- (ticket address: ticket@test.nl)
+	  	* (ticket address: ticket@test.nl)
 	  	[notification]
 		smtp_enabled = true
 		smtp_always_cc = test@test.nl
@@ -54,24 +58,24 @@
 
 	  With both options you get the right format of the subject line.
 
-	- Use the short options for the install command. So it works for
+	* Use the short options for the install command. So it works for
 	  MacOSx Reported by: Nathaniel Irons.
 
-	- Updated inline documentation by Nathaniel Irons.
+	* Updated inline documentation by Nathaniel Irons.
 	  	 
 2006-05-16
-	- Fixed a bug when there was no plain text body.
+	* Fixed a bug when there was no plain text body.
 	  Reported by: Greg Deakyne
-	- Fixed a small bug if default component owner is unknown.
+	* Fixed a small bug if default component owner is unknown.
 	  Just fill in some bogus info.
-	- Use the short options for the install command. So it works for
+	* Use the short options for the install command. So it works for
 	  MacOSx
 	  Reported by: Nathaniel Irons
-	- Messages that has X-Virus-found in header are marked as SPAM
+	* Messages that has X-Virus-found in header are marked as SPAM
 	  Implemented by: Walter de Jong
-	- Some modules are changed for version 0.10, Added and made some
+	* Some modules are changed for version 0.10, Added and made some
 	  minor changes: Patch supplied by: Markus Tacker  
-	- Ported delete_spam.py to version 0.9 and higher:
+	* Ported delete_spam.py to version 0.9 and higher:
 	  Reported by: Nathaniel Irons
 
 
@@ -80,15 +84,15 @@
 	  removed it.
 	  Reported by: mi-trachacks@moensolutions.com	
 	  Fixed by: Bas van der Vlies
-	- Fixed an exception error in delete_spam.py
+	* Fixed an exception error in delete_spam.py
 	  when shutil has not enough priveledges to remove the
 	  attachments it is reported
 	  Fixed by: Bas van der Vlies
-	- email2trac.py: When you include the body tag, some 
+	* email2trac.py: When you include the body tag, some 
 	  mailers (like Thunderbird) will leave out the signature.
           Therefore this version leaves out the body tag.
 	  Fixed by: Walter de Jong
-	- Added msg.txt for testing
+	* Added msg.txt for testing
 	  Fixed by: Bas van der Vlies
 
 2006-02-01  Bas van der Vlies <basv@sara.nl>:
