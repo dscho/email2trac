@@ -803,9 +803,6 @@ if __name__ == '__main__':
 	# else stdout
 	#
 	except Exception, error:
-		if m:
-			self.save_email_for_debug(m, True)
-
 		if ENABLE_SYSLOG:
 			syslog.openlog('email2trac', syslog.LOG_NOWAIT)
 			etype, evalue, etb = sys.exc_info()
@@ -814,5 +811,8 @@ if __name__ == '__main__':
 			syslog.closelog()
 		else:
 			traceback.print_exc()
+
+		if m:
+			self.save_email_for_debug(m, True)
 
 # EOB
