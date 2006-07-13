@@ -1,6 +1,15 @@
-2006-07-09	Michel Jouvin <jouvin@lal.in2p3.fr>
+2006-XXXXX	
 	* Use X11R5 install-sh to install email2trac components to hide
-          native install program differences
+          native install program differences.
+	  Author: Michel Jouvin <jouvin@lal.in2p3.fr>
+
+	* Fixed an error in saving attachments for new tickets for trac 
+	  versions greater then 0.9.
+	  Fixed by: Bas van der Vlies
+
+	* When something went wrong save the offending email for debug
+	  purposes.
+	  Fixed by: Bas van der Vlies
 
 2006-07-06
 	* Fixed an error in already added attachments. Do not close

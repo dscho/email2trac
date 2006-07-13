@@ -435,6 +435,7 @@ class TicketEmailParser(object):
 			ticket_id = tkt.insert(self.db)
 		else:
 			ticket_id = tkt.insert()
+			tkt['id'] = ticket_id
 
 		changed = False
 		comment = ''
@@ -813,6 +814,6 @@ if __name__ == '__main__':
 			traceback.print_exc()
 
 		if m:
-			self.save_email_for_debug(m, True)
+			tktparser.save_email_for_debug(m, True)
 
 # EOB
