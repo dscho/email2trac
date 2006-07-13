@@ -78,7 +78,9 @@ def ReadConfig(file, name):
 def delete_spam(project, debug):
 			env = Environment(project, create=0)
 			db = env.get_db_cnx()
-			
+
+			attachment_dir = os.path.join(env.path, 'attachments', 'ticket')
+
 			cursor = db.cursor()
 
 			# Delete the attachments associated with Spam tickets
@@ -89,12 +91,16 @@ def delete_spam(project, debug):
 				if not row:
 					break
 				spam_id =  row[0]
-				attachment_dir = os.path.join(env.get_attachments_dir(), 'ticket', str(spam_id)) 
-				if os.path.exists(attachment_dir):
+
+				sql_cmd = "DELETE FROM attachment WHERE type='ticket' and id='%s';" %spam_id
+				cursor.execute(sql_cmd) 
+
+				dir = os.path.join(attachment_dir, str(spam_id)) 
+				if os.path.exists(dir):
 					if debug:
-						print 'delete %s : %s' %(spam_id, attachment_dir)
+						print 'delete %s : %s' %(spam_id, dir)
 					try:
-						shutil.rmtree(attachment_dir)
+						shutil.rmtree(dir)
 					except OSError, detail:
 						print 'Contact system-administrator: %s' %detail
 						continue
