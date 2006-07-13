@@ -87,11 +87,15 @@ import ConfigParser
 from email import Header
 from stat import *
 import mimetypes
+import syslog
+import traceback
 
-# Fix some errors
-#import codecs
 
+# Some global variables
+#
 trac_default_version = 0.9
+m = None 
+
 
 class TicketEmailParser(object):
 	env = None
@@ -200,10 +204,11 @@ class TicketEmailParser(object):
 				temp = unicode(text, 'iso-8859-15')
 
 			if str:
-				str = '%s %s' %(str, temp)
+				str = u'%s %s' %(str, temp)
 			else:
-				str = temp
+				str = u'%s' %temp
 
+		str = str.encode('utf-8')
 		return str
 
 	def debug_attachments(self, message):
@@ -305,12 +310,18 @@ class TicketEmailParser(object):
 
 			for name,mail in addrs:
 					try:
-						ticket['cc'] = '%s,%s' %(ticket['cc'], mail)
+						mail_list = '%s,%s' %(mail_list, mail)
 					except:
-						ticket['cc'] = mail
+						mail_list = mail
 
-	def save_email_for_debug(self, message):
-		msg_file = '/var/tmp/msg.txt' 
+			ticket['cc'] = self.to_unicode(mail_list)
+
+	def save_email_for_debug(self, message, tempfile=False):
+		if tempfile:
+			import tempfile
+			msg_file = tempfile.mktemp('.email2trac')
+		else:
+			msg_file = '/var/tmp/msg.txt' 
 		print 'TD: saving email to %s' % msg_file
 		fx = open(msg_file, 'wb')
 		fx.write('%s' % message)
@@ -381,7 +392,7 @@ class TicketEmailParser(object):
 		tkt['version'] = self.get_config('ticket', 'default_version')
 
 		if not msg['Subject']:
-			tkt['summary'] = '(geen subject)'
+			tkt['summary'] = u'(geen subject)'
 		else:
 			tkt['summary'] = self.to_unicode(msg['Subject'])
 
@@ -416,7 +427,7 @@ class TicketEmailParser(object):
 		# A patch so that the web-interface will not update the description
 		# field of a ticket
 		#
-		tkt['description'] = 'email2trac:%s\r\n{{{\r\n%s\r\n}}}' \
+		tkt['description'] = u'email2trac:%s\r\n{{{\r\n%s\r\n}}}' \
 			%(head, body_text)
 
 		when = int(time.time())
@@ -432,7 +443,7 @@ class TicketEmailParser(object):
 		#
 		if self.MAILTO:
 			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
-			tkt['description'] = 'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
+			tkt['description'] = u'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
 			comment = '\nadded mailto line\n'
 			changed = True
 
@@ -454,6 +465,8 @@ class TicketEmailParser(object):
 			#self.notify(tkt, False)
 
 	def parse(self, fp):
+		global m
+
 		m = email.message_from_file(fp)
 		if not m:
 			return
@@ -484,7 +497,7 @@ class TicketEmailParser(object):
 		message text can be plain text or html or something else
 		"""
 		has_description = 0
-		ubody_text = '\r\n{{{\nNo plain text message\n}}}\r\n'
+		ubody_text = u'\r\n{{{\nNo plain text message\n}}}\r\n'
 		for part in msg.walk():
 
 			# 'multipart/*' is a container for multipart messages
@@ -504,25 +517,23 @@ class TicketEmailParser(object):
 				#
 				charset = part.get_content_charset('iso-8859-15')
 				try:
-					temp = unicode(body_text, charset)
+					ubody_text = unicode(body_text, charset)
 				except (UnicodeError,LookupError):
-					temp = unicode(body_text, 'iso-8859-15')
-
-				ubody_text = temp.encode('utf-8')
+					ubody_text = unicode(body_text, 'iso-8859-15')
 
 			elif part.get_content_type() == 'text/html':
-				ubody_text = '\r\n(see attachment for HTML mail message)\r\n'
+				ubody_text = u'\r\n(see attachment for HTML mail message)\r\n'
 
 			else:
-				ubody_text = '\r\n(see attachment for message)\r\n'
+				ubody_text = u'\r\n(see attachment for message)\r\n'
 
 			has_description = 1
 			break		# we have the description, so break
 
 		if not has_description:
-			ubody_text = '\r\n(see attachment for message)\r\n'
+			ubody_text = u'\r\n(see attachment for message)\r\n'
 
-		return ubody_text
+		return ubody_text.encode('utf-8')
 
 	def notify(self, tkt , new=True, modtime=0):
 		"""
@@ -792,7 +803,8 @@ if __name__ == '__main__':
 	# else stdout
 	#
 	except Exception, error:
-		import syslog, traceback
+		if m:
+			self.save_email_for_debug(m, True)
 
 		if ENABLE_SYSLOG:
 			syslog.openlog('email2trac', syslog.LOG_NOWAIT)

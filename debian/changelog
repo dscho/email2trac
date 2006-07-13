@@ -1,3 +1,15 @@
+email2trac (0.7.4-2) stable; urgency=low
+
+  * New bug fixes for unicode support 
+
+ -- root <root@subtrac.sara.nl>  Tue, 11 Jul 2006 14:52:58 +0200
+
+email2trac (0.7.4-1) stable; urgency=low
+
+  * Unicode bug fixes
+
+ -- root <root@subtrac.sara.nl>  Tue, 11 Jul 2006 09:24:00 +0200
+
 email2trac (0.7.3-7) stable; urgency=low
 
   * removed some unicode data conversions
