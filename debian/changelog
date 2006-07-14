@@ -1,3 +1,9 @@
+email2trac (0.7.6-3) stable; urgency=low
+
+  * Hopefully now fixed the unicode/encode problems
+
+ -- Bas van der Vlies <basv@sara.nl>  Fri, 14 Jul 2006 10:59:25 +0200
+
 email2trac (0.7.6-2) stable; urgency=low
 
   * Fixed delete_spam.py for versions higher then 0.8

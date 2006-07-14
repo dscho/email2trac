@@ -197,16 +197,14 @@ class TicketEmailParser(object):
 					# This always works 
 					#
 					temp = unicode(text, 'iso-8859-15')
-					
-				temp =  temp.encode('utf-8')
 			else:
 				temp = string.strip(text)
 				temp = unicode(text, 'iso-8859-15')
 
 			if str:
-				str = u'%s %s' %(str, temp)
+				str = '%s %s' %(str, temp)
 			else:
-				str = u'%s' %temp
+				str = '%s' %temp
 
 		str = str.encode('utf-8')
 		return str
@@ -422,12 +420,8 @@ class TicketEmailParser(object):
 			
 
 		body_text = self.get_body_text(msg)
-		body_text = ('\r\n'.join(body_text.splitlines()))
 
-		# A patch so that the web-interface will not update the description
-		# field of a ticket
-		#
-		tkt['description'] = u'email2trac:%s\r\n{{{\r\n%s\r\n}}}' \
+		tkt['description'] = 'email2trac:%s\r\n{{{\r\n%s\r\n}}}' \
 			%(head, body_text)
 
 		when = int(time.time())
@@ -443,15 +437,15 @@ class TicketEmailParser(object):
 		# Rewrite the description if we have mailto enabled
 		#
 		if self.MAILTO:
-			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
-			tkt['description'] = u'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
-			comment = '\nadded mailto line\n'
 			changed = True
+			comment = '\nadded mailto line\n'
+			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
+			tkt['description'] = 'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
 
 		n =  self.attachments(msg, tkt)
 		if n:
-			comment = '%s\nThis message has %d attachment(s)\n' %(comment, n)
 			changed = True
+			comment = '%s\nThis message has %d attachment(s)\n' %(comment, n)
 
 		if changed:
 			if self.VERSION  == 0.8:
@@ -498,6 +492,7 @@ class TicketEmailParser(object):
 		message text can be plain text or html or something else
 		"""
 		has_description = 0
+		encoding = True
 		ubody_text = u'\r\n{{{\nNo plain text message\n}}}\r\n'
 		for part in msg.walk():
 
@@ -514,27 +509,42 @@ class TicketEmailParser(object):
 					body_text = part.get_payload(decode=0)
 
 				# Get contents charset (iso-8859-15 if not defined in mail headers)
-				# UTF-8 encode body_text
 				#
-				charset = part.get_content_charset('iso-8859-15')
+				charset = part.get_content_charset()
 				try:
 					ubody_text = unicode(body_text, charset)
-				except (UnicodeError,LookupError):
+
+				except UnicodeError, detail:
 					ubody_text = unicode(body_text, 'iso-8859-15')
 
+				except LookupError, detail:
+					ubody_text = body_text
+					encoding = False
+
 			elif part.get_content_type() == 'text/html':
-				ubody_text = u'\r\n(see attachment for HTML mail message)\r\n'
+				ubody_text = '\r\n(see attachment for HTML mail message)\r\n'
 
 			else:
-				ubody_text = u'\r\n(see attachment for message)\r\n'
+				ubody_text = '\r\n(see attachment for message)\r\n'
 
 			has_description = 1
 			break		# we have the description, so break
 
 		if not has_description:
-			ubody_text = u'\r\n(see attachment for message)\r\n'
+			ubody_text = '\r\n(see attachment for message)\r\n'
 
-		return ubody_text.encode('utf-8')
+		# A patch so that the web-interface will not update the description
+		# field of a ticket
+		#
+		ubody_text = ('\r\n'.join(ubody_text.splitlines()))
+
+		#  If we can unicode it try to encode it for trac
+		#  else we a lot of garbage
+		#
+		if encoding:
+			ubody_text = ubody_text.encode('utf-8')
+
+		return ubody_text
 
 	def notify(self, tkt , new=True, modtime=0):
 		"""

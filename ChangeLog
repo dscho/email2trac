@@ -15,6 +15,10 @@
 	   - did not clean up the attachment table. So we got nasty new 
 	     mails with fake attachments.
 	   - It works now for versions higher then 0.8
+
+	* Finally understand the unicode/encode functions and hopefully
+	  fixed the errors.
+	  Fixed by: Bas van der Vlies
 	
 2006-07-06
 	* Fixed an error in already added attachments. Do not close
