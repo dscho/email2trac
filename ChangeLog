@@ -19,6 +19,9 @@
 	* Finally understand the unicode/encode functions and hopefully
 	  fixed the errors.
 	  Fixed by: Bas van der Vlies
+
+	* Remove the temporarly created attachment files.
+	  Fixed by: Bas van der Vlies
 	
 2006-07-06
 	* Fixed an error in already added attachments. Do not close

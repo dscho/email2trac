@@ -1,3 +1,9 @@
+email2trac (0.7.6-4) stable; urgency=low
+
+  *  Remove the temporarly create files by trac for attachment insertion
+
+ -- root <basv@sara.nl>  Mon, 17 Jul 2006 10:46:29 +0200
+
 email2trac (0.7.6-3) stable; urgency=low
 
   * Hopefully now fixed the unicode/encode problems

@@ -685,6 +685,10 @@ class TicketEmailParser(object):
 				att.insert(url_filename, fd, filesize)
 				fd.close()
 
+			# Remove the created temporary filename
+			#
+			os.unlink(path)
+
 		# Return how many attachments
 		#
 		return count
