@@ -296,6 +296,8 @@ class TicketEmailParser(object):
 			ccs = message.get_all('cc', [])
 
 			addrs = email.Utils.getaddresses(ccs)
+			if not addrs:
+				return
 
 			# Remove reporter email address if notification is 
 			# on
@@ -307,12 +309,13 @@ class TicketEmailParser(object):
 					pass
 
 			for name,mail in addrs:
-					try:
-						mail_list = '%s,%s' %(mail_list, mail)
-					except:
-						mail_list = mail
+				try:
+					mail_list = '%s,%s' %(mail_list, mail)
+				except:
+					mail_list = mail
 
-			ticket['cc'] = self.to_unicode(mail_list)
+			if mail_list:
+				ticket['cc'] = self.to_unicode(mail_list)
 
 	def save_email_for_debug(self, message, tempfile=False):
 		if tempfile:

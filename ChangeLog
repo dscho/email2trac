@@ -1,3 +1,7 @@
+2006-???
+	* fixes an error in the 'reply_all' setting
+	  Thanks to and Patch by: ncarlson@ibsys.com
+
 2006-07-14
 	* Use X11R5 install-sh to install email2trac components to hide
           native install program differences.

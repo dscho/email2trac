@@ -1,8 +1,14 @@
+email2trac (0.7.6-5) stable; urgency=low
+
+  *  Fixed reply_all bug, thanks to ncarlson@ibsys.com
+
+ -- Bas van der Vlies <basv@sara.nl>  Fri, 21 Jul 2006 14:45:14 +0200
+
 email2trac (0.7.6-4) stable; urgency=low
 
   *  Remove the temporarly create files by trac for attachment insertion
 
- -- root <basv@sara.nl>  Mon, 17 Jul 2006 10:46:29 +0200
+ -- Bas van der Vlies <basv@sara.nl>  Mon, 17 Jul 2006 10:46:29 +0200
 
 email2trac (0.7.6-3) stable; urgency=low
 
