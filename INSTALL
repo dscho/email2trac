@@ -53,6 +53,10 @@ option 2:
   * debian/rules binary
   * First install copy emailtrac.conf to /etc
 
+option 3:
+  * cp email2trac.tar.gz /usr/src/redhat/SOURCES
+  * rpmbuild -ba email2trac.spec
+
 After installation, edit email2trac.conf for your site. Most important 
 parameter is project, see above
 

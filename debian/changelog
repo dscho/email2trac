@@ -1,3 +1,9 @@
+email2trac (0.7.7-1) stable; urgency=low
+
+  * added RPM specfile 
+
+ -- root <root@rc.sara.nl>  Mon, 28 Aug 2006 10:11:30 +0200
+
 email2trac (0.7.6-5) stable; urgency=low
 
   *  Fixed reply_all bug, thanks to ncarlson@ibsys.com

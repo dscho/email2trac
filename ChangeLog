@@ -1,6 +1,9 @@
-2006-???
+2006-08-28
 	* fixes an error in the 'reply_all' setting
 	  Thanks to and Patch by: ncarlson@ibsys.com
+
+	* Added RPM spec file 
+	  Thanks to:  Jon Topper <jon@topper.me.uk>
 
 2006-07-14
 	* Use X11R5 install-sh to install email2trac components to hide
