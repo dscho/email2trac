@@ -310,7 +310,7 @@ class TicketEmailParser(object):
 
 			for name,mail in addrs:
 				try:
-					mail_list = '%s,%s' %(mail_list, mail)
+					mail_list = '%s, %s' %(mail_list, mail)
 				except:
 					mail_list = mail
 
