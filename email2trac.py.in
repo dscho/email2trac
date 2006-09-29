@@ -352,7 +352,6 @@ class TicketEmailParser(object):
 			return False
 
 		body_text = self.get_body_text(m)
-		body_text = '{{{\n%s\n}}}' %body_text
 
 		# Strip '#' and ':' from ticket_id
 		#
@@ -424,7 +423,7 @@ class TicketEmailParser(object):
 
 		body_text = self.get_body_text(msg)
 
-		tkt['description'] = 'email2trac:%s\r\n{{{\r\n%s\r\n}}}' \
+		tkt['description'] = 'email2trac:%s\r\n%s' \
 			%(head, body_text)
 
 		when = int(time.time())
@@ -443,7 +442,8 @@ class TicketEmailParser(object):
 			changed = True
 			comment = '\nadded mailto line\n'
 			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
-			tkt['description'] = 'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
+			#tkt['description'] = 'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
+			tkt['description'] = 'email2trac:%s%s\r\n%s' %(head, mailto, body_text)
 
 		n =  self.attachments(msg, tkt)
 		if n:
@@ -496,7 +496,7 @@ class TicketEmailParser(object):
 		"""
 		has_description = 0
 		encoding = True
-		ubody_text = u'\r\n{{{\nNo plain text message\n}}}\r\n'
+		ubody_text = u'No plain text message'
 		for part in msg.walk():
 
 			# 'multipart/*' is a container for multipart messages
@@ -528,16 +528,16 @@ class TicketEmailParser(object):
 					encoding = False
 
 			elif part.get_content_type() == 'text/html':
-				ubody_text = '\r\n(see attachment for HTML mail message)\r\n'
+				ubody_text = '(see attachment for HTML mail message)'
 
 			else:
-				ubody_text = '\r\n(see attachment for message)\r\n'
+				ubody_text = '(see attachment for message)'
 
 			has_description = 1
 			break		# we have the description, so break
 
 		if not has_description:
-			ubody_text = '\r\n(see attachment for message)\r\n'
+			ubody_text = '(see attachment for message)'
 
 		# A patch so that the web-interface will not update the description
 		# field of a ticket
@@ -550,6 +550,7 @@ class TicketEmailParser(object):
 		if encoding:
 			ubody_text = ubody_text.encode('utf-8')
 
+		ubody_text = '{{{\r\n%s\r\n}}}' %ubody_text
 		return ubody_text
 
 	def notify(self, tkt , new=True, modtime=0):

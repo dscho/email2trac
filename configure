@@ -272,7 +272,7 @@ PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 
 ac_unique_file="email2trac.py.in"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS pyexecdir trac_user mta_user email2trac_conf PYTHON PYTHON_VERSION PYTHON_PREFIX PYTHON_EXEC_PREFIX PYTHON_PLATFORM pythondir pkgpythondir pkgpyexecdir CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP SYSTEM_EMAIL2TRAC_CONF LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS pyexecdir trac_user mta_user PYTHON PYTHON_VERSION PYTHON_PREFIX PYTHON_EXEC_PREFIX PYTHON_PLATFORM pythondir pkgpythondir pkgpyexecdir CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP DEBUG email2trac_conf SYSTEM_EMAIL2TRAC_CONF LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1264,7 +1264,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-
+#DEBUG=0
 
 
 
@@ -2612,6 +2612,11 @@ echo "${ECHO_T}$ac_cv_prog_gcc_traditional" >&6
 fi
 
 
+if test "x$DEBUG" = "x";then
+  DEBUG=0
+fi
+
+
 # Now a user can specify the TRAC user
 #
 
@@ -2651,6 +2656,7 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define SYSTEM_EMAIL2TRAC_CONF "$email2trac_conf"
 _ACEOF
+
 
 
 
@@ -3296,7 +3302,6 @@ s,@LIBS@,$LIBS,;t t
 s,@pyexecdir@,$pyexecdir,;t t
 s,@trac_user@,$trac_user,;t t
 s,@mta_user@,$mta_user,;t t
-s,@email2trac_conf@,$email2trac_conf,;t t
 s,@PYTHON@,$PYTHON,;t t
 s,@PYTHON_VERSION@,$PYTHON_VERSION,;t t
 s,@PYTHON_PREFIX@,$PYTHON_PREFIX,;t t
@@ -3314,6 +3319,8 @@ s,@EXEEXT@,$EXEEXT,;t t
 s,@OBJEXT@,$OBJEXT,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
+s,@DEBUG@,$DEBUG,;t t
+s,@email2trac_conf@,$email2trac_conf,;t t
 s,@SYSTEM_EMAIL2TRAC_CONF@,$SYSTEM_EMAIL2TRAC_CONF,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t

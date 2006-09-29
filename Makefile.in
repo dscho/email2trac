@@ -15,12 +15,12 @@ CONFIG=@sysconfdir@
 #
 TRAC_USER=@trac_user@
 MTA_USER=@mta_user@
+DEBUG=@DEBUG@
 
 TRAC_SCRIPT_NAME=email2trac
 
 CC=@CC@
 INSTALL=./install-sh
-DEBUG=0
 CFLAGS=-DMTA_USER=\"$(MTA_USER)\" -DTRAC_USER=\"$(TRAC_USER)\" -DTRAC_SCRIPT_NAME=\"$(TRAC_SCRIPT_NAME)\" -DTRAC_SCRIPT_PATH=\"$(EXEC_PREFIX)\" -DDEBUG=$(DEBUG)
 
 PYTHON_FILES=delete_spam.py email2trac.py

@@ -13,8 +13,15 @@ AC_SUBST(trac_user)
 AC_SUBST(mta_user)
 AC_SUBST(sysconfdir)
 
+#DEBUG=0
+
 AM_PATH_PYTHON
 AC_PROG_GCC_TRADITIONAL
+
+if test "x$DEBUG" = "x";then
+  DEBUG=0
+fi
+AC_SUBST(DEBUG)
 
 # Now a user can specify the TRAC user
 #
