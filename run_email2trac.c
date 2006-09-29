@@ -40,6 +40,14 @@
 #define DEBUG 0
 #endif
 
+int check_username(char *name)
+{
+  if ( strlen(name) > 30 ) {
+    	  if ( DEBUG ) printf("MTA_USERNAME is to large; %s\n", name);
+	  exit(-1);
+  }
+}
+
 int main(int argc, char** argv) {
 
   int i,j;
@@ -81,8 +89,16 @@ int main(int argc, char** argv) {
 
   
   /* Check caller */
-  
+
+
+  check_username(MTA_USER);
   MTA = getpwnam(MTA_USER);
+
+  if ( MTA == NULL ) {
+    if ( DEBUG ) printf("Invalid MTA user (%s)\n", MTA_USER);
+    return -3;     /* 253 : MTA user not found */
+  }
+
   if ( caller !=  MTA->pw_uid ) {
     if ( DEBUG ) printf("Invalid caller UID (%d)\n",caller);
     return -2;     /* 254 : Invalid caller */
@@ -90,6 +106,7 @@ int main(int argc, char** argv) {
   
   
   /* set UID/GID to Trac (or apache) user */
+  check_username(TRAC_USER);
   if ( TRAC = getpwnam(TRAC_USER) ) {
     setuid(TRAC->pw_uid);
     setgid(TRAC->pw_gid);
