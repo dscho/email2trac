@@ -1,3 +1,9 @@
+email2trac (0.8.0-1) stable; urgency=low
+
+  * See ChangeLog
+
+ -- root <root@subtrac.sara.nl>  Fri, 29 Sep 2006 12:29:30 +0200
+
 email2trac (0.7.7-1) stable; urgency=low
 
   * added RPM specfile 

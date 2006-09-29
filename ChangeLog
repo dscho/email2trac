@@ -1,3 +1,17 @@
+2006-0?-??
+	* Fixes possible segmentation faults in run_email2trac.c 
+	  Reported by: bcornec
+	  Fixed by   : Bas van der Vlies
+
+	* Can set DEBUG level while configuring package, eg:
+	  DEBUG=1 ./configure ( default : 0)
+	  Reported by: syd at plug dot ca
+	  Fixed By   : Bas van der Vlies
+
+	* delete_spam.py did not delete everything from the SQL tables
+	  Reported by: brent at rcfile dot org
+	  Fixed by   : Bas van der Vlies
+
 2006-08-28
 	* fixes an error in the 'reply_all' setting
 	  Thanks to and Patch by: ncarlson@ibsys.com

@@ -95,6 +95,12 @@ def delete_spam(project, debug):
 				sql_cmd = "DELETE FROM attachment WHERE type='ticket' and id='%s';" %spam_id
 				cursor.execute(sql_cmd) 
 
+				sql_cmd = "DELETE FROM ticket_change WHERE ticket='%s';" %spam_id
+				cursor.execute(sql_cmd) 
+
+				sql_cmd = "DELETE FROM ticket_custom WHERE ticket='%s';" %spam_id
+				cursor.execute(sql_cmd) 
+
 				dir = os.path.join(attachment_dir, str(spam_id)) 
 				if os.path.exists(dir):
 					if debug:
