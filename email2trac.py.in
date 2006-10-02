@@ -557,6 +557,9 @@ class TicketEmailParser(object):
 		"""
 		A wrapper for the TRAC notify function. So we can use templates
 		"""
+		if tkt['component'] == 'Spam':
+			return	
+
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#

@@ -12,6 +12,9 @@
 	  Reported by: brent at rcfile dot org
 	  Fixed by   : Bas van der Vlies
 
+	* Do not send Spam when message is Spam
+	  Fixed by   : Bas van der Vlies
+	  
 2006-08-28
 	* fixes an error in the 'reply_all' setting
 	  Thanks to and Patch by: ncarlson@ibsys.com
