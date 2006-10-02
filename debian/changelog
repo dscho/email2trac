@@ -1,6 +1,6 @@
 email2trac (0.8.0-2) stable; urgency=low
 
-  * Do not send notification when message is Spam
+  * Do not send notification when message is marked as Spam
 
  -- root <root@subtrac.sara.nl>  Mon,  2 Oct 2006 10:57:09 +0200
 

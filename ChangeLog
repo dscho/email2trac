@@ -1,4 +1,4 @@
-2006-0?-??
+2006-10-02
 	* Fixes possible segmentation faults in run_email2trac.c 
 	  Reported by: bcornec
 	  Fixed by   : Bas van der Vlies
@@ -12,7 +12,7 @@
 	  Reported by: brent at rcfile dot org
 	  Fixed by   : Bas van der Vlies
 
-	* Do not send Spam when message is Spam
+	* Do not send notification when message is marked as Spam
 	  Fixed by   : Bas van der Vlies
 	  
 2006-08-28
