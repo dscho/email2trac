@@ -165,6 +165,11 @@ class TicketEmailParser(object):
 		else:
 			self.TICKET_UPDATE = 0
 
+		if parameters.has_key('drop_spam'):
+			self.DROP_SPAM = int(parameters['drop_spam'])
+		else:
+			self.DROP_SPAM = 0
+
 
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
@@ -402,12 +407,11 @@ class TicketEmailParser(object):
 		else:
 			tkt['component'] = self.spam(msg)
 
-		# Must make this an option or so, discard SPAM messages or save then
-		# and delete later
+		# Discard SPAM messages.
 		#
-		#if self.SPAM_LEVEL and self.spam(msg):
-		#	print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
-		#	sys.exit(1)
+		if self.DROP_SPAM:
+			# print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
+			sys.exit(0)
 
 		# Set default owner for component
 		#
