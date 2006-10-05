@@ -1,3 +1,10 @@
+email2trac (0.8.1-1) stable; urgency=low
+
+  * Fixed some errors in delete_spam.py
+  * Add Author to Trac:attachment.py else we have no authors ;-(
+
+ -- root <root@rc.sara.nl>  Thu,  5 Oct 2006 15:03:23 +0200
+
 email2trac (0.8.0-2) stable; urgency=low
 
   * Do not send notification when message is marked as Spam

@@ -1,3 +1,13 @@
+2006-
+	* Fixed race conditions in delete_spam.py and added some 
+	  debug code.
+	  Fixed by   : Bas van der Vlies
+	* Added author and description field when attachment is
+	  added to ticket. This is for trac version greater than
+	  0.8.
+	  Fixed by   : Bas van der Vlies
+	  Thanks to Matthew Good for the hint
+
 2006-10-02
 	* Fixes possible segmentation faults in run_email2trac.c 
 	  Reported by: bcornec
