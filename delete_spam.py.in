@@ -82,6 +82,7 @@ def delete_spam(project, debug):
 			attachment_dir = os.path.join(env.path, 'attachments', 'ticket')
 
 			cursor = db.cursor()
+			tkt_cursor = db.cursor()
 
 			# Delete the attachments associated with Spam tickets
 			#
@@ -92,14 +93,34 @@ def delete_spam(project, debug):
 					break
 				spam_id =  row[0]
 
+				if debug:
+					sql_cmd = "SELECT *  FROM attachment WHERE type='ticket' and id='%s';" %spam_id
+					tkt_cursor.execute(sql_cmd) 
+					row = tkt_cursor.fetchone()
+					print row
+
+					sql_cmd = "SELECT * FROM ticket_change WHERE ticket='%s';" %spam_id 
+					tkt_cursor.execute(sql_cmd) 
+					row = tkt_cursor.fetchone()
+					print row 
+					
+					sql_cmd = "SELECT * FROM ticket_custom WHERE ticket='%s';" %spam_id
+					tkt_cursor.execute(sql_cmd) 
+					row = tkt_cursor.fetchone()
+					print row
+
 				sql_cmd = "DELETE FROM attachment WHERE type='ticket' and id='%s';" %spam_id
-				cursor.execute(sql_cmd) 
+				tkt_cursor.execute(sql_cmd) 
 
 				sql_cmd = "DELETE FROM ticket_change WHERE ticket='%s';" %spam_id
-				cursor.execute(sql_cmd) 
+				tkt_cursor.execute(sql_cmd) 
 
 				sql_cmd = "DELETE FROM ticket_custom WHERE ticket='%s';" %spam_id
-				cursor.execute(sql_cmd) 
+				tkt_cursor.execute(sql_cmd) 
+
+				# Ticket commit
+				#
+				db.commit()
 
 				dir = os.path.join(attachment_dir, str(spam_id)) 
 				if os.path.exists(dir):
