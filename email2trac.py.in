@@ -694,7 +694,7 @@ class TicketEmailParser(object):
 				fd = open(path)
 				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
 				att.author = self.author
-				att.description = 'email2trac'
+				att.description = 'Added by email2trac'
 				att.insert(url_filename, fd, filesize)
 				fd.close()
 
