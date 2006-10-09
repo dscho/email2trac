@@ -2,7 +2,7 @@ email2trac (0.8.1-1) stable; urgency=low
 
   * Fixed some errors in delete_spam.py
   * added drop_spam option
-  * add author and description fieldi when adding a attachment
+  * add author and description field when adding a attachment
 
  -- root <root@rc.sara.nl>  Thu,  5 Oct 2006 15:03:23 +0200
 

@@ -1,4 +1,4 @@
-2006-
+2006-10-10
 	* Fixed race conditions in delete_spam.py and added some 
 	  debug code.
 	  Fixed by   : Bas van der Vlies
@@ -13,7 +13,8 @@
 	  mail marked as Spam is not accepted.
 	  Added by   : Bas van der Vlies
 
-	* Do not send notification if message is marked as Spam.
+	* Do not send notification if message is marked as Spam 
+	  and drop_spam is not set.
 	  Fixed by   : Bas van der Vlies
 
 2006-10-02
