@@ -411,7 +411,7 @@ class TicketEmailParser(object):
 		#
 		if self.DROP_SPAM and (tkt['component'] == 'Spam'):
 			# print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
-			sys.exit(0)
+			return False	
 
 		# Set default owner for component
 		#

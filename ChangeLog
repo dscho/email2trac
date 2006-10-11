@@ -1,3 +1,8 @@
+2006-xxxx
+	* Fixed an error if enable_syslog and drop_spam is set. We get
+	  an exception in the syslog if we use sys.exit(0), replaced by
+	  return.
+	
 2006-10-10
 	* Fixed race conditions in delete_spam.py and added some 
 	  debug code.
