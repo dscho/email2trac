@@ -2,6 +2,10 @@
 	* Fixed an error if enable_syslog and drop_spam is set. We get
 	  an exception in the syslog if we use sys.exit(0), replaced by
 	  return.
+
+	* run_email2trac.c. Setgid() must be called before setuid().
+	  Reported by:  Anonymous
+	  Fixed    by:  Bas van der Vlies
 	
 2006-10-10
 	* Fixed race conditions in delete_spam.py and added some 

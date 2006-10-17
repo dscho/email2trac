@@ -108,8 +108,8 @@ int main(int argc, char** argv) {
   /* set UID/GID to Trac (or apache) user */
   check_username(TRAC_USER);
   if ( TRAC = getpwnam(TRAC_USER) ) {
-    setuid(TRAC->pw_uid);
     setgid(TRAC->pw_gid);
+    setuid(TRAC->pw_uid);
   } else {
     if ( DEBUG ) printf("Invalid Trac user (%s)\n",TRAC_USER);
     return -3;     /* 253 : Trac user not found */
