@@ -371,7 +371,11 @@ class TicketEmailParser(object):
 			tkt = Ticket(self.db, ticket_id)
 			tkt.save_changes(self.db, self.author, body_text, when)
 		else:
-			tkt = Ticket(self.env, ticket_id, self.db)
+			try:
+				tkt = Ticket(self.env, ticket_id, self.db)
+			except TracError, detail:
+				return False
+
 			tkt.save_changes(self.author, body_text, when)
 			tkt['id'] = ticket_id
 

@@ -6,6 +6,9 @@
 	* run_email2trac.c. Setgid() must be called before setuid().
 	  Reported by:  Anonymous
 	  Fixed    by:  Bas van der Vlies
+
+	* email2trac.py, Fixed an error in Ticket Update. When ticket
+	  does not exists, threat it like a new ticket.
 	
 2006-10-10
 	* Fixed race conditions in delete_spam.py and added some 
