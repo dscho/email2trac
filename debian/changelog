@@ -1,3 +1,10 @@
+email2trac (0.8.1-4) stable; urgency=low
+
+  * Fixed an error in ticket update, when a ticket does not exists
+    threat it like a new ticket
+
+ -- root <root@rc.sara.nl>  Wed, 18 Oct 2006 09:50:36 +0200
+
 email2trac (0.8.1-3) stable; urgency=low
 
   * setgid() must be called before setuid() 
