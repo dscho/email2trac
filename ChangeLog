@@ -2,13 +2,19 @@
 	* Fixed an error if enable_syslog and drop_spam is set. We get
 	  an exception in the syslog if we use sys.exit(0), replaced by
 	  return.
+	  Fixed    by:  Bas van der Vlies
 
 	* run_email2trac.c. Setgid() must be called before setuid().
 	  Reported by:  Anonymous
 	  Fixed    by:  Bas van der Vlies
 
 	* email2trac.py, Fixed an error in Ticket Update. When ticket
-	  does not exists, threat it like a new ticket.
+	  does not exists, proceed as if it is a new ticket
+	  Fixed    by:  Bas van der Vlies
+
+	* delete_spam.py. Trac version 0.10 made it easier to delete 
+	  tickets.
+	  Fixed    by:  Bas van der Vlies
 	
 2006-10-10
 	* Fixed race conditions in delete_spam.py and added some 

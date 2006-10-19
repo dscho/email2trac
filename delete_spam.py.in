@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2002
 #
-# This file is part of the pxeconfig utils
+# This file is part of the email2trac utils
 #
 # This program is free software; you can redistribute it and/or modify it 
 # under the terms of the GNU General Public License as published by the
@@ -18,6 +18,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 #
+# vi:
+#	set ts=4
 """
 Author: Bas van der Vlies
 Date  : 29 September 2205
@@ -75,70 +77,99 @@ def ReadConfig(file, name):
 
 	return project
 
-def delete_spam(project, debug):
-			env = Environment(project, create=0)
-			db = env.get_db_cnx()
 
-			attachment_dir = os.path.join(env.path, 'attachments', 'ticket')
 
-			cursor = db.cursor()
-			tkt_cursor = db.cursor()
+def new_delete_spam(project, debug):
+	"""
+	This only works for trac versions higher or equal then 0.10
+	"""
+	env = Environment(project, create=0)
+	db = env.get_db_cnx()
 
-			# Delete the attachments associated with Spam tickets
-			#
-			cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
-			while 1:
-				row = cursor.fetchone()
-				if not row:
-					break
-				spam_id =  row[0]
+	cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
+	while 1: 
+		row = cursor.fetchone()
+		if not row:
+			break 
 
-				if debug:
-					sql_cmd = "SELECT *  FROM attachment WHERE type='ticket' and id='%s';" %spam_id
-					tkt_cursor.execute(sql_cmd) 
-					row = tkt_cursor.fetchone()
-					print row
+		spam_id =  row[0]
 
-					sql_cmd = "SELECT * FROM ticket_change WHERE ticket='%s';" %spam_id 
-					tkt_cursor.execute(sql_cmd) 
-					row = tkt_cursor.fetchone()
-					print row 
-					
-					sql_cmd = "SELECT * FROM ticket_custom WHERE ticket='%s';" %spam_id
-					tkt_cursor.execute(sql_cmd) 
-					row = tkt_cursor.fetchone()
-					print row
+		try:
+			tkt = Ticket(env, spam_id, db)
+		except TracError, detail:
+			continue
 
-				sql_cmd = "DELETE FROM attachment WHERE type='ticket' and id='%s';" %spam_id
-				tkt_cursor.execute(sql_cmd) 
+		if debug:
+			print "Deleting ticket %s" %spam_id
+		
+		tkt.delete()
 
-				sql_cmd = "DELETE FROM ticket_change WHERE ticket='%s';" %spam_id
-				tkt_cursor.execute(sql_cmd) 
+def old_delete_spam(project, debug):
+	"""
+	This only works for trac versions before 0.10
+	"""
+	env = Environment(project, create=0)
+	db = env.get_db_cnx() 
+	
+	attachment_dir = os.path.join(env.path, 'attachments', 'ticket') 
+	cursor = db.cursor()
+	tkt_cursor = db.cursor() 
+	
+	# Delete the attachments associated with Spam tickets
+	#
+	cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
+	while 1:
+		row = cursor.fetchone()
+		if not row:
+			break
+		spam_id =  row[0] 
+		
+		if debug:
+			sql_cmd = "SELECT *  FROM attachment WHERE type='ticket' and id='%s';" %spam_id
+			tkt_cursor.execute(sql_cmd) 
+			row = tkt_cursor.fetchone()
+			print row 
+			
+			sql_cmd = "SELECT * FROM ticket_change WHERE ticket='%s';" %spam_id 
+			tkt_cursor.execute(sql_cmd) 
+			row = tkt_cursor.fetchone()
+			print row 
+			
+			sql_cmd = "SELECT * FROM ticket_custom WHERE ticket='%s';" %spam_id
+			tkt_cursor.execute(sql_cmd) 
+			row = tkt_cursor.fetchone()
+			print row 
+			
+		sql_cmd = "DELETE FROM attachment WHERE type='ticket' and id='%s';" %spam_id
+		tkt_cursor.execute(sql_cmd) 
 
-				sql_cmd = "DELETE FROM ticket_custom WHERE ticket='%s';" %spam_id
-				tkt_cursor.execute(sql_cmd) 
+		sql_cmd = "DELETE FROM ticket_change WHERE ticket='%s';" %spam_id
+		tkt_cursor.execute(sql_cmd) 
+			
+		sql_cmd = "DELETE FROM ticket_custom WHERE ticket='%s';" %spam_id
+		tkt_cursor.execute(sql_cmd) 
+			
+		# Ticket commit 
+		# 
+		db.commit() 
+		dir = os.path.join(attachment_dir, str(spam_id)) 
+		if os.path.exists(dir):
+			if debug:
+				print 'delete %s : %s' %(spam_id, dir)
+			try: 
+				shutil.rmtree(dir) 
+			except OSError, detail: 
+				print 'Contact system-administrator: %s' %detail
+				continue
 
-				# Ticket commit
-				#
-				db.commit()
-
-				dir = os.path.join(attachment_dir, str(spam_id)) 
-				if os.path.exists(dir):
-					if debug:
-						print 'delete %s : %s' %(spam_id, dir)
-					try:
-						shutil.rmtree(dir)
-					except OSError, detail:
-						print 'Contact system-administrator: %s' %detail
-						continue
-
-			cursor.execute("DELETE FROM ticket WHERE  component = 'Spam';") 
-			db.commit()
+	cursor.execute("DELETE FROM ticket WHERE  component = 'Spam';") 
+	db.commit()
 
 if __name__ == '__main__':
 	# Default config file
 	#
 	configfile = '@email2trac_conf@'
+
 
 	try:
 		 opts, args = getopt.getopt(sys.argv[1:], 'hf:p:', ['help', 'file=', 'project='])
@@ -168,13 +199,18 @@ if __name__ == '__main__':
 	else:
 		version = trac_default_version
 
-
 	if version == 0.8:
 		from trac.Environment import Environment
 	else:
 		from trac.env import Environment
+		from trac.ticket import Ticket
 
-	delete_spam(settings['project'], int(settings['debug']))
+	if version == 0.10:
+		new_delete_spam(settings['project'], int(settings['debug']))
+	elif version == 0.9:
+		old_delete_spam(settings['project'], int(settings['debug']))
+	elif version == 0.8:
+		old_delete_spam(settings['project'], int(settings['debug']))
+
 	print 'Spam is deleted succesfully..' 
-
 # EOB

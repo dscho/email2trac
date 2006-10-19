@@ -1,7 +1,13 @@
+email2trac (0.8.1-5) stable; urgency=low
+
+  *  Adjust delete_spam.py for version 0.10
+
+ -- root <root@rc.sara.nl>  Thu, 19 Oct 2006 10:57:30 +0200
+
 email2trac (0.8.1-4) stable; urgency=low
 
   * Fixed an error in ticket update, when a ticket does not exists
-    threat it like a new ticket
+    proceed if it is a new ticket.
 
  -- root <root@rc.sara.nl>  Wed, 18 Oct 2006 09:50:36 +0200
 
