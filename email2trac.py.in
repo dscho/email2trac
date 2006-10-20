@@ -379,7 +379,10 @@ class TicketEmailParser(object):
 			tkt.save_changes(self.author, body_text, when)
 			tkt['id'] = ticket_id
 
-		self.attachments(m, tkt)
+		if self.VERSION  == 0.9:
+			self.attachments(m, tkt, True)
+		else:
+			self.attachments(m, tkt)
 
 		if self.notification:
 			self.notify(tkt, False, when)
@@ -611,7 +614,7 @@ class TicketEmailParser(object):
 
 		return str
 
-	def attachments(self, message, ticket):
+	def attachments(self, message, ticket, update=False):
 		'''
 		save any attachments as files in the ticket's directory
 		'''
@@ -697,8 +700,14 @@ class TicketEmailParser(object):
 			else:
 				fd = open(path)
 				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
-				att.author = self.author
-				att.description = 'Added by email2trac'
+
+				# This will break the ticket_update system, the body_text is vaporized
+				# ;-(
+				#
+				if not update:
+					att.author = self.author
+					att.description = self.to_unicode('Added by email2trac')
+
 				att.insert(url_filename, fd, filesize)
 				fd.close()
 

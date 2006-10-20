@@ -1,3 +1,11 @@
+email2trac (0.8.1-6) stable; urgency=low
+
+  * Fixed a strang bug in 0.9 version, if ticket update and email has
+    attachment we are not allowed to set the description and author
+    field of the attachment else the comment text is lost
+
+ -- root <root@rc.sara.nl>  Fri, 20 Oct 2006 13:06:28 +0200
+
 email2trac (0.8.1-5) stable; urgency=low
 
   *  Adjust delete_spam.py for version 0.10
