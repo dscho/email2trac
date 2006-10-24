@@ -40,7 +40,7 @@
 #define DEBUG 0
 #endif
 
-int check_username(char *name)
+void check_username(char *name)
 {
   if ( strlen(name) > 30 ) {
     	  if ( DEBUG ) printf("MTA_USERNAME is to large; %s\n", name);
