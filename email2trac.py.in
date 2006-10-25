@@ -373,7 +373,7 @@ class TicketEmailParser(object):
 		else:
 			try:
 				tkt = Ticket(self.env, ticket_id, self.db)
-			except TracError, detail:
+			except util.TracError, detail:
 				return False
 
 			tkt.save_changes(self.author, body_text, when)
