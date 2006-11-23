@@ -170,6 +170,11 @@ class TicketEmailParser(object):
 		else:
 			self.DROP_SPAM = 0
 
+		if parameters.has_key('verbatim_format'):
+			self.VERBATIM_FORMAT = int(parameters['verbatim_format'])
+		else:
+			self.VERBATIM_FORMAT = 1
+
 
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
@@ -561,7 +566,11 @@ class TicketEmailParser(object):
 		if encoding:
 			ubody_text = ubody_text.encode('utf-8')
 
-		ubody_text = '{{{\r\n%s\r\n}}}' %ubody_text
+		if self.VERBATIM_FORMAT:
+			ubody_text = '{{{\r\n%s\r\n}}}' %ubody_text
+		else:
+			ubody_text = '%s' %ubody_text
+
 		return ubody_text
 
 	def notify(self, tkt , new=True, modtime=0):
