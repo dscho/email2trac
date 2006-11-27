@@ -80,11 +80,12 @@ import getopt
 import stat
 import time
 import email
+import email.Iterators
+import email.Header
 import re
 import urllib
 import unicodedata
 import ConfigParser
-from email import Header
 from stat import *
 import mimetypes
 import syslog
@@ -175,6 +176,11 @@ class TicketEmailParser(object):
 		else:
 			self.VERBATIM_FORMAT = 1
 
+		if parameters.has_key('strip_signature'):
+			self.STRIP_SIGNATURE = int(parameters['strip_signature'])
+		else:
+			self.STRIP_SIGNATURE = 0
+
 
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
@@ -197,7 +203,7 @@ class TicketEmailParser(object):
         that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
 		understands it.
 		"""
-		results =  Header.decode_header(str)
+		results =  email.Header.decode_header(str)
 		str = None
 		for text,format in results:
 			if format:
@@ -505,6 +511,18 @@ class TicketEmailParser(object):
 
 		self.new_ticket(m)
 
+	def strip_signature(self, text):
+		"""
+		Strip signature from message, inspired by Mailman software
+		"""
+		body = []
+		for line in text.splitlines():
+			if line == '-- ':
+				break 
+			body.append(line)
+
+		return ('\n'.join(body))
+
 	def get_body_text(self, msg):
 		"""
 		put the message text in the ticket description or in the changes field.
@@ -526,6 +544,9 @@ class TicketEmailParser(object):
 				body_text = part.get_payload(decode=1)
 				if not body_text:			
 					body_text = part.get_payload(decode=0)
+		
+				if self.STRIP_SIGNATURE:
+					body_text = self.strip_signature(body_text)
 
 				# Get contents charset (iso-8859-15 if not defined in mail headers)
 				#

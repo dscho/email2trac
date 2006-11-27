@@ -2,6 +2,7 @@
 	* email2trac.py:
 	
 	  - Added verbatim_format option default is: 1
+	  - Added strip_signature option default is: 0 
 
 2006-10-27
 
