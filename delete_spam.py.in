@@ -86,6 +86,7 @@ def new_delete_spam(project, debug):
 	env = Environment(project, create=0)
 	db = env.get_db_cnx()
 
+	cursor = db.cursor()
 	cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
 	while 1: 
 		row = cursor.fetchone()
@@ -94,14 +95,15 @@ def new_delete_spam(project, debug):
 
 		spam_id =  row[0]
 
-		try:
-			tkt = Ticket(env, spam_id, db)
-		except TracError, detail:
-			continue
-
 		if debug:
 			print "Deleting ticket %s" %spam_id
-		
+
+		try:
+			tkt = Ticket(env, spam_id, db)
+		except util.TracError, detail:
+		        print detail
+			continue
+
 		tkt.delete()
 
 def old_delete_spam(project, debug):
@@ -123,8 +125,10 @@ def old_delete_spam(project, debug):
 		if not row:
 			break
 		spam_id =  row[0] 
-		
+	
 		if debug:
+			print spam_id 
+
 			sql_cmd = "SELECT *  FROM attachment WHERE type='ticket' and id='%s';" %spam_id
 			tkt_cursor.execute(sql_cmd) 
 			row = tkt_cursor.fetchone()
@@ -152,6 +156,7 @@ def old_delete_spam(project, debug):
 		# Ticket commit 
 		# 
 		db.commit() 
+
 		dir = os.path.join(attachment_dir, str(spam_id)) 
 		if os.path.exists(dir):
 			if debug:
@@ -201,12 +206,16 @@ if __name__ == '__main__':
 
 	if version == 0.8:
 		from trac.Environment import Environment
+		from trac import util
 	else:
 		from trac.env import Environment
 		from trac.ticket import Ticket
+		from trac import util
 
 	if version == 0.10:
 		new_delete_spam(settings['project'], int(settings['debug']))
+		#new_delete_spam(settings['project'], 1)
+		#old_delete_spam(settings['project'], 0)
 	elif version == 0.9:
 		old_delete_spam(settings['project'], int(settings['debug']))
 	elif version == 0.8:
