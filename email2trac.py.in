@@ -266,7 +266,9 @@ class TicketEmailParser(object):
 		if m['Cc'] and len(m['Cc']) > 0:
 			str = "%s'''Cc:''' %s [[BR]]" % (str, m['Cc'])
 
-		return  self.to_unicode(str)
+		#return  self.to_unicode(str)
+		return  util.text.to_unicode(str)
+
 
 	def set_owner(self, ticket):
 		"""
@@ -297,7 +299,8 @@ class TicketEmailParser(object):
 		if len(users) == 1:
 			self.email_field = users[0]
 		else:
-			self.email_field =  self.to_unicode(message['from'])
+			#self.email_field =  self.to_unicode(message['from'])
+			self.email_field =  util.text.to_unicode(message['from'])
 
 	def set_reply_fields(self, ticket, message):
 		"""
@@ -331,7 +334,8 @@ class TicketEmailParser(object):
 					mail_list = mail
 
 			if mail_list:
-				ticket['cc'] = self.to_unicode(mail_list)
+				#ticket['cc'] = self.to_unicode(mail_list)
+				ticket['cc'] = util.text.to_unicode(mail_list)
 
 	def save_email_for_debug(self, message, tempfile=False):
 		if tempfile:
@@ -357,7 +361,8 @@ class TicketEmailParser(object):
 		if not m['Subject']:
 			return False
 		else:
-			subject  = self.to_unicode(m['Subject'])
+			#subject  = self.to_unicode(m['Subject'])
+			subject  = util.text.to_unicode(m['Subject'])
 
 		TICKET_RE = re.compile(r"""
 					(?P<ticketnr>[#][0-9]+:)
@@ -417,7 +422,8 @@ class TicketEmailParser(object):
 		if not msg['Subject']:
 			tkt['summary'] = u'(geen subject)'
 		else:
-			tkt['summary'] = self.to_unicode(msg['Subject'])
+			#tkt['summary'] = self.to_unicode(msg['Subject'])
+			tkt['summary'] = util.text.to_unicode(msg['Subject'])
 
 
 		if settings.has_key('component'):
@@ -463,7 +469,8 @@ class TicketEmailParser(object):
 		if self.MAILTO:
 			changed = True
 			comment = '\nadded mailto line\n'
-			mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
+			#mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
+			mailto = self.html_mailto_link(util.text.to_unicode(msg['subject']), ticket_id, body_text)
 			#tkt['description'] = 'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
 			tkt['description'] = 'email2trac:%s%s\r\n%s' %(head, mailto, body_text)
 
@@ -624,7 +631,8 @@ class TicketEmailParser(object):
 		if not self.author:
 			author = self.email_addr
 		else:	
-			author = self.to_unicode(self.author)
+			#author = self.to_unicode(self.author)
+			author = util.text.to_unicode(self.author)
 
 		# Must find a fix
 		#
@@ -672,7 +680,8 @@ class TicketEmailParser(object):
 
 				filename = '%s%s' % (filename, ext)
 			else:
-				filename = self.to_unicode(filename)
+				#filename = self.to_unicode(filename)
+				filename = util.text.to_unicode(filename)
 
 			# From the trac code
 			#
@@ -736,7 +745,8 @@ class TicketEmailParser(object):
 				#
 				if not update:
 					att.author = self.author
-					att.description = self.to_unicode('Added by email2trac')
+					#att.description = self.to_unicode('Added by email2trac')
+					att.description = util.text.to_unicode('Added by email2trac')
 
 				att.insert(url_filename, fd, filesize)
 				fd.close()
