@@ -450,7 +450,7 @@ class TicketEmailParser(object):
 
 		body_text = self.get_body_text(msg)
 
-		tkt['description'] = 'email2trac:%s\r\n%s' \
+		tkt['description'] = '\r\n%s\r\n%s' \
 			%(head, body_text)
 
 		when = int(time.time())
