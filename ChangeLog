@@ -12,6 +12,10 @@
 	    trac crashed with unicode errors ;-(
 	  Fixed by: Bas van der Vlies
 
+	   - Fixed statements: str + unicode, raises an exception if 
+	     non-ascii value in unicode object.
+	  Fixed by: Bas van der Vlies
+
 	* delete_spam.py:
 	  - Now works for version 0.10 with new API-functions
 	  Fixed by: Bas van der Vlies

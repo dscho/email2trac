@@ -451,7 +451,7 @@ class TicketEmailParser(object):
 		body_text = self.get_body_text(msg)
 
 		tkt['description'] = '\r\n%s\r\n%s' \
-			%(head, body_text)
+			%(head, body_text.decode('utf-8'))
 
 		when = int(time.time())
 		if self.VERSION == 0.8:
@@ -469,7 +469,8 @@ class TicketEmailParser(object):
 			changed = True
 			comment = '\nadded mailto line\n'
 			mailto = self.html_mailto_link(self.email_to_unicode(msg['subject']), ticket_id, body_text)
-			tkt['description'] = 'email2trac:%s%s\r\n%s' %(head, mailto, body_text)
+			tkt['description'] = '\r\n%s%s\r\n%s\r\n' \
+				%(head, mailto, body_text.decode('utf-8'))
 
 		n =  self.attachments(msg, tkt)
 		if n:
