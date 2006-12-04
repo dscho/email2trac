@@ -181,7 +181,6 @@ class TicketEmailParser(object):
 		else:
 			self.STRIP_SIGNATURE = 0
 
-
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
 	def spam(self, message):
@@ -197,22 +196,27 @@ class TicketEmailParser(object):
 
 		return self.get_config('ticket', 'default_component') 
 
-	def to_unicode(self, str):
+	def email_to_unicode(self, message_str):
 		"""
 		Email has 7 bit ASCII code, convert it to unicode with the charset
         that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
 		understands it.
 		"""
-		results =  email.Header.decode_header(str)
+		results =  email.Header.decode_header(message_str)
 		str = None
 		for text,format in results:
 			if format:
 				try:
 					temp = unicode(text, format)
-				except (UnicodeError,LookupError):
+				except UnicodeError, detail:
 					# This always works 
 					#
 					temp = unicode(text, 'iso-8859-15')
+				except LookupError, detail:
+					#text = 'ERROR: Could not find charset: %s, please install' %format
+					#temp = unicode(text, 'iso-8859-15')
+					temp = message_str
+				    	
 			else:
 				temp = string.strip(text)
 				temp = unicode(text, 'iso-8859-15')
@@ -222,7 +226,7 @@ class TicketEmailParser(object):
 			else:
 				str = '%s' %temp
 
-		str = str.encode('utf-8')
+		#str = str.encode('utf-8')
 		return str
 
 	def debug_attachments(self, message):
@@ -266,8 +270,7 @@ class TicketEmailParser(object):
 		if m['Cc'] and len(m['Cc']) > 0:
 			str = "%s'''Cc:''' %s [[BR]]" % (str, m['Cc'])
 
-		#return  self.to_unicode(str)
-		return  util.text.to_unicode(str)
+		return  self.email_to_unicode(str)
 
 
 	def set_owner(self, ticket):
@@ -299,8 +302,7 @@ class TicketEmailParser(object):
 		if len(users) == 1:
 			self.email_field = users[0]
 		else:
-			#self.email_field =  self.to_unicode(message['from'])
-			self.email_field =  util.text.to_unicode(message['from'])
+			self.email_field =  self.email_to_unicode(message['from'])
 
 	def set_reply_fields(self, ticket, message):
 		"""
@@ -334,8 +336,7 @@ class TicketEmailParser(object):
 					mail_list = mail
 
 			if mail_list:
-				#ticket['cc'] = self.to_unicode(mail_list)
-				ticket['cc'] = util.text.to_unicode(mail_list)
+				ticket['cc'] = self.email_to_unicode(mail_list)
 
 	def save_email_for_debug(self, message, tempfile=False):
 		if tempfile:
@@ -361,8 +362,7 @@ class TicketEmailParser(object):
 		if not m['Subject']:
 			return False
 		else:
-			#subject  = self.to_unicode(m['Subject'])
-			subject  = util.text.to_unicode(m['Subject'])
+			subject  = self.email_to_unicode(m['Subject'])
 
 		TICKET_RE = re.compile(r"""
 					(?P<ticketnr>[#][0-9]+:)
@@ -422,8 +422,7 @@ class TicketEmailParser(object):
 		if not msg['Subject']:
 			tkt['summary'] = u'(geen subject)'
 		else:
-			#tkt['summary'] = self.to_unicode(msg['Subject'])
-			tkt['summary'] = util.text.to_unicode(msg['Subject'])
+			tkt['summary'] = self.email_to_unicode(msg['Subject'])
 
 
 		if settings.has_key('component'):
@@ -469,9 +468,7 @@ class TicketEmailParser(object):
 		if self.MAILTO:
 			changed = True
 			comment = '\nadded mailto line\n'
-			#mailto = self.html_mailto_link(self.to_unicode(msg['subject']), ticket_id, body_text)
-			mailto = self.html_mailto_link(util.text.to_unicode(msg['subject']), ticket_id, body_text)
-			#tkt['description'] = 'email2trac:%s%s\r\n{{{\r\n%s\r\n}}}' %(head, mailto, body_text)
+			mailto = self.html_mailto_link(self.email_to_unicode(msg['subject']), ticket_id, body_text)
 			tkt['description'] = 'email2trac:%s%s\r\n%s' %(head, mailto, body_text)
 
 		n =  self.attachments(msg, tkt)
@@ -568,8 +565,7 @@ class TicketEmailParser(object):
 					ubody_text = unicode(body_text, 'iso-8859-15')
 
 				except LookupError, detail:
-					ubody_text = body_text
-					encoding = False
+					ubody_text = 'ERROR: Could not find charset: %s, please install' %(charset)
 
 			elif part.get_content_type() == 'text/html':
 				ubody_text = '(see attachment for HTML mail message)'
@@ -631,8 +627,7 @@ class TicketEmailParser(object):
 		if not self.author:
 			author = self.email_addr
 		else:	
-			#author = self.to_unicode(self.author)
-			author = util.text.to_unicode(self.author)
+			author = self.email_to_unicode(self.author)
 
 		# Must find a fix
 		#
@@ -680,8 +675,7 @@ class TicketEmailParser(object):
 
 				filename = '%s%s' % (filename, ext)
 			else:
-				#filename = self.to_unicode(filename)
-				filename = util.text.to_unicode(filename)
+				filename = self.email_to_unicode(filename)
 
 			# From the trac code
 			#
@@ -745,8 +739,7 @@ class TicketEmailParser(object):
 				#
 				if not update:
 					att.author = self.author
-					#att.description = self.to_unicode('Added by email2trac')
-					att.description = util.text.to_unicode('Added by email2trac')
+					att.description = self.email_to_unicode('Added by email2trac')
 
 				att.insert(url_filename, fd, filesize)
 				fd.close()
@@ -876,6 +869,9 @@ if __name__ == '__main__':
 			from trac.ticket import Ticket
 			from trac.web.href import Href
 			from trac import util
+			#
+			# return  util.text.to_unicode(str)
+			#
 			# see http://projects.edgewall.com/trac/changeset/2799
 			from trac.ticket.notification import TicketNotifyEmail
 	

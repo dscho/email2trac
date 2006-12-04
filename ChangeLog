@@ -1,8 +1,20 @@
 2XXXXXX
 	* email2trac.py:
-	
 	  - Added verbatim_format option default is: 1
+	  Added by : Bas van der Vlies
+
 	  - Added strip_signature option default is: 0 
+	  Added by : Bas van der Vlies
+
+	  - Fixed some unicode errors, thanks to japanes SPAM. 
+	    If we can not unicode email message then display which
+	    charset must be installed in ticket description. Else we 
+	    trac crashed with unicode errors ;-(
+	  Fixed by: Bas van der Vlies
+
+	* delete_spam.py:
+	  - Now works for version 0.10 with new API-functions
+	  Fixed by: Bas van der Vlies
 
 2006-10-27
 
