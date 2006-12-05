@@ -1,4 +1,4 @@
-2XXXXXX
+2006-12-
 	* email2trac.py:
 	  - Added verbatim_format option default is: 1
 	  Added by : Bas van der Vlies
@@ -12,8 +12,11 @@
 	    trac crashed with unicode errors ;-(
 	  Fixed by: Bas van der Vlies
 
-	   - Fixed statements: str + unicode, raises an exception if 
-	     non-ascii value in unicode object.
+	  - Fixed statements: str + unicode, raises an exception if 
+	    non-ascii value in unicode object.
+
+	  - Forgot to unicode the author. So we got an error if we use 
+	    the mailto_link option in email2trac.conf. 
 	  Fixed by: Bas van der Vlies
 
 	* delete_spam.py:

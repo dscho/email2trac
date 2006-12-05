@@ -291,6 +291,9 @@ class TicketEmailParser(object):
 		"""
 		self.author, self.email_addr  = email.Utils.parseaddr(message['from'])
 
+		self.author = self.email_to_unicode(self.author)
+		#self.author = self.author.encode('utf-8', 'replace')
+
 		# Look for email address in registered trac users
 		#
 		if self.VERSION == 0.8:
@@ -447,11 +450,10 @@ class TicketEmailParser(object):
 		if self.EMAIL_HEADER > 0:
 			head = self.email_header_txt(msg)
 			
-
 		body_text = self.get_body_text(msg)
 
 		tkt['description'] = '\r\n%s\r\n%s' \
-			%(head, body_text.decode('utf-8'))
+			%(head, body_text)
 
 		when = int(time.time())
 		if self.VERSION == 0.8:
@@ -467,10 +469,10 @@ class TicketEmailParser(object):
 		#
 		if self.MAILTO:
 			changed = True
-			comment = '\nadded mailto line\n'
-			mailto = self.html_mailto_link(self.email_to_unicode(msg['subject']), ticket_id, body_text)
-			tkt['description'] = '\r\n%s%s\r\n%s\r\n' \
-				%(head, mailto, body_text.decode('utf-8'))
+			comment = u'\nadded mailto line\n'
+			mailto = self.html_mailto_link(tkt['summary'], ticket_id, body_text)
+			tkt['description'] = u'\r\n%s\r\n%s%s\r\n' \
+				%(head, mailto, body_text)
 
 		n =  self.attachments(msg, tkt)
 		if n:
@@ -588,8 +590,8 @@ class TicketEmailParser(object):
 		#  If we can unicode it try to encode it for trac
 		#  else we a lot of garbage
 		#
-		if encoding:
-			ubody_text = ubody_text.encode('utf-8')
+		#if encoding:
+		#	ubody_text = ubody_text.encode('utf-8')
 
 		if self.VERBATIM_FORMAT:
 			ubody_text = '{{{\r\n%s\r\n}}}' %ubody_text
@@ -626,9 +628,9 @@ class TicketEmailParser(object):
 
 	def html_mailto_link(self, subject, id, body):
 		if not self.author:
-			author = self.email_addr
+			author = self.self.email_addr
 		else:	
-			author = self.email_to_unicode(self.author)
+			author = self.author
 
 		# Must find a fix
 		#
@@ -638,6 +640,7 @@ class TicketEmailParser(object):
 		#body = '%s wrote:\n%s' %(author, body)
 
 		# Temporary fix
+		#
 		str = 'mailto:%s?Subject=%s&Cc=%s' %( 
 		       urllib.quote(self.email_addr), 
 			   urllib.quote('Re: #%s: %s' %(id, subject)),
@@ -645,7 +648,6 @@ class TicketEmailParser(object):
 			   )
 
 		str = '\r\n{{{\r\n#!html\r\n<a href="%s">Reply to: %s</a>\r\n}}}\r\n' %(str, author)
-
 		return str
 
 	def attachments(self, message, ticket, update=False):

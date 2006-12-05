@@ -1,3 +1,9 @@
+email2trac (0.9.0-1) stable; urgency=low
+
+  * New version nothing changed 
+
+ -- root <root@subtrac.sara.nl>  Mon,  4 Dec 2006 18:57:16 +0100
+
 email2trac (0.8.2-2) stable; urgency=low
 
   * Try new version with unicode fixes 
