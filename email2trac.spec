@@ -34,8 +34,6 @@ make
 
 %install
 make DESTDIR="$RPM_BUILD_ROOT" install
-mkdir -p $RPM_BUILD_ROOT/etc
-cp email2trac.conf $RPM_BUILD_ROOT/etc/
 
 %files
 /usr/bin/delete_spam
