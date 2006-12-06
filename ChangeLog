@@ -23,6 +23,11 @@
 	  - Now works for version 0.10 with new API-functions
 	  Fixed by: Bas van der Vlies
 
+	* Makefile.in
+	  - Added install-conf. Install email2trac.conf if there is none
+	    installed.
+	  Fixed by: Bas van der Vlies
+
 2006-10-27
 
 	* run_email2trac.c. 

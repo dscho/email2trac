@@ -31,7 +31,7 @@ all: run_email2trac
 run_email2trac: $(WRAPPER_SRC) Makefile
 	$(CC) $(CFLAGS) -o $@ run_email2trac.c
 
-install: all
+install: all install-conf
 	$(INSTALL) -d $(DESTDIR)$(EXEC_PREFIX)
 	$(INSTALL) -m 4111 -o root run_email2trac $(DESTDIR)$(EXEC_PREFIX)
 	for script in $(PYTHON_FILES) ; \
@@ -40,6 +40,12 @@ install: all
 	  $(INSTALL) -m 755 -o root $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
 	done
 
+install-conf:
+	if [ ! -f  $(DESTDIR)/$(CONFIG)/email2trac.conf ] ; \
+	then \
+		$(INSTALL) -c -m 644 -o root email2trac.conf $(DESTDIR)/$(CONFIG)/email2trac.conf ;\
+	fi
+ 
 clean:
 	rm run_email2trac
 
