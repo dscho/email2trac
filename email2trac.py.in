@@ -94,7 +94,7 @@ import traceback
 
 # Some global variables
 #
-trac_default_version = 0.9
+trac_default_version = 0.10
 m = None 
 
 
