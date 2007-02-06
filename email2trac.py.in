@@ -57,9 +57,9 @@ How to use
 	mailto_link  : 1               # OPTIONAL, if set then [mailto:<>] in description 
 	mailto_cc    : basv@sara.nl    # OPTIONAL, use this address as CC in mailto line
 	ticket_update: 1               # OPTIONAL, if set then check if this is an update for a ticket
-	trac_version : 0.8             # OPTIONAL, default is 0.9
+	trac_version : 0.8             # OPTIONAL, default is 0.10
 
-	[jouvin]                         # OPTIONAL project declaration, if set both fields necessary
+	[jouvin]                       # OPTIONAL project declaration, if set both fields necessary
 	project      : /data/trac/jouvin # use -p|--project jouvin.  
         
  * default config file is : /etc/email2trac.conf
@@ -180,6 +180,11 @@ class TicketEmailParser(object):
 			self.STRIP_SIGNATURE = int(parameters['strip_signature'])
 		else:
 			self.STRIP_SIGNATURE = 0
+
+		if parameters.has_key('use_textwrap'):
+			self.USE_TEXTWRAP = int(parameters['use_textwrap'])
+		else:
+			self.USE_TEXTWRAP = 0
 
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
@@ -555,6 +560,13 @@ class TicketEmailParser(object):
 		
 				if self.STRIP_SIGNATURE:
 					body_text = self.strip_signature(body_text)
+
+
+				if self.USE_TEXTWRAP:
+					import textwrap
+					body_text = textwrap.fill( body_text, 
+											   width = self.USE_TEXTWRAP, 
+											   replace_whitespace = False )
 
 				# Get contents charset (iso-8859-15 if not defined in mail headers)
 				#
