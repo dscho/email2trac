@@ -201,6 +201,16 @@ class TicketEmailParser(object):
 
 		return self.get_config('ticket', 'default_component') 
 
+	def blacklisted_from(self):
+		FROM_RE = re.compile(r"""
+                    MAILER-DAEMON@
+                    """, re.VERBOSE)
+		result =  FROM_RE.search(self.email_addr)
+		if result:
+			return True
+		else:
+			return False
+
 	def email_to_unicode(self, message_str):
 		"""
 		Email has 7 bit ASCII code, convert it to unicode with the charset
@@ -442,7 +452,8 @@ class TicketEmailParser(object):
 		# Discard SPAM messages.
 		#
 		if self.DROP_SPAM and (tkt['component'] == 'Spam'):
-			# print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
+			if self.DROP_SPAM > 2 :
+			  print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
 			return False	
 
 		# Set default owner for component
@@ -509,7 +520,11 @@ class TicketEmailParser(object):
 			self.debug_attachments(m)
 
 		self.db = self.env.get_db_cnx()
- 		self.get_author_emailaddrs(m) 
+ 		self.get_author_emailaddrs(m)
+ 		if self.blacklisted_from():
+ 			if self.DEBUG > 1 :
+ 				print 'Message rejected : From: in blacklist'
+ 			return False
 
 		if self.get_config('notification', 'smtp_enabled') in ['true']:
 			self.notification = 1
