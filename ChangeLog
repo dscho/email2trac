@@ -1,8 +1,13 @@
+2007-03-09 
+
+	* Added some primarily check to catch an error when attachment size
+	 is too large, bug #1153
+	 Author: Bas van der Vlies
+
 2007-03-08 Michel Jouvin <jouvin@lal.in2p3.fr>
         * email2trac.py : blacklist (don't create ticket) mail from
 	  MAILER-DAEMON to avoid loops
 	* msg.bad.txt : add an example of message from MAILER-DAEMON
-
 
 2006-12-08
 	* email2trac.py:

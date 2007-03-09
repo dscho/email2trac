@@ -452,7 +452,7 @@ class TicketEmailParser(object):
 		# Discard SPAM messages.
 		#
 		if self.DROP_SPAM and (tkt['component'] == 'Spam'):
-			if self.DROP_SPAM > 2 :
+			if self.DEBUG > 2 :
 			  print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
 			return False	
 
@@ -772,7 +772,11 @@ class TicketEmailParser(object):
 					att.author = self.author
 					att.description = self.email_to_unicode('Added by email2trac')
 
-				att.insert(url_filename, fd, filesize)
+				try:
+					att.insert(url_filename, fd, filesize)
+				except  util.TracError, detail:
+					a =  1
+
 				fd.close()
 
 			# Remove the created temporary filename
