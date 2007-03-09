@@ -1,8 +1,17 @@
 2007-03-09 
 
 	* Added some primarily check to catch an error when attachment size
-	 is too large, bug #1153
-	 Author: Bas van der Vlies
+	  is too large, bug #1153
+	  Author: Bas van der Vlies
+
+	* Wrap long line into user given length, use_textwrap: 72. Wraps lines
+	  greater then 72 chars, #1123
+	  Author: Bas van der Vlies & 
+	          Rainer Sokoll (r.sokoll at intershop dot de)
+
+	* Fixed a dutch spelling, #1295
+	  Author: Rainer Sokoll (r.sokoll at intershop dot de)
+
 
 2007-03-08 Michel Jouvin <jouvin@lal.in2p3.fr>
         * email2trac.py : blacklist (don't create ticket) mail from

@@ -439,7 +439,7 @@ class TicketEmailParser(object):
 		tkt['version'] = self.get_config('ticket', 'default_version')
 
 		if not msg['Subject']:
-			tkt['summary'] = u'(geen subject)'
+			tkt['summary'] = u'(No subject)'
 		else:
 			tkt['summary'] = self.email_to_unicode(msg['Subject'])
 
@@ -551,6 +551,16 @@ class TicketEmailParser(object):
 
 		return ('\n'.join(body))
 
+
+	def wrap_text(str='', width = self.USE_TEXTWRAP, replace_whitespace = False):
+		"""
+		Will break a lines longer then given length into several small lines of size 
+		given length
+		"""
+		import textwrap
+		LINESEPARATOR = '\n'
+		return LINESEPARATOR.join(textwrap.fill(s,width) for s in str.split(LINESEPARATOR))
+
 	def get_body_text(self, msg):
 		"""
 		put the message text in the ticket description or in the changes field.
@@ -576,12 +586,8 @@ class TicketEmailParser(object):
 				if self.STRIP_SIGNATURE:
 					body_text = self.strip_signature(body_text)
 
-
 				if self.USE_TEXTWRAP:
-					import textwrap
-					body_text = textwrap.fill( body_text, 
-											   width = self.USE_TEXTWRAP, 
-											   replace_whitespace = False )
+					body_text = self.wrap_text(body_text)
 
 				# Get contents charset (iso-8859-15 if not defined in mail headers)
 				#
