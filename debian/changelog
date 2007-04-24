@@ -1,26 +1,32 @@
+email2trac (0.9.5-1) stable; urgency=low
+
+  * New version with some new features see ChangeLog 
+
+ -- bas <basv@sara.nl>  Tue, 24 Apr 2007 14:27:25 +0200
+
 email2trac (0.9.0-2) stable; urgency=low
 
   * add email2trac.conf to conffiles
 
- -- root <root@subtrac.sara.nl>  Wed,  6 Dec 2006 14:28:04 +0100
+ -- bas <basv@sara.nl>  Wed,  6 Dec 2006 14:28:04 +0100
 
 email2trac (0.9.0-1) stable; urgency=low
 
   * New version nothing changed 
 
- -- root <root@subtrac.sara.nl>  Mon,  4 Dec 2006 18:57:16 +0100
+ -- bas <basv@sara.nl>  Mon,  4 Dec 2006 18:57:16 +0100
 
 email2trac (0.8.2-2) stable; urgency=low
 
   * Try new version with unicode fixes 
 
- -- root <root@subtrac.sara.nl>  Mon,  4 Dec 2006 12:04:30 +0100
+ -- bas <basv@sara.nl>  Mon,  4 Dec 2006 12:04:30 +0100
 
 email2trac (0.8.2-1) stable; urgency=low
 
   * New release version 
 
- -- root <root@rc.sara.nl>  Thu, 26 Oct 2006 08:19:56 +0200
+ -- bas <basv@sara.nl>  Thu, 26 Oct 2006 08:19:56 +0200
 
 email2trac (0.8.1-6) stable; urgency=low
 
@@ -28,32 +34,32 @@ email2trac (0.8.1-6) stable; urgency=low
     attachment we are not allowed to set the description and author
     field of the attachment else the comment text is lost
 
- -- root <root@rc.sara.nl>  Fri, 20 Oct 2006 13:06:28 +0200
+ -- bas <basv@sara.nl>  Fri, 20 Oct 2006 13:06:28 +0200
 
 email2trac (0.8.1-5) stable; urgency=low
 
   *  Adjust delete_spam.py for version 0.10
 
- -- root <root@rc.sara.nl>  Thu, 19 Oct 2006 10:57:30 +0200
+ -- bas <basv@sara.nl>  Thu, 19 Oct 2006 10:57:30 +0200
 
 email2trac (0.8.1-4) stable; urgency=low
 
   * Fixed an error in ticket update, when a ticket does not exists
     proceed if it is a new ticket.
 
- -- root <root@rc.sara.nl>  Wed, 18 Oct 2006 09:50:36 +0200
+ -- bas <bas@rc.sara.nl>  Wed, 18 Oct 2006 09:50:36 +0200
 
 email2trac (0.8.1-3) stable; urgency=low
 
   * setgid() must be called before setuid() 
 
- -- root <root@rc.sara.nl>  Tue, 17 Oct 2006 11:17:13 +0200
+ -- bas <bas@rc.sara.nl>  Tue, 17 Oct 2006 11:17:13 +0200
 
 email2trac (0.8.1-2) stable; urgency=low
 
   * Replace sys.exit(0) bij return else there is an exception
 
- -- root <root@rc.sara.nl>  Wed, 11 Oct 2006 14:08:50 +0200
+ -- bas <bas@rc.sara.nl>  Wed, 11 Oct 2006 14:08:50 +0200
 
 email2trac (0.8.1-1) stable; urgency=low
 
@@ -61,25 +67,25 @@ email2trac (0.8.1-1) stable; urgency=low
   * added drop_spam option
   * add author and description field when adding a attachment
 
- -- root <root@rc.sara.nl>  Thu,  5 Oct 2006 15:03:23 +0200
+ -- bas <bas@rc.sara.nl>  Thu,  5 Oct 2006 15:03:23 +0200
 
 email2trac (0.8.0-2) stable; urgency=low
 
   * Do not send notification when message is marked as Spam
 
- -- root <root@subtrac.sara.nl>  Mon,  2 Oct 2006 10:57:09 +0200
+ -- bas <bas@subtrac.sara.nl>  Mon,  2 Oct 2006 10:57:09 +0200
 
 email2trac (0.8.0-1) stable; urgency=low
 
   * See ChangeLog
 
- -- root <root@subtrac.sara.nl>  Fri, 29 Sep 2006 12:29:30 +0200
+ -- bas <bas@subtrac.sara.nl>  Fri, 29 Sep 2006 12:29:30 +0200
 
 email2trac (0.7.7-1) stable; urgency=low
 
   * added RPM specfile 
 
- -- root <root@rc.sara.nl>  Mon, 28 Aug 2006 10:11:30 +0200
+ -- bas <bas@rc.sara.nl>  Mon, 28 Aug 2006 10:11:30 +0200
 
 email2trac (0.7.6-5) stable; urgency=low
 
@@ -110,119 +116,119 @@ email2trac (0.7.6-1) stable; urgency=low
   * Fixes delete_spam.py also delete from attachment table
     Fixes: Jaap Dijkshoorn
 
- -- root <root@rc.sara.nl>  Thu, 13 Jul 2006 12:33:41 +0200
+ -- bas <bas@rc.sara.nl>  Thu, 13 Jul 2006 12:33:41 +0200
 
 email2trac (0.7.5-1) stable; urgency=low
 
   * Fix for release greater than 0.8, now attachments where saved
     when a new ticket was inserted
 
- -- root <root@rc.sara.nl>  Thu, 13 Jul 2006 10:23:27 +0200
+ -- bas <bas@rc.sara.nl>  Thu, 13 Jul 2006 10:23:27 +0200
 
 email2trac (0.7.4-2) stable; urgency=low
 
   * New bug fixes for unicode support 
 
- -- root <root@subtrac.sara.nl>  Tue, 11 Jul 2006 14:52:58 +0200
+ -- bas <bas@subtrac.sara.nl>  Tue, 11 Jul 2006 14:52:58 +0200
 
 email2trac (0.7.4-1) stable; urgency=low
 
   * Unicode bug fixes
 
- -- root <root@subtrac.sara.nl>  Tue, 11 Jul 2006 09:24:00 +0200
+ -- bas <bas@subtrac.sara.nl>  Tue, 11 Jul 2006 09:24:00 +0200
 
 email2trac (0.7.3-7) stable; urgency=low
 
   * removed some unicode data conversions
 
- -- root <root@subtrac.sara.nl>  Thu,  6 Jul 2006 09:04:35 +0200
+ -- bas <bas@subtrac.sara.nl>  Thu,  6 Jul 2006 09:04:35 +0200
 
 email2trac (0.7.3-6) stable; urgency=low
 
   * Fixed an encoding problem when email_header is set to 1
 
- -- root <root@subtrac.sara.nl>  Fri, 30 Jun 2006 13:42:38 +0200
+ -- bas <bas@subtrac.sara.nl>  Fri, 30 Jun 2006 13:42:38 +0200
 
 email2trac (0.7.3-5) stable; urgency=low
 
   *  Description always changed when accesing the ticket via the web.
      Suggestion/Patch by: Christian Boos
 
- -- root <root@subtrac.sara.nl>  Fri, 30 Jun 2006 09:50:32 +0200
+ -- bas <bas@subtrac.sara.nl>  Fri, 30 Jun 2006 09:50:32 +0200
 
 email2trac (0.7.3-4) stable; urgency=low
 
   * Fixed a LookupError  
 
- -- root <basv@sara.nl>  Mon, 26 Jun 2006 09:58:07 +0200
+ -- bas <basv@sara.nl>  Mon, 26 Jun 2006 09:58:07 +0200
 
 email2trac (0.7.3-3) stable; urgency=low
 
   * Fixed and spell error, self.mail_addr must be self.email_addr
 
- -- root <basv@sara.nl>  Thu, 22 Jun 2006 15:17:55 +0200
+ -- bas <basv@sara.nl>  Thu, 22 Jun 2006 15:17:55 +0200
 
 email2trac (0.7.3-1) stable; urgency=low
 
   * Enabled syslog option
 
- -- root <root@subtrac.sara.nl>  Thu, 22 Jun 2006 12:45:37 +0200
+ -- bas <bas@subtrac.sara.nl>  Thu, 22 Jun 2006 12:45:37 +0200
 
 email2trac (0.7.2-0) stable; urgency=low
 
   * Added new try/except statement and fixed LookupError
 
- -- root <root@subtrac.sara.nl>  Thu, 22 Jun 2006 09:59:02 +0200
+ -- bas <bas@subtrac.sara.nl>  Thu, 22 Jun 2006 09:59:02 +0200
 
 email2trac (0.7.1-3) stable; urgency=low
 
   * Fixed an error for already added attachments. Do not close the 
     database connection 
 
- -- root <root@subtrac.sara.nl>  Fri, 16 Jun 2006 13:52:26 +0200
+ -- bas <bas@subtrac.sara.nl>  Fri, 16 Jun 2006 13:52:26 +0200
 
 email2trac (0.7.0-2) stable; urgency=low
 
   * Fixed some language errors by Nathaniel Irons 
 
- -- root <root@subtrac.sara.nl>  Fri,  2 Jun 2006 09:27:22 +0200
+ -- bas <bas@subtrac.sara.nl>  Fri,  2 Jun 2006 09:27:22 +0200
 
 email2trac (0.7.0-1) stable; urgency=low
 
   * Added Ticket merging
 
- -- root <root@subtrac.sara.nl>  Fri, 26 May 2006 15:01:03 +0200
+ -- bas <bas@subtrac.sara.nl>  Fri, 26 May 2006 15:01:03 +0200
 
 email2trac (0.6.0-1) stable; urgency=low
 
   * New Version 0.6
 
- -- root <bas@sara.nl>  Tue, 16 May 2006 11:14:11 +0200
+ -- bas <bas@sara.nl>  Tue, 16 May 2006 11:14:11 +0200
 
 email2trac (0.5.7-1) stable; urgency=low
 
   * New version that fixes serveral bugs 
 
- -- root <root@subtrac.sara.nl>  Wed, 12 Apr 2006 15:54:30 +0200
+ -- bas <bas@subtrac.sara.nl>  Wed, 12 Apr 2006 15:54:30 +0200
 
 email2trac (0.5.0-4) stable; urgency=low
 
   *  Continue instead of going on
 
- -- root <root@subtrac.sara.nl>  Fri, 17 Feb 2006 14:29:48 +0100
+ -- bas <bas@subtrac.sara.nl>  Fri, 17 Feb 2006 14:29:48 +0100
 
 email2trac (0.5.0-3) stable; urgency=low
 
   *  Fixed delete_spam.py if there are not enough permissions to
      delete tickets
 
- -- root <root@subtrac.sara.nl>  Fri, 17 Feb 2006 12:38:19 +0100
+ -- bas <bas@subtrac.sara.nl>  Fri, 17 Feb 2006 12:38:19 +0100
 
 email2trac (0.5.0-2) stable; urgency=low
 
   * leave out the body tag for email urls
 
- -- root <root@subtrac.sara.nl>  Thu, 16 Feb 2006 16:01:02 +0100
+ -- bas <bas@subtrac.sara.nl>  Thu, 16 Feb 2006 16:01:02 +0100
 
 email2trac (0.5.0-1) stable; urgency=low
 
