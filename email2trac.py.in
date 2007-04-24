@@ -322,6 +322,7 @@ class TicketEmailParser(object):
 			self.email_field = users[0]
 		else:
 			self.email_field =  self.email_to_unicode(message['from'])
+			#self.email_field =  self.email_to_unicode(self.email_addr)
 
 	def set_reply_fields(self, ticket, message):
 		"""
