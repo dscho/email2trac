@@ -553,14 +553,19 @@ class TicketEmailParser(object):
 		return ('\n'.join(body))
 
 
-	def wrap_text(str='', width = self.USE_TEXTWRAP, replace_whitespace = False):
+	def wrap_text(str='', replace_whitespace = False):
 		"""
 		Will break a lines longer then given length into several small lines of size 
 		given length
 		"""
 		import textwrap
 		LINESEPARATOR = '\n'
-		return LINESEPARATOR.join(textwrap.fill(s,width) for s in str.split(LINESEPARATOR))
+		reformat = ''
+
+		for s in str.split(LINESEPARATOR):
+			reformat = '%s%s' %(reformat, LINESEPARATOR.join(textwrap.fill(s,self.USE_TEXTWRAP)))
+
+		return reformat
 
 	def get_body_text(self, msg):
 		"""
@@ -696,7 +701,7 @@ class TicketEmailParser(object):
 		# Get Maxium attachment size
 		#
 		max_size = int(self.get_config('attachment', 'max_size'))
-		message = ''
+		status   = ''
 
 		for part in message.walk():
 			if part.get_content_maintype() == 'multipart':		# multipart/* is just a container
@@ -751,16 +756,16 @@ class TicketEmailParser(object):
 			fd.write(text)
 			fd.close()
 
-			# get the filesize
+			# get the file_size
 			#
 			stats = os.lstat(path) 
-			filesize = stats[stat.ST_SIZE]
+			file_size = stats[stat.ST_SIZE]
 
 			# Check if the attachment size is allowed
 			#
-			if file_size > max_size:
-				message = '%s\n%sFile %s is larger then allowed attachment size (%d > %d)' 
-					%(message, filename, file_size, max_size)
+			if (max_size != -1) and (file_size > max_size):
+				status = '%s\nFile %s is larger then allowed attachment size (%d > %d)\n\n' \
+					%(status, filename, file_size, max_size)
 
 				os.unlink(path)
 				continue
@@ -773,7 +778,7 @@ class TicketEmailParser(object):
 				cursor = self.db.cursor()
 				try:
 					cursor.execute('INSERT INTO attachment VALUES("%s","%s","%s",%d,%d,"%s","%s","%s")' 
-						%('ticket', urllib.quote(str(ticket['id'])), filename + '?format=raw', filesize, 
+						%('ticket', urllib.quote(str(ticket['id'])), filename + '?format=raw', file_size, 
 						int(time.time()),'', self.author, 'e-mail') ) 
 
 				# Attachment is already known
@@ -795,7 +800,7 @@ class TicketEmailParser(object):
 					att.author = self.author
 					att.description = self.email_to_unicode('Added by email2trac')
 
-				att.insert(url_filename, fd, filesize)
+				att.insert(url_filename, fd, file_size)
 
 				#except  util.TracError, detail:
 				#	print detail
@@ -808,8 +813,8 @@ class TicketEmailParser(object):
 
 		# Return how many attachments
 		#
-		message = 'This message has %d attachment(s)\n%s' %(count, message)
-		return message
+		status = 'This message has %d attachment(s)\n%s' %(count, status)
+		return status
 
 
 def mkdir_p(dir, mode):
