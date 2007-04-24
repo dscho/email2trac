@@ -40,7 +40,7 @@ The scripts reads emails from stdin and inserts directly into a Trac database.
 MIME headers are mapped as follows:
 
 	* From:      => Reporter
-	             => CC (Optional via reply_address option)
+	             => CC (Optional via reply_all option)
 	* Subject:   => Summary
 	* Body       => Description
 	* Component  => Can be set to SPAM via spam_level option
@@ -52,7 +52,7 @@ How to use
 	project      : /data/trac/test # REQUIRED
 	debug        : 1               # OPTIONAL, if set print some DEBUG info
 	spam_level   : 4               # OPTIONAL, if set check for SPAM mail 
-	reply_address: 1               # OPTIONAL, if set then fill in ticket CC field
+	reply_all    : 1               # OPTIONAL, if set then fill in ticket CC field
 	umask        : 022             # OPTIONAL, if set then use this umask for creation of the attachments
 	mailto_link  : 1               # OPTIONAL, if set then [mailto:<>] in description 
 	mailto_cc    : basv@sara.nl    # OPTIONAL, use this address as CC in mailto line
@@ -415,9 +415,9 @@ class TicketEmailParser(object):
 			tkt['id'] = ticket_id
 
 		if self.VERSION  == 0.9:
-			self.attachments(m, tkt, True)
+			str = self.attachments(m, tkt, True)
 		else:
-			self.attachments(m, tkt)
+			str = self.attachments(m, tkt)
 
 		if self.notification:
 			self.notify(tkt, False, when)
@@ -491,10 +491,10 @@ class TicketEmailParser(object):
 			tkt['description'] = u'\r\n%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
 
-		n =  self.attachments(msg, tkt)
-		if n:
+		str =  self.attachments(msg, tkt)
+		if str:
 			changed = True
-			comment = '%s\nThis message has %d attachment(s)\n' %(comment, n)
+			comment = '%s\n%s\n' %(comment, str)
 
 		if changed:
 			if self.VERSION  == 0.8:
@@ -521,6 +521,7 @@ class TicketEmailParser(object):
 
 		self.db = self.env.get_db_cnx()
  		self.get_author_emailaddrs(m)
+
  		if self.blacklisted_from():
  			if self.DEBUG > 1 :
  				print 'Message rejected : From: in blacklist'
@@ -691,6 +692,12 @@ class TicketEmailParser(object):
 		count = 0
 		first = 0 
 		number = 0 
+
+		# Get Maxium attachment size
+		#
+		max_size = int(self.get_config('attachment', 'max_size'))
+		message = ''
+
 		for part in message.walk():
 			if part.get_content_maintype() == 'multipart':		# multipart/* is just a container
 				continue
@@ -701,7 +708,6 @@ class TicketEmailParser(object):
 					continue
 
 			filename = part.get_filename() 
-			count = count + 1
 			if not filename:
 				number = number + 1
 				filename = 'part%04d' % number
@@ -750,6 +756,17 @@ class TicketEmailParser(object):
 			stats = os.lstat(path) 
 			filesize = stats[stat.ST_SIZE]
 
+			# Check if the attachment size is allowed
+			#
+			if file_size > max_size:
+				message = '%s\n%sFile %s is larger then allowed attachment size (%d > %d)' 
+					%(message, filename, file_size, max_size)
+
+				os.unlink(path)
+				continue
+			else:
+				count = count + 1
+					
 			# Insert the attachment it differs for the different TRAC versions
 			# 
 			if self.VERSION == 0.8:
@@ -778,10 +795,10 @@ class TicketEmailParser(object):
 					att.author = self.author
 					att.description = self.email_to_unicode('Added by email2trac')
 
-				try:
-					att.insert(url_filename, fd, filesize)
-				except  util.TracError, detail:
-					a =  1
+				att.insert(url_filename, fd, filesize)
+
+				#except  util.TracError, detail:
+				#	print detail
 
 				fd.close()
 
@@ -791,7 +808,8 @@ class TicketEmailParser(object):
 
 		# Return how many attachments
 		#
-		return count
+		message = 'This message has %d attachment(s)\n%s' %(count, message)
+		return message
 
 
 def mkdir_p(dir, mode):

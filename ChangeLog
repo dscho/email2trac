@@ -1,4 +1,4 @@
-2007-03-09 
+2007-XXXXX
 
 	* Added some primarily check to catch an error when attachment size
 	  is too large, bug #1153
@@ -12,11 +12,12 @@
 	* Fixed a dutch spelling, #1295
 	  Author: Rainer Sokoll (r.sokoll at intershop dot de)
 
-
-2007-03-08 Michel Jouvin <jouvin@lal.in2p3.fr>
         * email2trac.py : blacklist (don't create ticket) mail from
 	  MAILER-DAEMON to avoid loops
+	  Author: Michel Jouvin <jouvin at lal dot in2p3 dot fr>
+
 	* msg.bad.txt : add an example of message from MAILER-DAEMON
+	  Author: Michel Jouvin <jouvin at lal dot in2p3 dot fr>
 
 2006-12-08
 	* email2trac.py:
