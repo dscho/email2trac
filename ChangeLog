@@ -1,6 +1,6 @@
 2007-XXXXX
 
-	* Added some primarily check to catch an error when attachment size
+	* Added check to catch an error when attachment size
 	  is too large, bug #1153
 	  Author: Bas van der Vlies
 

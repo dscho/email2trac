@@ -553,19 +553,30 @@ class TicketEmailParser(object):
 		return ('\n'.join(body))
 
 
-	def wrap_text(str='', replace_whitespace = False):
+	def wrap_text(self, text, replace_whitespace = False):
 		"""
 		Will break a lines longer then given length into several small lines of size 
 		given length
 		"""
 		import textwrap
+
 		LINESEPARATOR = '\n'
 		reformat = ''
 
-		for s in str.split(LINESEPARATOR):
-			reformat = '%s%s' %(reformat, LINESEPARATOR.join(textwrap.fill(s,self.USE_TEXTWRAP)))
+		for s in text.split(LINESEPARATOR):
+			tmp = textwrap.fill(s,self.USE_TEXTWRAP)
+			if tmp:
+				reformat = '%s\n%s' %(reformat,tmp)
+			else:
+				reformat = '%s\n' %reformat
 
 		return reformat
+
+		# Python2.4 and higher
+		#
+		#return LINESEPARATOR.join(textwrap.fill(s,width) for s in str.split(LINESEPARATOR))
+		#
+
 
 	def get_body_text(self, msg):
 		"""
@@ -588,7 +599,7 @@ class TicketEmailParser(object):
 				body_text = part.get_payload(decode=1)
 				if not body_text:			
 					body_text = part.get_payload(decode=0)
-		
+	
 				if self.STRIP_SIGNATURE:
 					body_text = self.strip_signature(body_text)
 
