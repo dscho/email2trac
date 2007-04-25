@@ -4,7 +4,7 @@ Version: 0.9.5
 Release: 1
 License: GPL
 Group: Applications/Internet
-URL: http://www.trac-hacks.org/wiki/EmailtoTracScript
+URL: https://subtrac.sara.nl/oss/email2trac
 
 Packager: Jon Topper <jon@topper.me.uk>
 
