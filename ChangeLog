@@ -1,4 +1,4 @@
-2007-XXXXX
+2007-04-27
 
 	* Added check to catch an error when attachment size
 	  is too large, bug #1153
