@@ -377,7 +377,7 @@ class TicketEmailParser(object):
 		except OSError:
 			pass
 
-	def keywords_to_dict(self, str)
+	def keywords_to_dict(self, str):
 		"""
 		Transfrom a str of the form [<key>=<value>]+ to dict[<key>] = <value>
 		""" 
@@ -390,11 +390,11 @@ class TicketEmailParser(object):
 			try: 
 				index, value = string.split(field,'=')
 				if value:
-					result[index] = value
+					result[index.lower()] = value
 			except ValueError:
 				pass
 
-		return results
+		return result
 				
 	def ticket_update(self, m):
 		"""
@@ -420,15 +420,22 @@ class TicketEmailParser(object):
 
 		# Must we update ticket fields
 		#
-		if result.group('ticketnr_keywords'):
+		try:
 			nr, keywords = string.split(result.group('ticketnr_fields'), '?')
 			tkt_fields = self.keywords_to_dict(keywords)
-		else:
-			nr = result.group('ticketnr') 
 
-		# Strip '#' and ':' from ticket_id
-		#
-		ticket_id = int(nr[1:-1])
+			# Strip '#' 
+			#
+			ticket_id = int(nr[1:])
+
+		except AttributeError:
+			tkt_fields = dict()
+
+			nr = result.group('ticketnr') 
+			# Strip '#' and ':'
+			#
+			ticket_id = int(nr[1:-1])
+
 
 		# Get current time
 		#
@@ -442,6 +449,15 @@ class TicketEmailParser(object):
 				tkt = Ticket(self.env, ticket_id, self.db)
 			except util.TracError, detail:
 				return False
+
+			# Must we update some ticket fields
+			#
+			#for entry in tkt.fields:
+			#	print entry['name']
+			#	print entry
+			#sys.exit(1)
+			for key,value in tkt_fields.items():
+				tkt[key] = value
 
 			tkt.save_changes(self.author, body_text, when)
 			tkt['id'] = ticket_id
