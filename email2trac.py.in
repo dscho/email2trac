@@ -430,8 +430,8 @@ class TicketEmailParser(object):
 
 		except AttributeError:
 			tkt_fields = dict()
-
 			nr = result.group('ticketnr') 
+
 			# Strip '#' and ':'
 			#
 			ticket_id = int(nr[1:-1])
@@ -452,10 +452,15 @@ class TicketEmailParser(object):
 
 			# Must we update some ticket fields
 			#
-			#for entry in tkt.fields:
-			#	print entry['name']
-			#	print entry
-			#sys.exit(1)
+			for entry in tkt.fields:
+				print entry['name']
+				try:
+					print entry['options']
+				except KeyError:
+					print entry
+					pass
+
+			sys.exit(1)
 			for key,value in tkt_fields.items():
 				tkt[key] = value
 
