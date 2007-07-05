@@ -9,14 +9,15 @@ with the following extensions:
   - HTML messages
   - Attachments
   - Use commandline options
-  - Use config file to change the behaviour of the email2trac.py program
-  - Some unicode support for special characters in the headers of an email
+  - Config file is used to control the behaviour of the email2trac software 
+  - Unicode support for special characters in the headers of an email
     message
+  - Ticket updates via mail
+
 
 See INSTALL for the how to setup the utilities
 
 Comments or Suggestions mail them to: 
-Bas van der Vlies <basv@sara.nl>
-Walter de Jong <walter@sara.nl>
+	email2trac <email2trac@sara.nl>
 
 http://www.sara.nl for more info about SARA.
