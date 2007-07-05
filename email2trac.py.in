@@ -377,6 +377,25 @@ class TicketEmailParser(object):
 		except OSError:
 			pass
 
+	def keywords_to_dict(self, str)
+		"""
+		Transfrom a str of the form [<key>=<value>]+ to dict[<key>] = <value>
+		""" 
+		# Skip the last ':' character
+		#
+		fields = string.split(str[:-1], ',')
+
+		result = dict()
+		for field in fields:
+			try: 
+				index, value = string.split(field,'=')
+				if value:
+					result[index] = value
+			except ValueError:
+				pass
+
+		return results
+				
 	def ticket_update(self, m):
 		"""
 		If the current email is a reply to an existing ticket, this function
@@ -390,6 +409,7 @@ class TicketEmailParser(object):
 
 		TICKET_RE = re.compile(r"""
 					(?P<ticketnr>[#][0-9]+:)
+					|(?P<ticketnr_fields>[#][\d]+\?.*:)
 					""", re.VERBOSE)
 
 		result =  TICKET_RE.search(subject)
@@ -398,10 +418,17 @@ class TicketEmailParser(object):
 
 		body_text = self.get_body_text(m)
 
+		# Must we update ticket fields
+		#
+		if result.group('ticketnr_keywords'):
+			nr, keywords = string.split(result.group('ticketnr_fields'), '?')
+			tkt_fields = self.keywords_to_dict(keywords)
+		else:
+			nr = result.group('ticketnr') 
+
 		# Strip '#' and ':' from ticket_id
 		#
-		ticket_id = result.group('ticketnr')
-		ticket_id = int(ticket_id[1:-1])
+		ticket_id = int(nr[1:-1])
 
 		# Get current time
 		#
