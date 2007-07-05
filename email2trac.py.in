@@ -377,7 +377,7 @@ class TicketEmailParser(object):
 		except OSError:
 			pass
 
-	def keywords_to_dict(self, str):
+	def str_to_dict(self, str):
 		"""
 		Transfrom a str of the form [<key>=<value>]+ to dict[<key>] = <value>
 		""" 
@@ -395,6 +395,15 @@ class TicketEmailParser(object):
 				pass
 
 		return result
+
+	def update_ticket_fields(self, system_fields, user_fields): 
+		for field in system_fields:
+			print field['name']
+			try:
+				print field['options']
+			except KeyError:
+				print field
+				pass
 				
 	def ticket_update(self, m):
 		"""
@@ -420,20 +429,19 @@ class TicketEmailParser(object):
 
 		# Must we update ticket fields
 		#
+		update_tkt_fields = dict()
 		try:
 			nr, keywords = string.split(result.group('ticketnr_fields'), '?')
-			tkt_fields = self.keywords_to_dict(keywords)
+			update_tkt_fields = self.str_to_dict(keywords)
 
 			# Strip '#' 
 			#
 			ticket_id = int(nr[1:])
 
 		except AttributeError:
-			tkt_fields = dict()
-			nr = result.group('ticketnr') 
-
 			# Strip '#' and ':'
 			#
+			nr = result.group('ticketnr') 
 			ticket_id = int(nr[1:-1])
 
 
@@ -452,15 +460,9 @@ class TicketEmailParser(object):
 
 			# Must we update some ticket fields
 			#
-			for entry in tkt.fields:
-				print entry['name']
-				try:
-					print entry['options']
-				except KeyError:
-					print entry
-					pass
-
+			self.update_ticket_fields(tkt.fields, update_tkt_fields)
 			sys.exit(1)
+
 			for key,value in tkt_fields.items():
 				tkt[key] = value
 
