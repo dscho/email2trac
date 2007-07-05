@@ -186,6 +186,10 @@ class TicketEmailParser(object):
 		else:
 			self.USE_TEXTWRAP = 0
 
+		if parameters.has_key('python_egg_cache'):
+			self.python_egg_cache = str(parameters['python_egg_cache'])
+			os.environ['PYTHON_EGG_CACHE'] = self.python_egg_cache
+
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
 	def spam(self, message):

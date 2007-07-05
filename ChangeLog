@@ -1,3 +1,12 @@
+2007-XXXX
+
+	* Implemented python_egg_cache environment variable. Some trac
+	  installations may depend on it, closes ticket #10, eg:
+	  	python_egg_cache : /var/cache/eggcache
+
+	  Reported By: Anonymous
+	  Fixed by   : Bas van der Vlies
+
 2007-04-27
 
 	* Added check to catch an error when attachment size
