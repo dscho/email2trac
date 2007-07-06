@@ -12,12 +12,12 @@
 
 	  	- Sets the owner of the ticket to: bas
 		- Sets the priority of the ticket to: minor
-	  
-	  If a ticket field have options specified like eg the priority field.
-	  It will check if the user has specified a valid value else the
-	  ticket field will not be updated.
+	 
+	  For some ticket fields there are only a limited number of allowed
+	  values. The supplied value will be checked against this list. If it
+	  is not vaild value the update will be cancelled.
 
-	  Requested by: trac at yadan dotnet, see ticket #7
+	  Requested by: trac at yadan dotnet, Jan Parchmann, see ticket #7
 	  Implemented by: basv@sara.nl 
 
 
