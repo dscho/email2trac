@@ -7,6 +7,20 @@
 	  Reported By: Anonymous
 	  Fixed by   : Bas van der Vlies
 
+	* Implemented update ticket fields via email subject line, eg:
+	  	Re: [email2trac] #7?owner=bas,priority=minor: Error in parsing
+
+	  	- Sets the owner of the ticket to: bas
+		- Sets the priority of the ticket to: minor
+	  
+	  If a ticket field have options specified like eg the priority field.
+	  It will check if the user has specified a valid value else the
+	  ticket field will not be updated.
+
+	  Requested by: trac at yadan dotnet, see ticket #7
+	  Implemented by: basv@sara.nl 
+
+
 2007-04-27
 
 	* Added check to catch an error when attachment size
