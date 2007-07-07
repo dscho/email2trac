@@ -24,6 +24,11 @@
 	  specific code. 
 	  Fixed by: basv@sara.nl 
 
+	* Added a new config parameter: tmpdir: /var/tmp, default is '/tmp'
+	  All functions now use this new parameter and use OS independent 
+	  path functions. 
+	  Implemented by: basv@sara.nl 
+
 2007-04-27
 
 	* Added check to catch an error when attachment size

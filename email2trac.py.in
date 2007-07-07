@@ -187,6 +187,12 @@ class TicketEmailParser(object):
 			self.python_egg_cache = str(parameters['python_egg_cache'])
 			os.environ['PYTHON_EGG_CACHE'] = self.python_egg_cache
 
+		# Use OS independend functions
+		#
+		self.TMPDIR = os.path.normcase('/tmp')
+		if parameters.has_key('tmpdir'):
+			self.TMPDIR = os.path.normcase(str(parameters['tmpdir']))
+
 	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 	# Note if Spam_level then '*' are included
 	def spam(self, message):
@@ -263,7 +269,9 @@ class TicketEmailParser(object):
 			else:
 				print 'TD: this part is not multipart'
 
-			part_file = '/var/tmp/part%d' % n
+			file = 'part%d' %n
+			part_file = os.path.join(self.TMPDIR, file)
+			#part_file = '/var/tmp/part%d' % n
 			print 'TD: writing part%d (%s)' % (n,part_file)
 			fx = open(part_file, 'wb')
 			text = part.get_payload(decode=1)
@@ -361,7 +369,9 @@ class TicketEmailParser(object):
 			import tempfile
 			msg_file = tempfile.mktemp('.email2trac')
 		else:
-			msg_file = '/var/tmp/msg.txt' 
+			#msg_file = '/var/tmp/msg.txt' 
+			msg_file = os.path.join(self.TMPDIR, 'msg.txt')
+
 		print 'TD: saving email to %s' % msg_file
 		fx = open(msg_file, 'wb')
 		fx.write('%s' % message)
@@ -835,8 +845,7 @@ class TicketEmailParser(object):
 			#
 			# Must be tuneables HvB
 			#
-			dir = '/tmp'
-			path, fd =  util.create_unique_file(os.path.join(dir, url_filename))
+			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, url_filename))
 			text = part.get_payload(decode=1)
 			if not text:
 				text = '(None)'
