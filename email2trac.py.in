@@ -57,7 +57,7 @@ How to use
 	mailto_link  : 1               # OPTIONAL, if set then [mailto:<>] in description 
 	mailto_cc    : basv@sara.nl    # OPTIONAL, use this address as CC in mailto line
 	ticket_update: 1               # OPTIONAL, if set then check if this is an update for a ticket
-	trac_version : 0.8             # OPTIONAL, default is 0.10
+	trac_version : 0.9             # OPTIONAL, default is 0.10
 
 	[jouvin]                       # OPTIONAL project declaration, if set both fields necessary
 	project      : /data/trac/jouvin # use -p|--project jouvin.  
@@ -116,10 +116,7 @@ class TicketEmailParser(object):
 		self.email_field = None
 
 		self.VERSION = version
-		if self.VERSION == 0.8:
-			self.get_config = self.env.get_config
-		else:
-			self.get_config = self.env.config.get
+		self.get_config = self.env.config.get
 
 		if parameters.has_key('umask'):
 			os.umask(int(parameters['umask'], 8))
@@ -316,10 +313,7 @@ class TicketEmailParser(object):
 
 		# Look for email address in registered trac users
 		#
-		if self.VERSION == 0.8:
-			users = []
-		else:
-			users = [ u for (u, n, e) in self.env.get_known_users(self.db)
+		users = [ u for (u, n, e) in self.env.get_known_users(self.db)
 				if e == self.email_addr ]
 
 		if len(users) == 1:
@@ -469,8 +463,6 @@ class TicketEmailParser(object):
 		if not result:
 			return False
 
-		body_text = self.get_body_text(m)
-
 		# Must we update ticket fields
 		#
 		update_tkt_fields = dict()
@@ -493,21 +485,20 @@ class TicketEmailParser(object):
 		#
 		when = int(time.time())
 
-		if self.VERSION  == 0.8:
-			tkt = Ticket(self.db, ticket_id)
-			tkt.save_changes(self.db, self.author, body_text, when)
-		else:
-			try:
-				tkt = Ticket(self.env, ticket_id, self.db)
-			except util.TracError, detail:
-				return False
+		try:
+			tkt = Ticket(self.env, ticket_id, self.db)
+		except util.TracError, detail:
+			return False
 
-			# Must we update some ticket fields properties
-			#
+		# Must we update some ticket fields properties
+		#
+		if update_tkt_fields:
 			self.update_ticket_fields(tkt, update_tkt_fields)
 
-			tkt.save_changes(self.author, body_text, when)
-			tkt['id'] = ticket_id
+		body_text = self.get_body_text(m)
+
+		tkt.save_changes(self.author, body_text, when)
+		tkt['id'] = ticket_id
 
 		if self.VERSION  == 0.9:
 			str = self.attachments(m, tkt, True)
@@ -568,11 +559,9 @@ class TicketEmailParser(object):
 			%(head, body_text)
 
 		when = int(time.time())
-		if self.VERSION == 0.8:
-			ticket_id = tkt.insert(self.db)
-		else:
-			ticket_id = tkt.insert()
-			tkt['id'] = ticket_id
+
+		ticket_id = tkt.insert()
+		tkt['id'] = ticket_id
 
 		changed = False
 		comment = ''
@@ -592,12 +581,8 @@ class TicketEmailParser(object):
 			comment = '%s\n%s\n' %(comment, str)
 
 		if changed:
-			if self.VERSION  == 0.8:
-				tkt.save_changes(self.db, self.author, comment)
-			else:
-				tkt.save_changes(self.author, comment)
-
-		#print tkt.get_changelog(self.db, when)
+			tkt.save_changes(self.author, comment)
+			#print tkt.get_changelog(self.db, when)
 
 		if self.notification:
 			self.notify(tkt, True)
@@ -847,14 +832,10 @@ class TicketEmailParser(object):
 					pass
 
 			url_filename = urllib.quote(filename)
-			if self.VERSION == 0.8:
-				dir = os.path.join(self.env.get_attachments_dir(), 'ticket', 
-				                    	urllib.quote(str(ticket['id'])))
-				if not os.path.exists(dir):
-					mkdir_p(dir, 0755)
-			else:
-				dir = '/tmp'
-
+			#
+			# Must be tuneables HvB
+			#
+			dir = '/tmp'
 			path, fd =  util.create_unique_file(os.path.join(dir, url_filename))
 			text = part.get_payload(decode=1)
 			if not text:
@@ -878,43 +859,25 @@ class TicketEmailParser(object):
 			else:
 				count = count + 1
 					
-			# Insert the attachment it differs for the different TRAC versions
+			# Insert the attachment
 			# 
-			if self.VERSION == 0.8:
-				cursor = self.db.cursor()
-				try:
-					cursor.execute('INSERT INTO attachment VALUES("%s","%s","%s",%d,%d,"%s","%s","%s")' 
-						%('ticket', urllib.quote(str(ticket['id'])), filename + '?format=raw', file_size, 
-						int(time.time()),'', self.author, 'e-mail') ) 
+			fd = open(path)
+			att = attachment.Attachment(self.env, 'ticket', ticket['id'])
 
-				# Attachment is already known
-				#
-				except sqlite.IntegrityError:	
-					#self.db.close()
-					return count
+			# This will break the ticket_update system, the body_text is vaporized
+			# ;-(
+			#
+			if not update:
+				att.author = self.author
+				att.description = self.email_to_unicode('Added by email2trac')
 
-				self.db.commit()
-
-			else:
-				fd = open(path)
-				att = attachment.Attachment(self.env, 'ticket', ticket['id'])
-
-				# This will break the ticket_update system, the body_text is vaporized
-				# ;-(
-				#
-				if not update:
-					att.author = self.author
-					att.description = self.email_to_unicode('Added by email2trac')
-
-				att.insert(url_filename, fd, file_size)
-
-				#except  util.TracError, detail:
-				#	print detail
-
-				fd.close()
+			att.insert(url_filename, fd, file_size)
+			#except  util.TracError, detail:
+			#	print detail
 
 			# Remove the created temporary filename
 			#
+			fd.close()
 			os.unlink(path)
 
 		# Return how many attachments
@@ -1019,14 +982,7 @@ if __name__ == '__main__':
 	#print settings
 	
 	try:
-		if version == 0.8:
-			from trac.Environment import Environment
-			from trac.Ticket import Ticket
-			from trac.Notify import TicketNotifyEmail
-			from trac.Href import Href
-			from trac import util
-			import sqlite
-		elif version == 0.9:
+		if version == 0.9:
 			from trac import attachment 
 			from trac.env import Environment
 			from trac.ticket import Ticket

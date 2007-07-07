@@ -20,6 +20,9 @@
 	  Requested by: trac at yadan dotnet, Jan Parchmann, see ticket #7
 	  Implemented by: basv@sara.nl 
 
+	* Dropped support for version trac version 0.8. Removed all 0.8
+	  specific code. 
+	  Fixed by: basv@sara.nl 
 
 2007-04-27
 
