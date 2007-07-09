@@ -301,13 +301,14 @@ class TicketEmailParser(object):
 		"""
 		Select default owner for ticket component
 		"""
+		#### return self.get_config('ticket', 'default_component') 
 		cursor = self.db.cursor()
 		sql = "SELECT owner FROM component WHERE name='%s'" % ticket['component']
 		cursor.execute(sql)
 		try:
 			ticket['owner'] = cursor.fetchone()[0]
 		except TypeError, detail:
-			ticket['owner'] = "UNKNOWN"
+			ticket['owner'] = None
 
 	def get_author_emailaddrs(self, message):
 		"""
@@ -552,9 +553,10 @@ class TicketEmailParser(object):
 			  print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
 			return False	
 
-		# Set default owner for component
+		# Set default owner for component, HvB
+		# Is not necessary, because if component is set. The trac code
+		# will find the owner: self.set_owner(tkt)
 		#
-		self.set_owner(tkt)
 		self.set_reply_fields(tkt, msg)
 
 		# produce e-mail like header

@@ -32,6 +32,10 @@
 	* fixed and a creating directory problem email2trac.spec file
 	  Fixed by: artrus at netzero dot net
 
+	* set_owner function is obsolete. When component is set the trac code
+	  will set the owner to the component owner. 
+	  Fixed by: basv@sara.nl 
+
 2007-04-27
 
 	* Added check to catch an error when attachment size
