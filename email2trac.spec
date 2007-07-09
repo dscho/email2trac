@@ -29,7 +29,7 @@ rm -rf $RPM_BUILD_ROOT
 %configure
 
 %build
-mkdir $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT
 make
 
 %install
