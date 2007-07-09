@@ -29,6 +29,9 @@
 	  path functions. 
 	  Implemented by: basv@sara.nl 
 
+	* fixed and a creating directory problem email2trac.spec file
+	  Fixed by: artrus at netzero dot net
+
 2007-04-27
 
 	* Added check to catch an error when attachment size
