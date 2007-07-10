@@ -507,6 +507,13 @@ class TicketEmailParser(object):
 			self.update_ticket_fields(tkt, update_tkt_fields)
 
 		body_text = self.get_body_text(m)
+		if self.EMAIL_HEADER:
+			head = self.email_header_txt(m)
+			body_text = u"\r\n%s \r\n%s" %(head, body_text)
+
+		#if self.MAILTO:
+		#	mailto = self.html_mailto_link(tkt['summary'], ticket_id, body_text)
+		#	body_text = u"\r\n%s \r\n%s" %(mailto, body_text)
 
 		tkt.save_changes(self.author, body_text, when)
 		tkt['id'] = ticket_id
