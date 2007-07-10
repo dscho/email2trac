@@ -5,5 +5,8 @@ The email2trac package is written by:
 The 0.9 port and regular patch contributor:
   Michel Jouvin <jouvin@lal.in2p3.fr>
 
+RPM spec file:
+ Jon Topper <jon at topper dot me dot uk>
+
 Initial setup and ideas from:
   Daniel Lundin <daniel@edgewall.com>
