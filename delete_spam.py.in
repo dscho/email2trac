@@ -42,7 +42,7 @@ import getopt
 import shutil
 import ConfigParser
 
-trac_default_version = 0.9
+trac_default_version = 0.10
 
 def ReadConfig(file, name):
 	"""
@@ -204,21 +204,15 @@ if __name__ == '__main__':
 	else:
 		version = trac_default_version
 
-	if version == 0.8:
-		from trac.Environment import Environment
-		from trac import util
-	else:
-		from trac.env import Environment
-		from trac.ticket import Ticket
-		from trac import util
+	from trac.env import Environment
+	from trac.ticket import Ticket
+	from trac import util
 
 	if version == 0.10:
 		new_delete_spam(settings['project'], int(settings['debug']))
 		#new_delete_spam(settings['project'], 1)
 		#old_delete_spam(settings['project'], 0)
 	elif version == 0.9:
-		old_delete_spam(settings['project'], int(settings['debug']))
-	elif version == 0.8:
 		old_delete_spam(settings['project'], int(settings['debug']))
 
 	print 'Spam is deleted succesfully..' 
