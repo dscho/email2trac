@@ -91,11 +91,32 @@ import mimetypes
 import syslog
 import traceback
 
+from datetime import tzinfo, timedelta, datetime
+
 
 # Some global variables
 #
 trac_default_version = 0.10
 m = None 
+
+
+
+# A UTC class needed for trac version 0.11, added by
+# tbaschak at ktc dot mb dot ca
+#
+class UTC(tzinfo):
+	"""UTC"""
+	ZERO = timedelta(0)
+	HOUR = timedelta(hours=1) 
+	
+	def utcoffset(self, dt):
+		return self.ZERO 
+		
+	def tzname(self, dt):
+		return "UTC" 
+		
+	def dst(self, dt):
+		return self.ZERO
 
 
 class TicketEmailParser(object):
@@ -465,6 +486,9 @@ class TicketEmailParser(object):
 		else:
 			subject  = self.email_to_unicode(m['Subject'])
 
+		# [hic] #1529: Re: LRZ
+		# [hic] #1529?owner=bas,priority=medium: Re: LRZ
+		#
 		TICKET_RE = re.compile(r"""
 					(?P<ticketnr>[#][0-9]+:)
 					|(?P<ticketnr_fields>[#][\d]+\?.*:)
@@ -577,7 +601,9 @@ class TicketEmailParser(object):
 		tkt['description'] = '\r\n%s\r\n%s' \
 			%(head, body_text)
 
-		when = int(time.time())
+		#when = int(time.time())
+		utc = UTC()
+		when = datetime.now(utc)
 
 		ticket_id = tkt.insert()
 		tkt['id'] = ticket_id
@@ -1018,6 +1044,18 @@ if __name__ == '__main__':
 			#
 			# see http://projects.edgewall.com/trac/changeset/2799
 			from trac.ticket.notification import TicketNotifyEmail
+		elif version == 0.11:
+			from trac import attachment 
+			from trac.env import Environment
+			from trac.ticket import Ticket
+			from trac.web.href import Href
+			from trac import util
+			#
+			# return  util.text.to_unicode(str)
+			#
+			# see http://projects.edgewall.com/trac/changeset/2799
+			from trac.ticket.notification import TicketNotifyEmail
+
 	
 		env = Environment(settings['project'], create=0)
 		tktparser = TicketEmailParser(env, settings, version)

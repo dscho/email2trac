@@ -40,6 +40,10 @@
 	  Requested by: Ramon Bastiaans 
 	  Fixed by    : Bas van der Vlies <basv@sara.nl>
 
+	* A date patch so it works with trac version 0.11 for ticket updates. 
+	  Also applied for other trac versions.
+	  Thanks to: tbaschak at ktc dot mb dot ca
+
 2007-04-27
 
 	* Added check to catch an error when attachment size
