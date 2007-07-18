@@ -134,7 +134,7 @@ class TicketEmailParser(object):
 		#
 		self.author = None
 		self.email_addr = None
-		self.email_field = None
+		self.email_from = None
 
 		self.VERSION = version
 		self.get_config = self.env.config.get
@@ -347,16 +347,16 @@ class TicketEmailParser(object):
 				if e == self.email_addr ]
 
 		if len(users) == 1:
-			self.email_field = users[0]
+			self.email_from = users[0]
 		else:
-			self.email_field =  self.email_to_unicode(message['from'])
-			#self.email_field =  self.email_to_unicode(self.email_addr)
+			self.email_from =  self.email_to_unicode(message['from'])
+			#self.email_from =  self.email_to_unicode(self.email_addr)
 
 	def set_reply_fields(self, ticket, message):
 		"""
 		Set all the right fields for a new ticket
 		"""
-		ticket['reporter'] = self.email_field
+		ticket['reporter'] = self.email_from
 
 		# Put all CC-addresses in ticket CC field
 		#
