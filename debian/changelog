@@ -1,3 +1,9 @@
+email2trac (0.10.0-2) stable; urgency=low
+
+  *  Added extra info to syslog when exception occurs
+
+ -- root <root@rc.sara.nl>  Fri,  3 Aug 2007 09:45:26 +0200
+
 email2trac (0.10.0-1) stable; urgency=low
 
   * New release, see ChangeLog

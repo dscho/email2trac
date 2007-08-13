@@ -606,6 +606,15 @@ class TicketEmailParser(object):
 		when = datetime.now(utc)
 
 		ticket_id = tkt.insert()
+		#try:
+		#	ticket_id = tkt.insert()
+		#except OperationalError, detail:
+		#	syslog.openlog('email2trac', syslog.LOG_NOWAIT)
+		#	syslog.syslog('catch tkt insert problem %s' %detail)
+		#	syslog.closelog()
+		#
+		#	ticket_id = tkt.insert()
+			
 		tkt['id'] = ticket_id
 
 		changed = False
@@ -1067,9 +1076,11 @@ if __name__ == '__main__':
 	except Exception, error:
 		if ENABLE_SYSLOG:
 			syslog.openlog('email2trac', syslog.LOG_NOWAIT)
+
 			etype, evalue, etb = sys.exc_info()
 			for e in traceback.format_exception(etype, evalue, etb):
 				syslog.syslog(e)
+
 			syslog.closelog()
 		else:
 			traceback.print_exc()
