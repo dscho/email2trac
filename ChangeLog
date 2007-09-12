@@ -1,5 +1,8 @@
 2007-XX-XX
-	* 
+	* Added version check and exit if we do not support the trac version
+	  closes bug #23
+	  Reported By: Marc Zahnlecker m.zahnlecker at lxbyte dot de
+	  Fixed By   : Bas van der Vlies
 
 2007-07-18
 

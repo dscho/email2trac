@@ -96,7 +96,7 @@ from datetime import tzinfo, timedelta, datetime
 
 # Some global variables
 #
-trac_default_version = 0.10
+trac_default_version = '0.10'
 m = None 
 
 
@@ -1024,25 +1024,23 @@ if __name__ == '__main__':
 		settings['component'] = component
 	
 	if settings.has_key('trac_version'):
-		version = float(settings['trac_version'])
+		version = settings['trac_version']
 	else:
 		version = trac_default_version
 
-	if settings.has_key('enable_syslog'):
-		ENABLE_SYSLOG =  float(settings['enable_syslog']) 
-			
+
 	#debug HvB
 	#print settings
-	
+
 	try:
-		if version == 0.9:
+		if version == '0.9':
 			from trac import attachment 
 			from trac.env import Environment
 			from trac.ticket import Ticket
 			from trac.web.href import Href
 			from trac import util
 			from trac.Notify import TicketNotifyEmail
-		elif version == 0.10:
+		elif version == '0.10':
 			from trac import attachment 
 			from trac.env import Environment
 			from trac.ticket import Ticket
@@ -1053,7 +1051,7 @@ if __name__ == '__main__':
 			#
 			# see http://projects.edgewall.com/trac/changeset/2799
 			from trac.ticket.notification import TicketNotifyEmail
-		elif version == 0.11:
+		elif version == '0.11':
 			from trac import attachment 
 			from trac.env import Environment
 			from trac.ticket import Ticket
@@ -1064,10 +1062,15 @@ if __name__ == '__main__':
 			#
 			# see http://projects.edgewall.com/trac/changeset/2799
 			from trac.ticket.notification import TicketNotifyEmail
+		else:
+			print 'TRAC version %s is not supported' %version
+			sys.exit(1)
+			
+		if settings.has_key('enable_syslog'):
+			ENABLE_SYSLOG =  float(settings['enable_syslog']) 
 
-	
 		env = Environment(settings['project'], create=0)
-		tktparser = TicketEmailParser(env, settings, version)
+		tktparser = TicketEmailParser(env, settings, float(version))
 		tktparser.parse(sys.stdin)
 
 	# Catch all errors ans log to SYSLOG if we have enabled this
