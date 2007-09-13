@@ -4,6 +4,11 @@
 	  Reported By: Marc Zahnlecker m.zahnlecker at lxbyte dot de
 	  Fixed By   : Bas van der Vlies
 
+	* Added check if syslog module is available. If it is not available
+          disable the syslog functionality.
+	  Author     : michael.th add gmx dot net 
+	  
+
 2007-07-18
 
 	* Implemented python_egg_cache environment variable. Some trac
