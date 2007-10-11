@@ -169,8 +169,10 @@ class TicketEmailParser(object):
 		else:
 			self.SPAM_LEVEL = 0
 
-		if parameters.has_key('email_comment'):
-			self.comment = str(parameters['email_comment'])
+		if parameters.has_key('email_quote'):
+			self.EMAIL_QUOTE = str(parameters['email_quote'])
+		else:	
+			self.EMAIL_QUOTE = '> '
 
 		if parameters.has_key('email_header'):
 			self.EMAIL_HEADER = int(parameters['email_header'])
@@ -207,6 +209,11 @@ class TicketEmailParser(object):
 		else:
 			self.STRIP_SIGNATURE = 0
 
+		if parameters.has_key('strip_quotes'):
+			self.STRIP_QUOTES = int(parameters['strip_quotes'])
+		else:
+			self.STRIP_QUOTES = 0
+
 		if parameters.has_key('use_textwrap'):
 			self.USE_TEXTWRAP = int(parameters['use_textwrap'])
 		else:
@@ -222,9 +229,12 @@ class TicketEmailParser(object):
 		if parameters.has_key('tmpdir'):
 			self.TMPDIR = os.path.normcase(str(parameters['tmpdir']))
 
-	# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
-	# Note if Spam_level then '*' are included
+
 	def spam(self, message):
+		"""
+		# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
+		# Note if Spam_level then '*' are included
+		"""
 		if message.has_key('X-Spam-Score'):
 			spam_l = string.split(message['X-Spam-Score'])
 			number = spam_l[0].count('*')
@@ -232,10 +242,13 @@ class TicketEmailParser(object):
 			if number >= self.SPAM_LEVEL:
 				return 'Spam'
 
-		elif message.has_key('X-Virus-found'):			# treat virus mails as spam
+		# treat virus mails as spam
+		#
+		elif message.has_key('X-Virus-found'):			
 			return 'Spam'
 
 		return self.get_config('ticket', 'default_component') 
+
 
 	def blacklisted_from(self):
 		FROM_RE = re.compile(r"""
@@ -694,11 +707,23 @@ class TicketEmailParser(object):
 
 		return ('\n'.join(body))
 
+	def strip_quotes(self, text): 
+	"""
+	Strip quotes from message by Nicolas Mendoza
+	"""
+	body = [] 
+	for line in text.splitlines():
+		if line.startswith(self.EMAIL_QUOTE): 
+			continue
+	 	body.append(line)
+
+	return ('\n'.join(body))
+
 
 	def wrap_text(self, text, replace_whitespace = False):
 		"""
-		Will break a lines longer then given length into several small lines of size 
-		given length
+		Will break a lines longer then given length into several small 
+		lines of size given length
 		"""
 		import textwrap
 
@@ -744,6 +769,9 @@ class TicketEmailParser(object):
 	
 				if self.STRIP_SIGNATURE:
 					body_text = self.strip_signature(body_text)
+
+				if self.STRIP_QUOTES: 
+					body_text = self.strip_quotes(body_text)
 
 				if self.USE_TEXTWRAP:
 					body_text = self.wrap_text(body_text)
@@ -814,10 +842,6 @@ class TicketEmailParser(object):
 
 		except Exception, e:
 			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(tkt['id'], e)
-
-	def mail_line(self, str):
-		return '%s %s' % (self.comment, str)
-
 
 	def html_mailto_link(self, subject, id, body):
 		if not self.author:

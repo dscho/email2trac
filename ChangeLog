@@ -7,7 +7,11 @@
 	* Added check if syslog module is available. If it is not available
           disable the syslog functionality.
 	  Author     : michael.th add gmx dot net 
-	  
+
+	* Added strip_quotes function, default settings:
+		strip_quotes: <int> (default: 0) 
+		mail_quote: <quote chars> (default: "> ")
+	  Author     : nicolasm @ opera dot com
 
 2007-07-18
 
