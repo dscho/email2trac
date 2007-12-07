@@ -712,17 +712,16 @@ class TicketEmailParser(object):
 		return ('\n'.join(body))
 
 	def strip_quotes(self, text): 
-	"""
-	Strip quotes from message by Nicolas Mendoza
-	"""
-	body = [] 
-	for line in text.splitlines():
-		if line.startswith(self.EMAIL_QUOTE): 
-			continue
-	 	body.append(line)
+		"""
+		Strip quotes from message by Nicolas Mendoza
+		"""
+		body = [] 
+		for line in text.splitlines():
+			if line.startswith(self.EMAIL_QUOTE): 
+				continue
+			body.append(line)
 
-	return ('\n'.join(body))
-
+		return ('\n'.join(body))
 
 	def wrap_text(self, text, replace_whitespace = False):
 		"""
@@ -835,7 +834,7 @@ class TicketEmailParser(object):
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
-			if not self.version == 0.11:
+			if not self.VERSION == 0.11:
 				self.env.abs_href = Href(self.get_config('project', 'url'))
 				self.env.href = Href(self.get_config('project', 'url'))
 
