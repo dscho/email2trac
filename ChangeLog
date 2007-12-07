@@ -2,17 +2,28 @@
 	* Added version check and exit if we do not support the trac version
 	  closes bug #23
 	  Reported By: Marc Zahnlecker m.zahnlecker at lxbyte dot de
-	  Fixed By   : Bas van der Vlies
+
+	  Fixed By: Bas van der Vlies
 
 	* Added check if syslog module is available. If it is not available
           disable the syslog functionality.
-	  Author     : michael.th add gmx dot net 
+	  Author: michael.th add gmx dot net 
+
+	  Implemented by: Bas van der Vlies
 
 	* Added strip_quotes function, default settings:
 		strip_quotes: <int> (default: 0) 
 		mail_quote: <quote chars> (default: "> ")
-	  Author     : nicolasm @ opera dot com
+	  Author: nicolasm @ opera dot com
 
+	  Implemented by: Bas van der Vlies
+
+	* Added patch to make notify email work with trac 0.11 dev.
+	  Author: tbaschak add ktc dot mb dot ca	
+	  Author: andrei2102 add gmail dot com 
+
+	  Implemented by: Bas van der Vlies
+	   
 2007-07-18
 
 	* Implemented python_egg_cache environment variable. Some trac

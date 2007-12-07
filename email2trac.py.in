@@ -538,8 +538,11 @@ class TicketEmailParser(object):
 
 
 		# Get current time
+		# to do
+		#when = int(time.time())
 		#
-		when = int(time.time())
+		utc = UTC()
+		when = datetime.now(utc)
 
 		try:
 			tkt = Ticket(self.env, ticket_id, self.db)
@@ -623,6 +626,7 @@ class TicketEmailParser(object):
 			%(head, body_text)
 
 		#when = int(time.time())
+		#
 		utc = UTC()
 		when = datetime.now(utc)
 
@@ -831,8 +835,9 @@ class TicketEmailParser(object):
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
-			self.env.abs_href = Href(self.get_config('project', 'url'))
-			self.env.href = Href(self.get_config('project', 'url'))
+			if not self.version == 0.11:
+				self.env.abs_href = Href(self.get_config('project', 'url'))
+				self.env.href = Href(self.get_config('project', 'url'))
 
 			tn = TicketNotifyEmail(self.env)
 			if self.notify_template:
