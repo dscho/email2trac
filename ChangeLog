@@ -1,4 +1,4 @@
-2007-XX-XX
+2008-02-04
 	* Added version check and exit if we do not support the trac version
 	  closes bug #23
 	  Reported By: Marc Zahnlecker m.zahnlecker at lxbyte dot de
@@ -23,6 +23,39 @@
 	  Author: andrei2102 add gmail dot com 
 
 	  Implemented by: Bas van der Vlies
+
+	* greedy matching in Subject line, We must stop after the first ':'
+	  else we get wrong values for ticket fields when we update a ticket
+	  via mail, closes ticket #37
+	  Reported by: dmaziuk at bmrb dot wisc dot edu
+	  Fixed    by: Bas van der Vlies
+
+	* added IGNORECASE flag to regular expression for black list. This
+	  is a quick fix, still want to implement this as configuration 
+	  option, closed bug #39
+
+	  Reported By: jodok at lovelysystems dot com
+	  Fixed by   : Bas van der Vlies
+
+	* When a known user mails a ticket. We will set the Reporter to
+	  its login name, closes bug #33, #41
+
+	  Also add configuration option: 
+	  	ignore_trac_user_settings : 0 (default value)
+
+	  This option will skip the email address to trac user login name
+	  mapping.
+
+	  Reported by: anonymous
+	  Fixed by   : Bas van der Vlies
+
+	
+	* SPAM detection was only for new mails not for ticket updates,
+	  closed ticket #44
+
+	  Reported by: Bas van der Vlies
+	  Fixed by   : Bas van der Vlies
+	  
 	   
 2007-07-18
 

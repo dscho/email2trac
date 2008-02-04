@@ -229,31 +229,50 @@ class TicketEmailParser(object):
 		if parameters.has_key('tmpdir'):
 			self.TMPDIR = os.path.normcase(str(parameters['tmpdir']))
 
+		if parameters.has_key('ignore_trac_user_settings'):
+			self.IGNORE_TRAC_USER_SETTINGS = int(parameters['ignore_trac_user_settings'])
+		else:
+			self.IGNORE_TRAC_USER_SETTINGS = 0
 
 	def spam(self, message):
 		"""
 		# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
 		# Note if Spam_level then '*' are included
 		"""
+		spam = False
 		if message.has_key('X-Spam-Score'):
 			spam_l = string.split(message['X-Spam-Score'])
 			number = spam_l[0].count('*')
 
 			if number >= self.SPAM_LEVEL:
-				return 'Spam'
-
+				spam = True
+				
 		# treat virus mails as spam
 		#
 		elif message.has_key('X-Virus-found'):			
+			spam = True
+
+		# How to handle SPAM messages
+		#
+		if self.DROP_SPAM and spam:
+			if self.DEBUG > 2 : 
+				print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
+
+			return True	
+
+		elif spam:
+
 			return 'Spam'
 
-		return self.get_config('ticket', 'default_component') 
+		else:
+
+			return self.get_config('ticket', 'default_component') 
 
 
 	def blacklisted_from(self):
 		FROM_RE = re.compile(r"""
                     MAILER-DAEMON@
-                    """, re.VERBOSE)
+                    """, re.VERBOSE|re.IGNORECASE)
 		result =  FROM_RE.search(self.email_addr)
 		if result:
 			return True
@@ -352,26 +371,32 @@ class TicketEmailParser(object):
 		except TypeError, detail:
 			ticket['owner'] = None
 
-	def get_author_emailaddrs(self, message):
+	def get_sender_info(self, message):
 		"""
 		Get the default author name and email address from the message
 		"""
-		temp = self.email_to_unicode(message['from'])
-		#print temp.encode('utf-8')
 
-		self.author, self.email_addr  = email.Utils.parseaddr(temp)
-		#print self.author.encode('utf-8', 'replace')
+		self.email_from = self.email_to_unicode(message['from'])
+		self.author, self.email_addr  = email.Utils.parseaddr(self.email_from)
 
-		# Look for email address in registered trac users
+		# Maybe for later user
+		#self.email_from =  self.email_to_unicode(self.email_addr)
+
+
+		if self.IGNORE_TRAC_USER_SETTINGS:
+			return
+
+		# Is this a registered user, use email address as search key:
+		# result:
+		#   u : login name
+		#   n : Name that the user has set in the settings tab
+		#   e : email address that the user has set in the settings tab 
 		#
-		users = [ u for (u, n, e) in self.env.get_known_users(self.db)
+		users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
 				if e == self.email_addr ]
 
 		if len(users) == 1:
-			self.email_from = users[0]
-		else:
-			self.email_from =  self.email_to_unicode(message['from'])
-			#self.email_from =  self.email_to_unicode(self.email_addr)
+			self.email_from = users[0][0]
 
 	def set_reply_fields(self, ticket, message):
 		"""
@@ -512,7 +537,7 @@ class TicketEmailParser(object):
 		#
 		TICKET_RE = re.compile(r"""
 					(?P<ticketnr>[#][0-9]+:)
-					|(?P<ticketnr_fields>[#][\d]+\?.*:)
+					|(?P<ticketnr_fields>[#][\d]+\?.*?:)
 					""", re.VERBOSE)
 
 		result =  TICKET_RE.search(subject)
@@ -537,12 +562,14 @@ class TicketEmailParser(object):
 			ticket_id = int(nr[1:-1])
 
 
-		# Get current time
-		# to do
-		#when = int(time.time())
+		# When is the change committed
+		# 
 		#
-		utc = UTC()
-		when = datetime.now(utc)
+		if self.VERSION == 0.11:
+			utc = UTC()
+			when = datetime.now(utc)
+		else:
+			when = int(time.time())
 
 		try:
 			tkt = Ticket(self.env, ticket_id, self.db)
@@ -576,7 +603,7 @@ class TicketEmailParser(object):
 
 		return True
 
-	def new_ticket(self, msg):
+	def new_ticket(self, msg, component):
 		"""
 		Create a new ticket
 		"""
@@ -595,18 +622,10 @@ class TicketEmailParser(object):
 		else:
 			tkt['summary'] = self.email_to_unicode(msg['Subject'])
 
-
 		if settings.has_key('component'):
 			tkt['component'] = settings['component']
 		else:
-			tkt['component'] = self.spam(msg)
-
-		# Discard SPAM messages.
-		#
-		if self.DROP_SPAM and (tkt['component'] == 'Spam'):
-			if self.DEBUG > 2 :
-			  print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
-			return False	
+			tkt['component'] = component
 
 		# Set default owner for component, HvB
 		# Is not necessary, because if component is set. The trac code
@@ -679,12 +698,19 @@ class TicketEmailParser(object):
 			self.debug_attachments(m)
 
 		self.db = self.env.get_db_cnx()
- 		self.get_author_emailaddrs(m)
+ 		self.get_sender_info(m)
 
  		if self.blacklisted_from():
  			if self.DEBUG > 1 :
  				print 'Message rejected : From: in blacklist'
  			return False
+
+	    # If component is true then we drop the message drop message
+		#
+		component =  self.spam(m)
+		if component == True:
+			return False
+
 
 		if self.get_config('notification', 'smtp_enabled') in ['true']:
 			self.notification = 1
@@ -697,7 +723,7 @@ class TicketEmailParser(object):
 			if self.ticket_update(m):
 				return True
 
-		self.new_ticket(m)
+		self.new_ticket(m, component)
 
 	def strip_signature(self, text):
 		"""
