@@ -1,3 +1,10 @@
+2008-XXX
+	* Fixed debian control file. Package can be build on any platform and
+	  not only on i386 platforms:
+
+	  Author: Christian Iversen ci add sikkerhed dot org
+	  Applied by: Bas van der Vlies
+
 2008-02-04
 	* Added version check and exit if we do not support the trac version
 	  closes bug #23
