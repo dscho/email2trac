@@ -100,7 +100,7 @@ except ImportError:
     SYSLOG_AVAILABLE = False
 
 from datetime import tzinfo, timedelta, datetime
-
+from trac import config as trac_config
 
 # Some global variables
 #
@@ -1013,7 +1013,6 @@ def mkdir_p(dir, mode):
 		except OSError:
 			os.mkdir(path, mode)
 
-
 def ReadConfig(file, name):
 	"""
 	Parse the config file
@@ -1023,25 +1022,20 @@ def ReadConfig(file, name):
 		print 'File %s does not exist' %file
 		sys.exit(1)
 
-	config = ConfigParser.ConfigParser()
-	try:
-		config.read(file)
-	except ConfigParser.MissingSectionHeaderError,detail:
-		print detail
-	  	sys.exit(1)
-
+	config = trac_config.Configuration(file)
 
   	# Use given project name else use defaults
   	#
 	if name:
-		if not config.has_section(name):
+		sections = config.sections()
+		if not name in sections:
 			print "Not a valid project name: %s" %name
-			print "Valid names: %s" %config.sections()
+			print "Valid names: %s" %sections
 			sys.exit(1)
 
 		project =  dict()
-		for option in  config.options(name):
-			project[option] = config.get(name, option) 
+		for option, value in  config.options(name):
+			project[option] = value 
 
 	else:
 		project = config.defaults()
@@ -1113,11 +1107,13 @@ if __name__ == '__main__':
 			#
 			# see http://projects.edgewall.com/trac/changeset/2799
 			from trac.ticket.notification import TicketNotifyEmail
+			from trac import config as trac_config
 		elif version == '0.11':
 			from trac import attachment 
 			from trac.env import Environment
 			from trac.ticket import Ticket
 			from trac.web.href import Href
+			from trac import config as trac_config
 			from trac import util
 			#
 			# return  util.text.to_unicode(str)
