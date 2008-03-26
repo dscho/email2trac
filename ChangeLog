@@ -5,6 +5,10 @@
 	  Author: Christian Iversen ci add sikkerhed dot org
 	  Applied by: Bas van der Vlies
 
+	* We now use the trac configuration parser routine
+	  Author: andrei2102 add gmail dot com
+	  Applied by: Bas van der Vlies
+
 2008-02-04
 	* Added version check and exit if we do not support the trac version
 	  closes bug #23
