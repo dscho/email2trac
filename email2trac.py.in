@@ -477,14 +477,16 @@ class TicketEmailParser(object):
 
 		return result
 
-	def update_ticket_fields(self, ticket, user_dict): 
-	        """
-		This will update the ticket fields when supplied via 
-		the subject mail line. It will only update the ticket 
-		field:
+	def update_ticket_fields(self, ticket, user_dict, use_default=None): 
+		"""
+		This will update the ticket fields. It will check if the 
+		given fields are known and if the right values are specified
+		It will only update the ticket field value:
 			- If the field is known
-			- If the value supplied is valid for the ticket field
-			- Else we skip it and no error is given
+			- If the value supplied is valid for the ticket field.
+			  If not then there are two options:
+			   1) Skip the value (use_default=None)
+			   2) Set default value for field (use_default=1)
 		"""
 
 		# Build a system dictionary from the ticket fields 
@@ -503,12 +505,10 @@ class TicketEmailParser(object):
 		# system one's
 		#
 		for field,value in user_dict.items():
-			if self.DEBUG >= 5: 
-				print  'user field : %s=%s' %(field,value)
+			if self.DEBUG >= 10: 
+				print  'user_field\t %s = %s' %(field,value)
 
 			if sys_dict.has_key(field):
-				if self.DEBUG >= 5: 
-					print  'sys field  : ', sys_dict[field]
 
 				# Check if value is an allowed system option, if TypeError then
 				# every value is allowed
@@ -516,9 +516,18 @@ class TicketEmailParser(object):
 				try:
 					if value in sys_dict[field]:
 						ticket[field] = value
+					else:
+						# Must we set a default if value is not allowed
+						#
+						if use_default:
+							value = self.get_config('ticket', 'default_%s' %(field) )
+							ticket[field] = value
 
 				except TypeError:
 					ticket[field] = value
+
+				if self.DEBUG >= 10: 
+					print  'ticket_field\t %s = %s' %(field,  ticket[field])
 					
 	def ticket_update(self, m):
 		"""
@@ -526,6 +535,8 @@ class TicketEmailParser(object):
 		will append the contents of this email to that ticket, instead of 
 		creating a new one.
 		"""
+		global DRY_RUN
+
 		if not m['Subject']:
 			return False
 		else:
@@ -602,38 +613,73 @@ class TicketEmailParser(object):
 
 		return True
 
-	def new_ticket(self, msg, component):
+	def set_ticket_fields(self, ticket):
+		"""
+		set the ticket fields to value specified
+			- /etc/email2trac.conf with <prefix>_<field>
+			- trac default values, trac.ini
+		"""
+		user_dict = dict()
+
+		for field in ticket.fields:
+
+			name = field['name'] 
+
+			# default trac value
+			#
+			value = self.get_config('ticket', 'default_%s' %(name) )
+			if self.DEBUG > 10:
+				print 'trac.ini name %s = %s' %(name, value)
+
+			prefix = settings['ticket_prefix']
+			try:
+				value = settings['%s_%s' %(prefix, name)]
+				if self.DEBUG > 10:
+					print 'email2trac.conf %s = %s ' %(name, value)
+
+			except KeyError, detail:
+				pass
+		
+			if self.DEBUG:
+				print 'user_dict[%s] = %s' %(name, value)
+
+			user_dict[name] = value
+
+		self.update_ticket_fields(ticket, user_dict, use_default=1)
+
+		# Set status ticket 
+		#`
+		ticket['status'] = 'new'
+
+
+
+	def new_ticket(self, msg):
 		"""
 		Create a new ticket
 		"""
 		tkt = Ticket(self.env)
-		tkt['status'] = 'new'
+
+		self.set_ticket_fields(tkt)
 
 		# Some defaults
 		#
-		tkt['milestone'] = self.get_config('ticket', 'default_milestone')
-		tkt['priority'] = self.get_config('ticket', 'default_priority')
-		tkt['severity'] = self.get_config('ticket', 'default_severity')
-		tkt['version'] = self.get_config('ticket', 'default_version')
+		#tkt['status'] = 'new'
+		#tkt['milestone'] = self.get_config('ticket', 'default_milestone')
+		#tkt['priority'] = self.get_config('ticket', 'default_priority')
+		#tkt['severity'] = self.get_config('ticket', 'default_severity')
+		#tkt['version'] = self.get_config('ticket', 'default_version')
+		#tkt['type'] = self.get_config('ticket', 'default_type')
 
-		tkt['type'] = self.get_config('ticket', 'default_type')
+		# Old style setting for component, will be removed
+		#
 		if settings.has_key('component'):
 			tkt['component'] = settings['component']
-		else:
-			tkt['component'] = self.get_config('ticket', 'default_component')
-			tkt['component'] = component
 
 		if not msg['Subject']:
 			tkt['summary'] = u'(No subject)'
 		else:
 			tkt['summary'] = self.email_to_unicode(msg['Subject'])
 
-
-		# Set default owner for component, HvB
-		# Is not necessary, because if component is set. The trac code
-		# will find the owner: 
-		#
-		# self.set_owner(tkt)
 
 		self.set_reply_fields(tkt, msg)
 
@@ -685,8 +731,11 @@ class TicketEmailParser(object):
 				#print tkt.get_changelog(self.db, when)
 
 		if self.notification:
-			self.notify(tkt, True)
-			#self.notify(tkt, False)
+			if DRY_RUN:
+				print 'DRY_RUN: self.notify(tkt, True)'
+			else:
+				self.notify(tkt, True)
+				#self.notify(tkt, False)
 
 	def parse(self, fp):
 		global m
@@ -709,8 +758,7 @@ class TicketEmailParser(object):
 
 	    # If component is true then we drop the message drop message
 		#
-		component =  self.spam(m)
-		if component == True:
+		if self.spam(m) == True:
 			return False
 
 
@@ -725,7 +773,7 @@ class TicketEmailParser(object):
 			if self.ticket_update(m):
 				return True
 
-		self.new_ticket(m, component)
+		self.new_ticket(m)
 
 	def strip_signature(self, text):
 		"""
@@ -1048,16 +1096,18 @@ def ReadConfig(file, name):
 if __name__ == '__main__':
 	# Default config file
 	#
+	global DRY_RUN
+
 	configfile = '@email2trac_conf@'
 	project = ''
 	component = ''
+	ticket_prefix = 'default'
+
 	ENABLE_SYSLOG = 0
 
-	SHORT_OPT = ''chf:np:'
-	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=']
+	SHORT_OPT = 'chf:np:t:'
+	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=']
 
-	global DRY_RUN
-		
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], SHORT_OPT, LONG_OPT)
 	except getopt.error,detail:
@@ -1078,6 +1128,8 @@ if __name__ == '__main__':
 			DRY_RUN = True
 		elif opt in ['-p', '--project']:
 			project_name = value
+		elif opt in ['-t', '--ticket_prefix']:
+			ticket_prefix = value
 	
 	settings = ReadConfig(configfile, project_name)
 	if not settings.has_key('project'):
@@ -1087,6 +1139,10 @@ if __name__ == '__main__':
 	
 	if component:
 		settings['component'] = component
+
+	# The default prefix for ticket values in email2trac.conf
+	#
+	settings['ticket_prefix'] = ticket_prefix
 	
 	if settings.has_key('trac_version'):
 		version = settings['trac_version']

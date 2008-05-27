@@ -54,26 +54,24 @@ int main(int argc, char** argv) {
   int caller = getuid();
   int status;
 
-  char   *trac_script;
   char   **trac_script_args;
   struct passwd *TRAC; 
   struct passwd *MTA;
   struct stat script_attrs;
+  const char *trac_script = TRAC_SCRIPT_PATH "/" TRAC_SCRIPT_NAME;
  
-  trac_script = malloc((strlen(TRAC_SCRIPT_PATH) 
-	+ strlen(TRAC_SCRIPT_NAME) + 10) * sizeof(char));
-
-  strncat(trac_script,TRAC_SCRIPT_PATH, strlen(TRAC_SCRIPT_PATH));
-  strcat(trac_script,"/");
-  strncat(trac_script,TRAC_SCRIPT_NAME, strlen(TRAC_SCRIPT_NAME));
-
   /*
   printf("trac_script = %s\n", trac_script);
   */
 
   /* First copy arguments passed to the wrapper as scripts arguments
      after filtering out some of the possible script options */
+
   trac_script_args = (char**) malloc((argc+1)*sizeof(char*));
+  if (trac_script_args == NULL) {
+    if ( DEBUG ) printf("malloc failed\n");
+    return 1;
+  }
   trac_script_args[0] = TRAC_SCRIPT_NAME;
   for (i=j=1; i<argc; i++) {
     if ( (strcmp(argv[i],"--file") == 0) || 
@@ -108,8 +106,10 @@ int main(int argc, char** argv) {
   /* set UID/GID to Trac (or apache) user */
   check_username(TRAC_USER);
   if ( TRAC = getpwnam(TRAC_USER) ) {
-    setgid(TRAC->pw_gid);
-    setuid(TRAC->pw_uid);
+    if (setgid(TRAC->pw_gid) || setuid(TRAC->pw_uid)) {
+      if ( DEBUG ) printf("setgid or setuid failed\n");
+      return -5;
+    }
   } else {
     if ( DEBUG ) printf("Invalid Trac user (%s)\n",TRAC_USER);
     return -3;     /* 253 : Trac user not found */

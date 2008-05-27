@@ -9,6 +9,19 @@
 	  Author: andrei2102 add gmail dot com
 	  Applied by: Bas van der Vlies
 
+	* Added new command line option -n/--dry-run. This option only show
+	  what commands will be executed.
+	  Author: Bas van der Vlies
+
+	* the default values for tickets can now also be set in 
+	  'email2trac.conf'. So you can use different values when an email
+	  is converted to a ticket. The ticket value is set to this rules
+	    - email2trac.conf
+	    - trac.ini
+
+	
+
+
 2008-02-04
 	* Added version check and exit if we do not support the trac version
 	  closes bug #23
