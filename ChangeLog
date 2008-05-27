@@ -19,7 +19,15 @@
 	    - email2trac.conf
 	    - trac.ini
 
-	
+	  closes request #55
+
+	* run_email2trac.c:
+	   - can no longer segfault after a failed malloc.
+	   - after set*id failure, you'll get a diagnostic (or at least 
+	     nonzero exit status) and it won't attempt the exec.
+
+	 Author: Jim Meyering jim add meyering dot net
+	 Implemented by: Bas van der Vlies
 
 
 2008-02-04
