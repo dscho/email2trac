@@ -106,6 +106,7 @@ from trac import config as trac_config
 #
 trac_default_version = '0.10'
 m = None 
+DRY_RUN = False
 
 
 
@@ -519,8 +520,6 @@ class TicketEmailParser(object):
 				except TypeError:
 					ticket[field] = value
 					
-				
-				
 	def ticket_update(self, m):
 		"""
 		If the current email is a reply to an existing ticket, this function
@@ -617,20 +616,25 @@ class TicketEmailParser(object):
 		tkt['severity'] = self.get_config('ticket', 'default_severity')
 		tkt['version'] = self.get_config('ticket', 'default_version')
 
+		tkt['type'] = self.get_config('ticket', 'default_type')
+		if settings.has_key('component'):
+			tkt['component'] = settings['component']
+		else:
+			tkt['component'] = self.get_config('ticket', 'default_component')
+			tkt['component'] = component
+
 		if not msg['Subject']:
 			tkt['summary'] = u'(No subject)'
 		else:
 			tkt['summary'] = self.email_to_unicode(msg['Subject'])
 
-		if settings.has_key('component'):
-			tkt['component'] = settings['component']
-		else:
-			tkt['component'] = component
 
 		# Set default owner for component, HvB
 		# Is not necessary, because if component is set. The trac code
-		# will find the owner: self.set_owner(tkt)
+		# will find the owner: 
 		#
+		# self.set_owner(tkt)
+
 		self.set_reply_fields(tkt, msg)
 
 		# produce e-mail like header
@@ -649,15 +653,10 @@ class TicketEmailParser(object):
 		utc = UTC()
 		when = datetime.now(utc)
 
-		ticket_id = tkt.insert()
-		#try:
-		#	ticket_id = tkt.insert()
-		#except OperationalError, detail:
-		#	syslog.openlog('email2trac', syslog.LOG_NOWAIT)
-		#	syslog.syslog('catch tkt insert problem %s' %detail)
-		#	syslog.closelog()
-		#
-		#	ticket_id = tkt.insert()
+		if DRY_RUN:
+			ticket_id = 'DRY_RUN'
+		else:
+			ticket_id = tkt.insert()
 			
 		tkt['id'] = ticket_id
 
@@ -679,8 +678,11 @@ class TicketEmailParser(object):
 			comment = '%s\n%s\n' %(comment, str)
 
 		if changed:
-			tkt.save_changes(self.author, comment)
-			#print tkt.get_changelog(self.db, when)
+			if DRY_RUN:
+				print 'DRY_RUN: tkt.save_changes(self.author, comment)'
+			else:
+				tkt.save_changes(self.author, comment)
+				#print tkt.get_changelog(self.db, when)
 
 		if self.notification:
 			self.notify(tkt, True)
@@ -1050,9 +1052,14 @@ if __name__ == '__main__':
 	project = ''
 	component = ''
 	ENABLE_SYSLOG = 0
+
+	SHORT_OPT = ''chf:np:'
+	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=']
+
+	global DRY_RUN
 		
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'chf:p:', ['component=','help', 'file=', 'project='])
+		opts, args = getopt.getopt(sys.argv[1:], SHORT_OPT, LONG_OPT)
 	except getopt.error,detail:
 		print __doc__
 		print detail
@@ -1067,6 +1074,8 @@ if __name__ == '__main__':
 			component = value
 		elif opt in ['-f', '--file']:
 			configfile = value
+		elif opt in ['-n', '--dry-run']:
+			DRY_RUN = True
 		elif opt in ['-p', '--project']:
 			project_name = value
 	
