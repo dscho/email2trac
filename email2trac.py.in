@@ -106,9 +106,6 @@ from trac import config as trac_config
 #
 trac_default_version = '0.10'
 m = None 
-DRY_RUN = False
-
-
 
 # A UTC class needed for trac version 0.11, added by
 # tbaschak at ktc dot mb dot ca
@@ -132,7 +129,7 @@ class TicketEmailParser(object):
 	env = None
 	comment = '> '
     
-	def __init__(self, env, parameters, version):
+	def __init__(self, env, parameters, version, dry_run):
 		self.env = env
 
 		# Database connection
@@ -146,6 +143,8 @@ class TicketEmailParser(object):
 		self.email_from = None
 
 		self.VERSION = version
+		self.DRY_RUN = dry_run
+
 		self.get_config = self.env.config.get
 
 		if parameters.has_key('umask'):
@@ -259,15 +258,15 @@ class TicketEmailParser(object):
 			if self.DEBUG > 2 : 
 				print 'This message is a SPAM. Automatic ticket insertion refused (SPAM level > %d' % self.SPAM_LEVEL
 
-			return True	
+			return 'drop'	
 
 		elif spam:
 
-			return 'Spam'
+			return 'Spam'	
 
 		else:
 
-			return self.get_config('ticket', 'default_component') 
+			return False
 
 
 	def blacklisted_from(self):
@@ -529,13 +528,12 @@ class TicketEmailParser(object):
 				if self.DEBUG >= 10: 
 					print  'ticket_field\t %s = %s' %(field,  ticket[field])
 					
-	def ticket_update(self, m):
+	def ticket_update(self, m, spam):
 		"""
 		If the current email is a reply to an existing ticket, this function
 		will append the contents of this email to that ticket, instead of 
 		creating a new one.
 		"""
-		global DRY_RUN
 
 		if not m['Subject']:
 			return False
@@ -608,7 +606,7 @@ class TicketEmailParser(object):
 		else:
 			str = self.attachments(m, tkt)
 
-		if self.notification:
+		if self.notification and not spam:
 			self.notify(tkt, False, when)
 
 		return True
@@ -653,7 +651,7 @@ class TicketEmailParser(object):
 
 
 
-	def new_ticket(self, msg):
+	def new_ticket(self, msg, spam):
 		"""
 		Create a new ticket
 		"""
@@ -672,7 +670,10 @@ class TicketEmailParser(object):
 
 		# Old style setting for component, will be removed
 		#
-		if settings.has_key('component'):
+		if spam:
+			tkt['component'] = 'Spam'
+
+		elif settings.has_key('component'):
 			tkt['component'] = settings['component']
 
 		if not msg['Subject']:
@@ -699,7 +700,7 @@ class TicketEmailParser(object):
 		utc = UTC()
 		when = datetime.now(utc)
 
-		if DRY_RUN:
+		if self.DRY_RUN:
 			ticket_id = 'DRY_RUN'
 		else:
 			ticket_id = tkt.insert()
@@ -724,17 +725,18 @@ class TicketEmailParser(object):
 			comment = '%s\n%s\n' %(comment, str)
 
 		if changed:
-			if DRY_RUN:
+			if self.DRY_RUN:
 				print 'DRY_RUN: tkt.save_changes(self.author, comment)'
 			else:
 				tkt.save_changes(self.author, comment)
 				#print tkt.get_changelog(self.db, when)
 
 		if self.notification:
-			if DRY_RUN:
+			if self.DRY_RUN:
 				print 'DRY_RUN: self.notify(tkt, True)'
 			else:
-				self.notify(tkt, True)
+				if not spam:
+					self.notify(tkt, True)
 				#self.notify(tkt, False)
 
 	def parse(self, fp):
@@ -756,11 +758,16 @@ class TicketEmailParser(object):
  				print 'Message rejected : From: in blacklist'
  			return False
 
-	    # If component is true then we drop the message drop message
+		# If drop the message
 		#
-		if self.spam(m) == True:
+		if self.spam(m) == 'drop':
 			return False
 
+		elif self.spam(m) == 'spam':
+			spam_msg = True
+
+		else:
+			spam_msg = False
 
 		if self.get_config('notification', 'smtp_enabled') in ['true']:
 			self.notification = 1
@@ -770,10 +777,10 @@ class TicketEmailParser(object):
 		# Must we update existing tickets
 		#
 		if self.TICKET_UPDATE > 0:
-			if self.ticket_update(m):
+			if self.ticket_update(m, spam_msg):
 				return True
 
-		self.new_ticket(m)
+		self.new_ticket(m, spam_msg)
 
 	def strip_signature(self, text):
 		"""
@@ -904,9 +911,6 @@ class TicketEmailParser(object):
 		"""
 		A wrapper for the TRAC notify function. So we can use templates
 		"""
-		if tkt['component'] == 'Spam':
-			return	
-
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
@@ -1096,14 +1100,14 @@ def ReadConfig(file, name):
 if __name__ == '__main__':
 	# Default config file
 	#
-	global DRY_RUN
-
 	configfile = '@email2trac_conf@'
 	project = ''
 	component = ''
 	ticket_prefix = 'default'
+	dry_run = None
 
 	ENABLE_SYSLOG = 0
+
 
 	SHORT_OPT = 'chf:np:t:'
 	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=']
@@ -1125,7 +1129,7 @@ if __name__ == '__main__':
 		elif opt in ['-f', '--file']:
 			configfile = value
 		elif opt in ['-n', '--dry-run']:
-			DRY_RUN = True
+			dry_run = True
 		elif opt in ['-p', '--project']:
 			project_name = value
 		elif opt in ['-t', '--ticket_prefix']:
@@ -1194,7 +1198,7 @@ if __name__ == '__main__':
 				ENABLE_SYSLOG =  float(settings['enable_syslog']) 
 
 		env = Environment(settings['project'], create=0)
-		tktparser = TicketEmailParser(env, settings, float(version))
+		tktparser = TicketEmailParser(env, settings, float(version), dry_run)
 		tktparser.parse(sys.stdin)
 
 	# Catch all errors ans log to SYSLOG if we have enabled this

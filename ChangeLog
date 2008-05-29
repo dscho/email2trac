@@ -21,6 +21,25 @@
 
 	  closes request #55
 
+	  email2trac.conf use same format as trac.ini, eg email2trac.conf:
+	  [project]
+	  default_component : test
+
+	  the ticket_prefix can be overriden by the commandline option:
+	   * -t,--ticket_prefix <value>
+
+	  The feature can be used to have different settings for different 
+	  email aliases
+
+	  Requested by: greg dot deakyne at etapestry dot com
+	  Implemented by: Bas van der Vlies
+
+
+	* Fixed a bug in ticket_update. It failed when project did not have 
+	  ticket component field,  closes bug #62
+	  Reported by: gernot dot hillier add siemens dot com
+	  Fixed by: Bas van der Vlies
+	  
 	* run_email2trac.c:
 	   - can no longer segfault after a failed malloc.
 	   - after set*id failure, you'll get a diagnostic (or at least 

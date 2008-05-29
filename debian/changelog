@@ -1,3 +1,9 @@
+email2trac (0.20-1) stable; urgency=low
+
+  * New version, see Changelog
+
+ -- root <root@rc.sara.nl>  Tue, 27 May 2008 23:12:54 +0200
+
 email2trac (0.13.0-1) stable; urgency=low
 
   * New version with a lot of improvements
