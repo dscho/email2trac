@@ -1,53 +1,46 @@
 2008-XXX
-	* Fixed debian control file. Package can be build on any platform and
-	  not only on i386 platforms:
+  * Fixed debian control file. Package can be build on any platform and
+    not only on i386 platforms:
 
-	  Author: Christian Iversen ci add sikkerhed dot org
-	  Applied by: Bas van der Vlies
+    Author: Christian Iversen ci add sikkerhed dot org
+    Applied by: Bas van der Vlies
 
-	* We now use the trac configuration parser routine
-	  Author: andrei2102 add gmail dot com
-	  Applied by: Bas van der Vlies
+  * We now use the trac configuration parser routine
+    Author: andrei2102 add gmail dot com
+    Applied by: Bas van der Vlies
 
-	* Added new command line option -n/--dry-run. This option only show
-	  what commands will be executed.
-	  Author: Bas van der Vlies
+  * Added new command line option -n/--dry-run. This option only show
+    what commands will be executed.
+    Author: Bas van der Vlies
 
-	* the default values for tickets can now also be set in 
-	  'email2trac.conf'. So you can use different values when an email
-	  is converted to a ticket. The ticket value is set to this rules
-	    - email2trac.conf
-	    - trac.ini
+  * the default values for tickets can now also be set in 
+   'email2trac.conf'. So you can use different values when an email
+    is converted to a ticket. The ticket value is set to this rules
+     - email2trac.conf
+     - trac.ini
 
-	  closes request #55
+    email2trac.conf use same format as trac.ini, eg email2trac.conf:
+      [project]
+      default_component : test
 
-	  email2trac.conf use same format as trac.ini, eg email2trac.conf:
-	  [project]
-	  default_component : test
+    closes request #55, for more info see:
+    - https://subtrac.sara.nl/oss/email2trac/wiki/Email2tracConfiguration
 
-	  the ticket_prefix can be overriden by the commandline option:
-	   * -t,--ticket_prefix <value>
+     Requested by: greg dot deakyne at etapestry dot com
+     Implemented by: Bas van der Vlies
 
-	  The feature can be used to have different settings for different 
-	  email aliases
-
-	  Requested by: greg dot deakyne at etapestry dot com
-	  Implemented by: Bas van der Vlies
-
-
-	* Fixed a bug in ticket_update. It failed when project did not have 
-	  ticket component field,  closes bug #62
-	  Reported by: gernot dot hillier add siemens dot com
-	  Fixed by: Bas van der Vlies
+  * Fixed a bug in ticket_update. It failed when project did not have 
+    ticket component field,  closes bug #62
+    Reported by: gernot dot hillier add siemens dot com
+    Fixed by: Bas van der Vlies
 	  
-	* run_email2trac.c:
-	   - can no longer segfault after a failed malloc.
-	   - after set*id failure, you'll get a diagnostic (or at least 
-	     nonzero exit status) and it won't attempt the exec.
+  * run_email2trac.c:
+     - can no longer segfault after a failed malloc.
+     - after set*id failure, you'll get a diagnostic (or at least 
+       nonzero exit status) and it won't attempt the exec.
 
-	 Author: Jim Meyering jim add meyering dot net
-	 Implemented by: Bas van der Vlies
-
+    Author: Jim Meyering jim add meyering dot net
+    Implemented by: Bas van der Vlies
 
 2008-02-04
 	* Added version check and exit if we do not support the trac version

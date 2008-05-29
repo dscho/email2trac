@@ -65,10 +65,11 @@ How to use
  * default config file is : /etc/email2trac.conf
 
  * Commandline opions:
-                -h | --help
-                -c <value> | --component=<value>
-                -f <config file> | --file=<config file>
-                -p <project name> | --project=<project name>
+                -h,--help
+                -f,--file  <configuration file>
+		-n,--dry-run
+                -p, --project <project name>
+		-t, --ticket_prefix <name>
 
 SVN Info:
         $Id$
