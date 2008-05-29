@@ -130,12 +130,16 @@ class TicketEmailParser(object):
 	env = None
 	comment = '> '
     
-	def __init__(self, env, parameters, version, dry_run):
+	def __init__(self, env, parameters, version):
 		self.env = env
 
 		# Database connection
 		#
 		self.db = None
+
+		# Save parameters
+		#
+		self.parameters = parameters
 
 		# Some useful mail constants
 		#
@@ -144,7 +148,7 @@ class TicketEmailParser(object):
 		self.email_from = None
 
 		self.VERSION = version
-		self.DRY_RUN = dry_run
+		self.DRY_RUN = parameters['dry_run']
 
 		self.get_config = self.env.config.get
 
@@ -271,6 +275,16 @@ class TicketEmailParser(object):
 
 
 	def blacklisted_from(self):
+		"""
+		This function wil check if the email address is in the black list
+		"""
+		try:
+			black_list = self.parameters['black_list']
+		except KeyError, detail:
+			black_list = 'MAILER-DAEMON@'
+
+		#print black_list
+
 		FROM_RE = re.compile(r"""
                     MAILER-DAEMON@
                     """, re.VERBOSE|re.IGNORECASE)
@@ -630,9 +644,9 @@ class TicketEmailParser(object):
 			if self.DEBUG > 10:
 				print 'trac.ini name %s = %s' %(name, value)
 
-			prefix = settings['ticket_prefix']
+			prefix = self.parameters['ticket_prefix']
 			try:
-				value = settings['%s_%s' %(prefix, name)]
+				value = self.parameters['%s_%s' %(prefix, name)]
 				if self.DEBUG > 10:
 					print 'email2trac.conf %s = %s ' %(name, value)
 
@@ -674,8 +688,8 @@ class TicketEmailParser(object):
 		if spam:
 			tkt['component'] = 'Spam'
 
-		elif settings.has_key('component'):
-			tkt['component'] = settings['component']
+		elif self.parameters.has_key('component'):
+			tkt['component'] = self.parameters['component']
 
 		if not msg['Subject']:
 			tkt['summary'] = u'(No subject)'
@@ -1148,6 +1162,7 @@ if __name__ == '__main__':
 	# The default prefix for ticket values in email2trac.conf
 	#
 	settings['ticket_prefix'] = ticket_prefix
+	settings['dry_run'] = dry_run
 	
 	if settings.has_key('trac_version'):
 		version = settings['trac_version']
@@ -1199,7 +1214,7 @@ if __name__ == '__main__':
 				ENABLE_SYSLOG =  float(settings['enable_syslog']) 
 
 		env = Environment(settings['project'], create=0)
-		tktparser = TicketEmailParser(env, settings, float(version), dry_run)
+		tktparser = TicketEmailParser(env, settings, float(version))
 		tktparser.parse(sys.stdin)
 
 	# Catch all errors ans log to SYSLOG if we have enabled this
