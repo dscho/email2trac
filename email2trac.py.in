@@ -297,6 +297,7 @@ class TicketEmailParser(object):
 			black_list.append('MAILER-DAEMON@')
 
 		for entry in black_list:	
+			entry = entry.strip()
 			FROM_RE = re.compile(entry, re.VERBOSE|re.IGNORECASE)
 			result =  FROM_RE.search(self.email_addr)
 			if result:
