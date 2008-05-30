@@ -1,4 +1,4 @@
-2008-XXX
+2008-05-30
   * Fixed debian control file. Package can be build on any platform and
     not only on i386 platforms:
 
@@ -60,9 +60,13 @@
     Can specifiy more then one email adress seperated by ',', eg:
     black_list : basv@sara.nl, walter@sara.nl
 
-    closes #39
+    closes #39, #56
     
     Author: Bas van der Vlies
+
+  * if mailto_link + german umlaut problem is fixed, closes #60
+    Reported by: alex at pirsig dot net
+    Fixed by: Bas van der Vlies
     
 
 2008-02-04

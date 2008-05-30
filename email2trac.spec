@@ -1,6 +1,6 @@
 Summary: Utilities for converting emails to trac tickets
 Name: email2trac
-Version: 0.13.0
+Version: 0.30.0
 Release: 1
 License: GPL
 Group: Applications/Internet
