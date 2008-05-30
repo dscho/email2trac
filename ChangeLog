@@ -40,7 +40,20 @@
        nonzero exit status) and it won't attempt the exec.
 
     Author: Jim Meyering jim add meyering dot net
-    Implemented by: Bas van der Vlies
+    Applied by: Bas van der Vlies
+
+  * Made some approvements to spam function:
+     - If the he X-Spam-Score header is present, but has no value 
+	email2trac will crash, closes #63
+
+     - Added config option which header field we must check 
+       for determing if mail is Spam, eg:
+        - spam_header : X-Spam-Level (default: X-Spam-Score)
+ 
+    Author: email2trac at bulk dot squeakyblue dot com
+    Applied by: Bas van der Vlies
+
+    
 
 2008-02-04
 	* Added version check and exit if we do not support the trac version
