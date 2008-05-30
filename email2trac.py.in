@@ -292,16 +292,17 @@ class TicketEmailParser(object):
 		except KeyError, detail:
 			black_list = 'MAILER-DAEMON@'
 
-		#print black_list
+		black_list = string.split(black_list)	
+		if not black_list.count('MAILER-DAEMON@'):
+			black_list.append('MAILER-DAEMON@')
 
-		FROM_RE = re.compile(r"""
-                    MAILER-DAEMON@
-                    """, re.VERBOSE|re.IGNORECASE)
-		result =  FROM_RE.search(self.email_addr)
-		if result:
-			return True
-		else:
-			return False
+		for entry in black_list:	
+			FROM_RE = re.compile(entry, re.VERBOSE|re.IGNORECASE)
+			result =  FROM_RE.search(self.email_addr)
+			if result:
+				return True
+
+		return False
 
 	def email_to_unicode(self, message_str):
 		"""

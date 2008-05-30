@@ -53,6 +53,16 @@
     Author: email2trac at bulk dot squeakyblue dot com
     Applied by: Bas van der Vlies
 
+
+  * black_list  is now a configuration option and is used to deny
+    email addesses, default value is: MAILER-DAEMON@
+
+    Can specifiy more then one email adress seperated by ',', eg:
+    black_list : basv@sara.nl, walter@sara.nl
+
+    closes #39
+    
+    Author: Bas van der Vlies
     
 
 2008-02-04
