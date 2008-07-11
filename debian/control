@@ -9,6 +9,6 @@ Package: email2trac
 Section: misc
 Architecture: any
 Maintainer: Bas van der Vlies <bas@sara.nl>
-Depends: ${slibs:Depends}, python, cdbs, trac
+Depends: ${slibs:Depends}, python, cdbs
 Description: Converts email to a trac ticket
 	Name says it All

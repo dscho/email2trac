@@ -1,3 +1,10 @@
+2008-XX-XX
+  * Fixed a bug in email_header formating. When an email2trac ticket 
+    was updated via the web interface it would trigger a description 
+    field update.
+
+    Fixed by: Bas van der Vlies
+
 2008-05-30
   * Fixed debian control file. Package can be build on any platform and
     not only on i386 platforms:
