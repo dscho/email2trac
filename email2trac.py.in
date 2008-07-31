@@ -618,8 +618,11 @@ class TicketEmailParser(object):
 
 		body_text = self.get_body_text(m)
 
+		# reopen the ticket if is was closed
+		#
 		if tkt['status'] in ['closed']:
 			tkt['status'] = 'reopened'
+			tkt['resolution'] = ''
 
 		if self.EMAIL_HEADER:
 			head = self.email_header_txt(m)
@@ -649,6 +652,11 @@ class TicketEmailParser(object):
 		for field in ticket.fields:
 
 			name = field['name'] 
+
+			# skip some fields like resolution
+			#
+			if name in [ 'resolution' ]:
+				continue
 
 			# default trac value
 			#
