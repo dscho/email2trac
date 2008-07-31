@@ -618,6 +618,9 @@ class TicketEmailParser(object):
 
 		body_text = self.get_body_text(m)
 
+		if tkt['status'] in ['closed']:
+			tkt['status'] = 'reopened'
+
 		if self.EMAIL_HEADER:
 			head = self.email_header_txt(m)
 			body_text = u"%s\r\n%s" %(head, body_text)
