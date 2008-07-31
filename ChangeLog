@@ -5,6 +5,11 @@
 
     Fixed by: Bas van der Vlies
 
+  * Reopen closed ticket if an update is received via email, closes #70
+    Requested by: Garrett McGrath gmcgrath add princeton dot edu
+    Fixed by: Bas van der Vlies
+
+
 2008-05-30
   * Fixed debian control file. Package can be build on any platform and
     not only on i386 platforms:
