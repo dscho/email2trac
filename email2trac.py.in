@@ -291,7 +291,7 @@ class TicketEmailParser(object):
 		except KeyError, detail:
 			black_list = 'MAILER-DAEMON@'
 
-		black_list = string.split(black_list)	
+		black_list = string.split(black_list, ',')	
 		if not black_list.count('MAILER-DAEMON@'):
 			black_list.append('MAILER-DAEMON@')
 

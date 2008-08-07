@@ -14,6 +14,11 @@
     trac parser, closes ticket #73
     Reported by: email2trac at bulk dot squeakyblue dot com
     Fixed by: Bas van der Vlies
+   
+  * black_list paramter must be comma-separated as mentioned in the 
+    documentation.
+    Reported by: email2trac at bulk dot squeakyblue dot com
+    Fixed by: Bas van der Vlies
 
 
 2008-05-30
