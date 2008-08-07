@@ -10,6 +10,12 @@
     Fixed by: Bas van der Vlies
 
 
+  * The [DEFAULT] section did not work any more due to change to internal
+    trac parser, closes ticket #73
+    Reported by: email2trac at bulk dot squeakyblue dot com
+    Fixed by: Bas van der Vlies
+
+
 2008-05-30
   * Fixed debian control file. Package can be build on any platform and
     not only on i386 platforms:

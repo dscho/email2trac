@@ -86,7 +86,6 @@ import email.Header
 import re
 import urllib
 import unicodedata
-import ConfigParser
 from stat import *
 import mimetypes
 import traceback
@@ -1108,7 +1107,6 @@ def ReadConfig(file, name):
 	"""
 	Parse the config file
 	"""
-
 	if not os.path.isfile(file):
 		print 'File %s does not exist' %file
 		sys.exit(1)
@@ -1129,7 +1127,9 @@ def ReadConfig(file, name):
 			project[option] = value 
 
 	else:
-		project = config.defaults()
+		# use some trac internales to get the defaults
+		#
+		project = config.parser.defaults()
 
 	return project
 

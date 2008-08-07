@@ -1,3 +1,10 @@
+email2trac (0.30-3) stable; urgency=low
+
+  * Non-maintainer upload.
+  * Reopen ticket if an email update is received 
+
+ -- root <root@subtrac2.rc.sara.nl>  Mon, 04 Aug 2008 16:14:12 +0200
+
 email2trac (0.30-2) stable; urgency=low
 
   *  Fixed an error in formating email_header.
