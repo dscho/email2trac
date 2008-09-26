@@ -627,7 +627,9 @@ class TicketEmailParser(object):
 			head = self.email_header_txt(m)
 			body_text = u"%s\r\n%s" %(head, body_text)
 
-		tkt.save_changes(self.author, body_text, when)
+		if body_text.strip():
+			tkt.save_changes(self.author, body_text, when)
+
 		tkt['id'] = ticket_id
 
 		if self.VERSION  == 0.9:
@@ -782,7 +784,7 @@ class TicketEmailParser(object):
 			return
 
 		if self.DEBUG > 1:	  # save the entire e-mail message text
-			self.save_email_for_debug(m)
+			self.save_email_for_debug(m, True)
 			self.debug_attachments(m)
 
 		self.db = self.env.get_db_cnx()

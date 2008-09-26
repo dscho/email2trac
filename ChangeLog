@@ -20,6 +20,11 @@
     Reported by: email2trac at bulk dot squeakyblue dot com
     Fixed by: Bas van der Vlies
 
+  * If a blank email is sent with just an attachment, a blank 
+    comment is appended to the comments. fixed closes #89
+
+    Reported/Fixed by: ???
+    Applied by: Bas van der Vlies
 
 2008-05-30
   * Fixed debian control file. Package can be build on any platform and
