@@ -580,10 +580,10 @@ class TicketEmailParser(object):
 
 		# Must we update ticket fields
 		#
-		update_tkt_fields = dict()
+		update_fields = dict()
 		try:
 			nr, keywords = string.split(result.group('ticketnr_fields'), '?')
-			update_tkt_fields = self.str_to_dict(keywords)
+			update_fields = self.str_to_dict(keywords)
 
 			# Strip '#' 
 			#
@@ -610,18 +610,19 @@ class TicketEmailParser(object):
 		except util.TracError, detail:
 			return False
 
-		# Must we update some ticket fields properties
-		#
-		if update_tkt_fields:
-			self.update_ticket_fields(tkt, update_tkt_fields)
-
-		body_text = self.get_body_text(m)
-
-		# reopen the ticket if is was closed
+		# reopen the ticket if it is was closed
+		# We must use the ticket workflow framework
 		#
 		if tkt['status'] in ['closed']:
 			tkt['status'] = 'reopened'
 			tkt['resolution'] = ''
+
+		# Must we update some ticket fields properties
+		#
+		if update_fields:
+			self.update_ticket_fields(tkt, update_fields)
+
+		body_text = self.get_body_text(m)
 
 		if self.EMAIL_HEADER:
 			head = self.email_header_txt(m)
