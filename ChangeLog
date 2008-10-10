@@ -26,6 +26,20 @@
     Reported/Fixed by: ???
     Applied by: Bas van der Vlies
 
+  * added white_list parameter.  If set then only mail is accepted if
+    sender matches.
+    Author: Bas van der Vlies, jon dot wbstr at gmail dot com
+
+
+  * alternate notify template did not work for trac version 0.11.
+    Reported/Fixed by: hju at jochenkuhl dot de
+    Applied by       : Bas van der Vlies
+
+  * added 'alternate_notify_template_update'. When set this notify 
+    template name will be used for ticket updates.
+    Author: Bas van der Vlies, hju at jochenkuhl dot de
+    
+   
 2008-05-30
   * Fixed debian control file. Package can be build on any platform and
     not only on i386 platforms:
