@@ -16,7 +16,8 @@
     Fixed by: Bas van der Vlies
    
   * black_list paramter must be comma-separated as mentioned in the 
-    documentation.
+    documentation (#75) and removed the default value 
+    "MAILER-DAEMON@" (#74)
     Reported by: email2trac at bulk dot squeakyblue dot com
     Fixed by: Bas van der Vlies
 
@@ -31,12 +32,13 @@
     Author: Bas van der Vlies, jon dot wbstr at gmail dot com
 
 
-  * alternate notify template did not work for trac version 0.11.
+  * alternate notify template did not work for trac version 0.11 
+    (#90).
     Reported/Fixed by: hju at jochenkuhl dot de
     Applied by       : Bas van der Vlies
 
   * added 'alternate_notify_template_update'. When set this notify 
-    template name will be used for ticket updates.
+    template name will be used for ticket updates (#90).
     Author: Bas van der Vlies, hju at jochenkuhl dot de
     
    
