@@ -1,3 +1,9 @@
+email2trac (0.40-1) stable; urgency=low
+
+  * New Version, see ChangeLog 
+
+ -- root <root@subtrac2.rc.sara.nl>  Fri, 10 Oct 2008 17:24:09 +0200
+
 email2trac (0.30-3) stable; urgency=low
 
   * Non-maintainer upload.
