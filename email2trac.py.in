@@ -281,24 +281,31 @@ class TicketEmailParser(object):
 
 			return False
 
-
-	def blacklisted_from(self):
+	def email_header_acl(self, keyword, header_field, default):
 		"""
-		This function wil check if the email address is in the black list
-		"""
+		This function wil check if the email address is allowed or denied
+		to send mail to the ticket list
+	    """	
 		try:
-			black_list = self.parameters['black_list']
+			mail_addresses = self.parameters[keyword]
+
+			# Check if we have an empty string
+			#
+			if not mail_addresses:
+				return default 
+
 		except KeyError, detail:
-			black_list = 'MAILER-DAEMON@'
+			if self.DEBUG > 2 :
+				print '%s not defined, all messages are allowed.' %(keyword)
 
-		black_list = string.split(black_list, ',')	
-		if not black_list.count('MAILER-DAEMON@'):
-			black_list.append('MAILER-DAEMON@')
+			return default 
 
-		for entry in black_list:	
+		mail_addresses = string.split(mail_addresses, ',')
+
+		for entry in mail_addresses:
 			entry = entry.strip()
-			FROM_RE = re.compile(entry, re.VERBOSE|re.IGNORECASE)
-			result =  FROM_RE.search(self.email_addr)
+			TO_RE = re.compile(entry, re.VERBOSE|re.IGNORECASE)
+			result =  TO_RE.search(header_field)
 			if result:
 				return True
 
@@ -403,7 +410,7 @@ class TicketEmailParser(object):
 		"""
 
 		self.email_from = self.email_to_unicode(message['from'])
-		self.author, self.email_addr  = email.Utils.parseaddr(self.email_from)
+		self.author, self.mail_addr  = email.Utils.parseaddr(self.email_from)
 
 		# Maybe for later user
 		#self.email_from =  self.email_to_unicode(self.email_addr)
@@ -782,6 +789,8 @@ class TicketEmailParser(object):
 
 		m = email.message_from_file(fp)
 		if not m:
+			if self.DEBUG:
+				print "This is not a valid email message format"
 			return
 
 		if self.DEBUG > 1:	  # save the entire e-mail message text
@@ -791,10 +800,16 @@ class TicketEmailParser(object):
 		self.db = self.env.get_db_cnx()
  		self.get_sender_info(m)
 
- 		if self.blacklisted_from():
- 			if self.DEBUG > 1 :
- 				print 'Message rejected : From: in blacklist'
- 			return False
+	
+		if not self.email_header_acl('white_list', self.email_addr, True):
+			if self.DEBUG > 1 :
+ 				print 'Message rejected : %s not in white list' %(self.email_addr)
+			return False
+
+		if self.email_header_acl('black_list', self.email_addr, False):
+			if self.DEBUG > 1 :
+ 				print 'Message rejected : %s in black list' %(self.email_addr)
+			return False
 
 		# If drop the message
 		#
@@ -959,7 +974,14 @@ class TicketEmailParser(object):
 			tn = TicketNotifyEmail(self.env)
 
 			if self.notify_template:
-				tn.template_name = self.notify_template;
+				if self.VERSION == 0.11:
+					from trac.web.chrome import Chrome
+					#if not new:
+					#	tn.template_name += ".update" 
+					tn.template = Chrome(tn.env).load_template(tn.template_name, method='text')
+						
+				else:
+					tn.template_name = self.notify_template;
 
 			tn.notify(tkt, new, modtime) 
 
