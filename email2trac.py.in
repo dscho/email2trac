@@ -193,6 +193,11 @@ class TicketEmailParser(object):
 		else:
 			self.notify_template = None
 
+		if parameters.has_key('alternate_notify_template_update'):
+			self.notify_template_update = str(parameters['alternate_notify_template_update'])
+		else:
+			self.notify_template_update = None
+
 		if parameters.has_key('reply_all'):
 			self.REPLY_ALL = int(parameters['reply_all'])
 		else:
@@ -974,13 +979,20 @@ class TicketEmailParser(object):
 			tn = TicketNotifyEmail(self.env)
 
 			if self.notify_template:
+
 				if self.VERSION == 0.11:
+
 					from trac.web.chrome import Chrome
-					#if not new:
-					#	tn.template_name += ".update" 
+
+					if self.notify_template_update and not new:
+						tn.template_name = self.notify_template_update
+					else:
+						tn.template_name = self.notify_template
+
 					tn.template = Chrome(tn.env).load_template(tn.template_name, method='text')
 						
 				else:
+
 					tn.template_name = self.notify_template;
 
 			tn.notify(tkt, new, modtime) 
