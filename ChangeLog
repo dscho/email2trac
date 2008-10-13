@@ -1,4 +1,4 @@
-2008-XX-XX
+2008-10-13
   * Fixed a bug in email_header formating. When an email2trac ticket 
     was updated via the web interface it would trigger a description 
     field update.
