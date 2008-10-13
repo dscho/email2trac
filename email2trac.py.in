@@ -818,7 +818,7 @@ class TicketEmailParser(object):
  				print 'Message rejected : %s in black list' %(self.email_addr)
 			return False
 
-		if self.email_header_acl('recipient_list', self.to_email_addr, True):
+		if not self.email_header_acl('recipient_list', self.to_email_addr, True):
 			if self.DEBUG > 1 :
  				print 'Message rejected : %s not in recipient list' %(self.to_email_addr)
 			return False
