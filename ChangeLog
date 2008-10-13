@@ -31,6 +31,10 @@
     sender matches.
     Author: Bas van der Vlies, jon dot wbstr at gmail dot com
 
+  * added recipient_list parameter.  If set then only mail is accepted if
+    to-field matches. This only uses when people use a drop box to accept
+    emai for several email addresses, (closes #77)
+    Author: Bas van der Vlies, jon dot wbstr at gmail dot com
 
   * alternate notify template did not work for trac version 0.11 
     (#90).
