@@ -467,7 +467,7 @@ class TicketEmailParser(object):
 			for name,mail in addrs:
 				try:
 					mail_list = '%s, %s' %(mail_list, mail)
-				except:
+				except UnboundLocalError, detail:
 					mail_list = mail
 
 			if mail_list:
