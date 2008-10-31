@@ -218,6 +218,11 @@ class TicketEmailParser(object):
 		else:
 			self.VERBATIM_FORMAT = 1
 
+		if parameters.has_key('reflow'):
+			self.REFLOW = int(parameter['reflow'])
+		else:
+			self.REFLOW = 1
+
 		if parameters.has_key('strip_signature'):
 			self.STRIP_SIGNATURE = int(parameters['strip_signature'])
 		else:
@@ -859,6 +864,43 @@ class TicketEmailParser(object):
 
 		return ('\n'.join(body))
 
+	def reflow(self, text, delsp = 0):
+		"""
+		Reflow the message based on the format="flowed" specification (RFC 3676)
+		"""
+		flowedlines = []
+		quotelevel = 0
+		prevflowed = 0
+
+		for line in text.splitlines():
+			from re import match
+			
+			# Figure out the quote level and the content of the current line
+			m = match('(>*)( ?)(.*)', line)
+			linequotelevel = len(m.group(1))
+			line = m.group(3)
+
+			# Determine whether this line is flowed
+			if line and line != '-- ' and line[-1] == ' ':
+				flowed = 1
+			else:
+				flowed = 0
+
+			if flowed and delsp and line and line[-1] == ' ':
+				line = line[:-1]
+
+			# If the previous line is flowed, append this line to it
+			if prevflowed and line != '-- ' and linequotelevel == quotelevel:
+				flowedlines[-1] += line
+			# Otherwise, start a new line
+			else:
+				flowedlines.append('>' * linequotelevel + line)
+
+			prevflowed = flowed
+			
+
+		return '\n'.join(flowedlines)
+
 	def strip_quotes(self, text): 
 		"""
 		Strip quotes from message by Nicolas Mendoza
@@ -917,6 +959,12 @@ class TicketEmailParser(object):
 				body_text = part.get_payload(decode=1)
 				if not body_text:			
 					body_text = part.get_payload(decode=0)
+
+				format = email.Utils.collapse_rfc2231_value(part.get_param('Format')).lower()
+				delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp')).lower()
+
+				if self.REFLOW and not self.VERBATIM_FORMAT and format == 'flowed':
+					body_text = self.reflow(body_text, delsp == 'yes')
 	
 				if self.STRIP_SIGNATURE:
 					body_text = self.strip_signature(body_text)

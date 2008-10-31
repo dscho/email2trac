@@ -1,3 +1,13 @@
+200X-XX-XX
+  * applied patch to support RFC 3676 (format=flowed), closed #94
+    This patch adds a new option: reflow (default: False/0)
+    Author: ben at fetchsoftworks dot com
+    Applied by : Bas van der Vlies
+
+  * Fixed a bug in reply_all option, closes #95
+    Reported by: gmcgrath at princeton dot edu
+    Fixed by: Bas van der Vlies
+
 2008-10-13
   * Fixed a bug in email_header formating. When an email2trac ticket 
     was updated via the web interface it would trigger a description 
@@ -33,7 +43,7 @@
 
   * added recipient_list parameter.  If set then only mail is accepted if
     to-field matches. This only uses when people use a drop box to accept
-    emai for several email addresses, (closes #77)
+    email for several email addresses, (closes #77)
     Author: Bas van der Vlies, jon dot wbstr at gmail dot com
 
   * alternate notify template did not work for trac version 0.11 
