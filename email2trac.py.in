@@ -960,8 +960,8 @@ class TicketEmailParser(object):
 				if not body_text:			
 					body_text = part.get_payload(decode=0)
 
-				format = email.Utils.collapse_rfc2231_value(part.get_param('Format')).lower()
-				delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp')).lower()
+				format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
+				delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
 
 				if self.REFLOW and not self.VERBATIM_FORMAT and format == 'flowed':
 					body_text = self.reflow(body_text, delsp == 'yes')

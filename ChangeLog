@@ -1,5 +1,5 @@
 200X-XX-XX
-  * applied patch to support RFC 3676 (format=flowed), closed #94
+  * applied patch to support RFC 3676 (format=flowed), closes #94, #99
     This patch adds a new option: reflow (default: False/0)
     Author: ben at fetchsoftworks dot com
     Applied by : Bas van der Vlies
