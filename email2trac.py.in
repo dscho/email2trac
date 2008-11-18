@@ -682,7 +682,14 @@ class TicketEmailParser(object):
 
 			# default trac value
 			#
-			value = self.get_config('ticket', 'default_%s' %(name) )
+			if not field.get('custom'):
+				value = self.get_config('ticket', 'default_%s' %(name) )
+			else:
+				value = field.get('value')
+				options = field.get('options')
+				if value and options and value not in options
+					value = options[int(value)]
+
 			if self.DEBUG > 10:
 				print 'trac.ini name %s = %s' %(name, value)
 

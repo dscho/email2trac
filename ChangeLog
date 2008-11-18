@@ -8,6 +8,10 @@
     Reported by: gmcgrath at princeton dot edu
     Fixed by: Bas van der Vlies
 
+  * Applied a patch for default values for custom ticket fields, closes #101
+    Author: ben at fetchsoftworks dot com
+    Applied by: Bas van der Vlies
+
 2008-10-13
   * Fixed a bug in email_header formating. When an email2trac ticket 
     was updated via the web interface it would trigger a description 
