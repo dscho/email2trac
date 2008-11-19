@@ -687,7 +687,7 @@ class TicketEmailParser(object):
 			else:
 				value = field.get('value')
 				options = field.get('options')
-				if value and options and value not in options
+				if value and options and value not in options:
 					value = options[int(value)]
 
 			if self.DEBUG > 10:
