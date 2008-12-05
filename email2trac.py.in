@@ -154,6 +154,11 @@ class TicketEmailParser(object):
 		if parameters.has_key('umask'):
 			os.umask(int(parameters['umask'], 8))
 
+		if parameters.has_key('quote_attachment_filenames'):
+			self.QUOTE_ATTACHMENT_FILENAMES = int(parameters['quote_attachment_filenames'])
+		else:
+			self.QUOTE_ATTACHMENT_FILENAMES = 1
+
 		if parameters.has_key('debug'):
 			self.DEBUG = int(parameters['debug'])
 		else:
@@ -354,26 +359,38 @@ class TicketEmailParser(object):
 		#str = str.encode('utf-8')
 		return str
 
-	def debug_attachments(self, message):
+	def debug_body(self, message_body, tempfile=False):
+		if tempfile:
+			import tempfile
+			body_file = tempfile.mktemp('.email2trac')
+		else:
+			body_file = os.path.join(self.TMPDIR, 'body.txt')
+
+		print 'TD: writing body (%s)' % body_file
+		fx = open(body_file, 'wb')
+		if not message_body:
+			message_body = '(None)'
+		fx.write(message_body)
+		fx.close()
+		try:
+			os.chmod(body_file,S_IRWXU|S_IRWXG|S_IRWXO)
+		except OSError:
+			pass
+
+	def debug_attachments(self, message_parts):
 		n = 0
-		for part in message.walk():
-			if part.get_content_maintype() == 'multipart':      # multipart/* is just a container
-				print 'TD: multipart container'
+		for part in message_parts:
+			# Skip inline text parts
+			if not isinstance(part, tuple):
 				continue
+				
+			(filename, part) = part
 
 			n = n + 1
 			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
 			print 'TD: part%d: filename: %s' % (n, part.get_filename())
 
-			if part.is_multipart():
-				print 'TD: this part is multipart'
-				payload = part.get_payload(decode=1)
-				print 'TD: payload:', payload
-			else:
-				print 'TD: this part is not multipart'
-
-			file = 'part%d' %n
-			part_file = os.path.join(self.TMPDIR, file)
+			part_file = os.path.join(self.TMPDIR, filename)
 			#part_file = '/var/tmp/part%d' % n
 			print 'TD: writing part%d (%s)' % (n,part_file)
 			fx = open(part_file, 'wb')
@@ -642,11 +659,13 @@ class TicketEmailParser(object):
 		if update_fields:
 			self.update_ticket_fields(tkt, update_fields)
 
-		body_text = self.get_body_text(m)
+		message_parts = self.get_message_parts(m)
+		message_parts = self.unique_attachment_names(message_parts, tkt)
 
 		if self.EMAIL_HEADER:
-			head = self.email_header_txt(m)
-			body_text = u"%s\r\n%s" %(head, body_text)
+			message_parts.insert(0, self.email_header_txt(m))
+
+		body_text = self.body_text(message_parts)
 
 		if body_text.strip():
 			tkt.save_changes(self.author, body_text, when)
@@ -654,9 +673,9 @@ class TicketEmailParser(object):
 		tkt['id'] = ticket_id
 
 		if self.VERSION  == 0.9:
-			str = self.attachments(m, tkt, True)
+			str = self.attachments(message_parts, tkt, True)
 		else:
-			str = self.attachments(m, tkt)
+			str = self.attachments(message_parts, tkt)
 
 		if self.notification and not spam:
 			self.notify(tkt, False, when)
@@ -754,10 +773,15 @@ class TicketEmailParser(object):
 		if self.EMAIL_HEADER > 0:
 			head = self.email_header_txt(msg)
 			
-		body_text = self.get_body_text(msg)
+		message_parts = self.get_message_parts(msg)
+		message_parts = self.unique_attachment_names(message_parts)
+		
+		if self.EMAIL_HEADER > 0:
+			message_parts.insert(0, self.email_header_txt(msg))
+			
+		body_text = self.body_text(message_parts)
 
-		tkt['description'] = '%s\r\n%s' \
-			%(head, body_text)
+		tkt['description'] = body_text
 
 		#when = int(time.time())
 		#
@@ -784,7 +808,7 @@ class TicketEmailParser(object):
 			tkt['description'] = u'%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
 
-		str =  self.attachments(msg, tkt)
+		str =  self.attachments(message_parts, tkt)
 		if str:
 			changed = True
 			comment = '%s\n%s\n' %(comment, str)
@@ -814,8 +838,12 @@ class TicketEmailParser(object):
 			return
 
 		if self.DEBUG > 1:	  # save the entire e-mail message text
+			message_parts = self.get_message_parts(m)
+			message_parts = self.unique_attachment_names(message_parts)
 			self.save_email_for_debug(m, True)
-			self.debug_attachments(m)
+			body_text = self.body_text(message_parts)
+			self.debug_body(body_text, True)
+			self.debug_attachments(message_parts)
 
 		self.db = self.env.get_db_cnx()
  		self.get_sender_info(m)
@@ -945,22 +973,30 @@ class TicketEmailParser(object):
 		#
 
 
-	def get_body_text(self, msg):
+	def get_message_parts(self, msg):
 		"""
-		put the message text in the ticket description or in the changes field.
-		message text can be plain text or html or something else
+		parses the email message and returns a list of body parts and attachments
+		body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
 		"""
-		has_description = 0
-		encoding = True
-		ubody_text = u'No plain text message'
-		for part in msg.walk():
+		message_parts = []
 
+		for part in msg.walk():
 			# 'multipart/*' is a container for multipart messages
 			#
+			if self.DEBUG:
+				print 'TD: Message part: Content-Type: %s' % part.get_content_type()
+
 			if part.get_content_maintype() == 'multipart':
 				continue
 
-			if part.get_content_type() == 'text/plain':
+			# Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
+			inline = self.inline_part(part)
+
+			# Inline text parts are where the body is
+			if part.get_content_type() == 'text/plain' and inline:
+				if self.DEBUG:
+					print 'TD:               Inline body part'
+
 				# Try to decode, if fails then do not decode
 				#
 				body_text = part.get_payload(decode=1)
@@ -997,35 +1033,114 @@ class TicketEmailParser(object):
 				except LookupError, detail:
 					ubody_text = 'ERROR: Could not find charset: %s, please install' %(charset)
 
-			elif part.get_content_type() == 'text/html':
-				ubody_text = '(see attachment for HTML mail message)'
-
+				if self.VERBATIM_FORMAT:
+					message_parts.append('{{{\r\n%s\r\n}}}' %ubody_text)
+				else:
+					message_parts.append('%s' %ubody_text)
 			else:
-				ubody_text = '(see attachment for message)'
+				if self.DEBUG:
+					print 'TD:               Filename: %s' % part.get_filename()
 
-			has_description = 1
-			break		# we have the description, so break
+				message_parts.append((part.get_filename(), part))
 
-		if not has_description:
-			ubody_text = '(see attachment for message)'
+		return message_parts
+		
+	def unique_attachment_names(self, message_parts, tkt = None):
+		renamed_parts = []
+		attachment_names = set()
+		for part in message_parts:
+			
+			# If not an attachment, leave it alone
+			if not isinstance(part, tuple):
+				renamed_parts.append(part)
+				continue
+				
+			(filename, part) = part
+			# Decode the filename
+			if filename:
+				filename = self.email_to_unicode(filename)			
+			# If no name, use a default one
+			else:
+				filename = 'untitled-part'
 
-		# A patch so that the web-interface will not update the description
-		# field of a ticket
-		#
-		ubody_text = ('\r\n'.join(ubody_text.splitlines()))
+				# Guess the extension from the content type
+				ext = mimetypes.guess_extension(part.get_content_type())
+				if not ext:
+					ext = '.bin'
 
-		#  If we can unicode it try to encode it for trac
-		#  else we a lot of garbage
-		#
-		#if encoding:
-		#	ubody_text = ubody_text.encode('utf-8')
+				filename = '%s%s' % (filename, ext)
 
-		if self.VERBATIM_FORMAT:
-			ubody_text = '{{{\r\n%s\r\n}}}' %ubody_text
-		else:
-			ubody_text = '%s' %ubody_text
+			# Discard relative paths in attachment names
+			filename = filename.replace('\\', '/').replace(':', '/') 
+			filename = os.path.basename(filename)
 
-		return ubody_text
+			# We try to normalize the filename to utf-8 NFC if we can.
+			# Files uploaded from OS X might be in NFD.
+			# Check python version and then try it
+			#
+			if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
+				try:
+					filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
+				except TypeError:
+					pass
+					
+			if self.QUOTE_ATTACHMENT_FILENAMES:
+				filename = urllib.quote(filename)
+
+			# Make the filename unique for this ticket
+			num = 0
+			unique_filename = filename
+			filename, ext = os.path.splitext(filename)
+
+			while unique_filename in attachment_names or self.attachment_exists(tkt, unique_filename):
+				num += 1
+				unique_filename = "%s-%s%s" % (filename, num, ext)
+				
+			if self.DEBUG:
+				print 'TD: Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+
+			attachment_names.add(unique_filename)
+
+			renamed_parts.append((filename, unique_filename, part))
+		
+		return renamed_parts
+			
+	def inline_part(self, part):
+		return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
+		
+			
+	def attachment_exists(self, tkt, filename):
+		if tkt is None:
+			return False
+			
+		try:
+			Attachment(self.env, 'ticket', tkt['id'], filename)
+			return True
+		except ResourceNotFound:
+			return False
+			
+	def body_text(self, message_parts):
+		body_text = []
+		
+		for part in message_parts:
+			# Plain text part, append it
+			if not isinstance(part, tuple):
+				body_text.extend(part.strip().splitlines())
+				body_text.append("")
+				continue
+				
+			(original, filename, part) = part
+			inline = self.inline_part(part)
+			
+			if part.get_content_maintype() == 'image' and inline:
+				body_text.append('[[Image(%s)]]' % filename)
+				body_text.append("")
+			else:
+				body_text.append('[attachment:"%s"]' % filename)
+				body_text.append("")
+				
+		body_text = '\r\n'.join(body_text)
+		return body_text
 
 	def notify(self, tkt , new=True, modtime=0):
 		"""
@@ -1086,7 +1201,7 @@ class TicketEmailParser(object):
 		str = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(str, author)
 		return str
 
-	def attachments(self, message, ticket, update=False):
+	def attachments(self, message_parts, ticket, update=False):
 		'''
 		save any attachments as files in the ticket's directory
 		'''
@@ -1098,49 +1213,17 @@ class TicketEmailParser(object):
 		#
 		max_size = int(self.get_config('attachment', 'max_size'))
 		status   = ''
-
-		for part in message.walk():
-			if part.get_content_maintype() == 'multipart':		# multipart/* is just a container
+		
+		for part in message_parts:
+			# Skip body parts
+			if not isinstance(part, tuple):
 				continue
-
-			if not first:										# first content is the message
-				first = 1
-				if part.get_content_type() == 'text/plain':		# if first is text, is was already put in the description
-					continue
-
-			filename = part.get_filename() 
-			if not filename:
-				number = number + 1
-				filename = 'part%04d' % number
-
-				ext = mimetypes.guess_extension(part.get_content_type())
-				if not ext:
-					ext = '.bin'
-
-				filename = '%s%s' % (filename, ext)
-			else:
-				filename = self.email_to_unicode(filename)
-
-			# From the trac code
-			#
-			filename = filename.replace('\\', '/').replace(':', '/') 
-			filename = os.path.basename(filename)
-
-			# We try to normalize the filename to utf-8 NFC if we can.
-			# Files uploaded from OS X might be in NFD.
-			# Check python version and then try it
-			#
-			if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
-				try:
-					filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
-				except TypeError:
-					pass
-
-			url_filename = urllib.quote(filename)
+				
+			(original, filename, part) = part
 			#
 			# Must be tuneables HvB
 			#
-			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, url_filename))
+			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, filename))
 			text = part.get_payload(decode=1)
 			if not text:
 				text = '(None)'
@@ -1156,7 +1239,7 @@ class TicketEmailParser(object):
 			#
 			if (max_size != -1) and (file_size > max_size):
 				status = '%s\nFile %s is larger then allowed attachment size (%d > %d)\n\n' \
-					%(status, filename, file_size, max_size)
+					%(status, original, file_size, max_size)
 
 				os.unlink(path)
 				continue
@@ -1175,7 +1258,7 @@ class TicketEmailParser(object):
 				att.author = self.author
 				att.description = self.email_to_unicode('Added by email2trac')
 
-			att.insert(url_filename, fd, file_size)
+			att.insert(filename, fd, file_size)
 			#except  util.TracError, detail:
 			#	print detail
 
