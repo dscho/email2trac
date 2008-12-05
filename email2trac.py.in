@@ -384,7 +384,7 @@ class TicketEmailParser(object):
 			if not isinstance(part, tuple):
 				continue
 				
-			(filename, part) = part
+			(original, filename, part) = part
 
 			n = n + 1
 			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
@@ -1205,6 +1205,9 @@ class TicketEmailParser(object):
 		'''
 		save any attachments as files in the ticket's directory
 		'''
+		if self.DRY_RUN:
+			return ''
+
 		count = 0
 		first = 0 
 		number = 0 
