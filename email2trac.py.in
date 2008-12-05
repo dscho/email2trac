@@ -243,6 +243,21 @@ class TicketEmailParser(object):
 		else:
 			self.USE_TEXTWRAP = 0
 
+		if parameters.has_key('binhex'):
+			self.BINHEX = parameters['binhex']
+		else:
+			self.BINHEX = 'warn'
+
+		if parameters.has_key('applesingle'):
+			self.APPLESINGLE = parameters['applesingle']
+		else:
+			self.APPLESINGLE = 'warn'
+
+		if parameters.has_key('appledouble'):
+			self.APPLEDOUBLE = parameters['appledouble']
+		else:
+			self.APPLEDOUBLE = 'warn'
+
 		if parameters.has_key('python_egg_cache'):
 			self.python_egg_cache = str(parameters['python_egg_cache'])
 			os.environ['PYTHON_EGG_CACHE'] = self.python_egg_cache
@@ -979,13 +994,50 @@ class TicketEmailParser(object):
 		body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
 		"""
 		message_parts = []
+		
+		# This is used to figure out when we are inside an AppleDouble container
+		# AppleDouble containers consists of two parts: Mac-specific file data, and platform-independent data
+		# We strip away Mac-specific stuff
+		appledouble_parts = []
 
 		for part in msg.walk():
-			# 'multipart/*' is a container for multipart messages
-			#
 			if self.DEBUG:
 				print 'TD: Message part: Content-Type: %s' % part.get_content_type()
+				
+			# Check whether we just finished processing an AppleDouble container
+			if part not in appledouble_parts:
+				appledouble_parts = []
 
+			# Special handling for BinHex attachments. Options are drop (leave out with no warning), warn (and leave out), and keep
+			if part.get_content_type() == 'application/mac-binhex40':
+				if self.BINHEX == 'warn':
+					message_parts.append("'''A BinHex attachment named '%s' was ignored (use MIME encoding instead).'''" % part.get_filename())
+					continue
+				elif self.BINHEX == 'drop':
+					continue
+
+			# Special handling for AppleSingle attachments. Options are drop (leave out with no warning), warn (and leave out), and keep
+			if part.get_content_type() == 'application/applefile' and not part in appledouble_parts:
+				if self.APPLESINGLE == 'warn':
+					message_parts.append("'''An AppleSingle attachment named '%s' was ignored (use MIME encoding instead).'''" % part.get_filename())
+					continue
+				elif self.APPLESINGLE == 'drop':
+					continue
+
+			# Special handling for the Mac-specific part of AppleDouble attachments. Options are strip (leave out with no warning), warn (and leave out), and keep
+			if part.get_content_type() == 'application/applefile':
+				if self.APPLEDOUBLE == 'warn':
+					message_parts.append("'''The resource fork of an attachment named '%s' was removed.'''" % part.get_filename())
+					continue
+				elif self.APPLEDOUBLE == 'strip':
+					continue
+
+			# If we entering an AppleDouble container, set up appledouble_parts so that we know what to do with its subparts
+			if part.get_content_type() == 'multipart/appledouble':
+				appledouble_parts = part.get_payload()
+				continue
+
+			# Any other multipart/* is just a container for multipart messages
 			if part.get_content_maintype() == 'multipart':
 				continue
 
