@@ -853,8 +853,6 @@ class TicketEmailParser(object):
 				print "This is not a valid email message format"
 			return
 			
-		print repr(m['Subject'])
-
 		# Work around lack of header folding in Python; see http://bugs.python.org/issue4696
 		m.replace_header('Subject', m['Subject'].replace('\r', '').replace('\n', ''))
 
