@@ -682,7 +682,7 @@ class TicketEmailParser(object):
 
 		body_text = self.body_text(message_parts)
 
-		if body_text.strip():
+		if body_text.strip() or update_fields:
 			tkt.save_changes(self.author, body_text, when)
 
 		tkt['id'] = ticket_id

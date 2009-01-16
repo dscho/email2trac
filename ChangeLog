@@ -12,6 +12,17 @@
     Author: ben at fetchsoftworks dot com
     Applied by: Bas van der Vlies
 
+  * Fixed a bug that a ticket was not updated when we only update ticket field(s)
+    via email (empty mail), closes #113
+    Reported by: winnie at debian dot org
+    Fixed by: Bas van der Vlies
+ 
+  * Better support for inline attachments and multiple body parts, closes #105,#80
+    Author: ben at fetchsoftworks dot com
+
+  * More versatile support for Mac attachments. closes #106
+    Author: ben at fetchsoftworks dot com
+
 2008-10-13
   * Fixed a bug in email_header formating. When an email2trac ticket 
     was updated via the web interface it would trigger a description 
