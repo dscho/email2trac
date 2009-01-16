@@ -1,4 +1,4 @@
-200X-XX-XX
+2009-01-XX
   * applied patch to support RFC 3676 (format=flowed), closes #94, #99
     This patch adds a new option: reflow (default: False/0)
     Author: ben at fetchsoftworks dot com
@@ -12,18 +12,23 @@
     Author: ben at fetchsoftworks dot com
     Applied by: Bas van der Vlies
 
-  * Fixed a bug that a ticket was not updated when we only update ticket field(s)
-    via email (empty mail), closes #113
+  * Fixed a bug that a ticket was not updated when we only update ticket 
+    field(s) via email (empty body email), closes #113
     Reported by: winnie at debian dot org
     Fixed by: Bas van der Vlies
  
-  * Better support for inline attachments and multiple body parts, closes #105,#80
+  * Better support for inline attachments and multiple body parts, closes #105,
+    #80. Inline images in email are also shown in the ticket with the trac
+    [[Image(..)]] macro.
     Author: ben at fetchsoftworks dot com
 
   * More versatile support for Mac attachments. closes #106
+    for explanation read: 
+    - https://subtrac.sara.nl/oss/email2trac/wiki/Email2tracConfiguration#AppleAttachmentsoptions
     Author: ben at fetchsoftworks dot com
 
-  * Applied an patch that solve problems with Window attachments, closes #110,#93 
+  * Applied a patch that solves problems with Window attachments, closes #110,
+    #93.
     Author: martin.poeschmann add eiskonzept dot com  	
     Applied by: Bas van der Vlies
 
