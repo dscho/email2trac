@@ -1119,8 +1119,11 @@ class TicketEmailParser(object):
 			else:
 				filename = 'untitled-part'
 
-				# Guess the extension from the content type
-				ext = mimetypes.guess_extension(part.get_content_type())
+				# Guess the extension from the content type, use non strict mode
+				# some additional non-standard but commonly used MIME types 
+				# are also recognized
+				#
+				ext = mimetypes.guess_extension(part.get_content_type(), False)
 				if not ext:
 					ext = '.bin'
 
@@ -1307,7 +1310,7 @@ class TicketEmailParser(object):
 					
 			# Insert the attachment
 			# 
-			fd = open(path)
+			fd = open(path, 'rb')
 			att = attachment.Attachment(self.env, 'ticket', ticket['id'])
 
 			# This will break the ticket_update system, the body_text is vaporized

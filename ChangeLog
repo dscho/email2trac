@@ -23,6 +23,10 @@
   * More versatile support for Mac attachments. closes #106
     Author: ben at fetchsoftworks dot com
 
+  * Applied an patch that solve problems with Window attachments, closes #110,#93 
+    Author: martin.poeschmann add eiskonzept dot com  	
+    Applied by: Bas van der Vlies
+
 2008-10-13
   * Fixed a bug in email_header formating. When an email2trac ticket 
     was updated via the web interface it would trigger a description 
