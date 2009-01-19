@@ -1,0 +1,15 @@
+The email2trac package is written by:
+  Bas van der Vlies <basv@sara.nl>
+  Walter de Jong <walter@sara.nl>
+
+regular patch contributor(s):
+   Ben Artin <ben at fetchsoftworks dot com>
+
+The 0.9 port:
+  Michel Jouvin <jouvin@lal.in2p3.fr>
+
+RPM spec file:
+ Jon Topper <jon at topper dot me dot uk>
+
+Initial setup and ideas from:
+  Daniel Lundin <daniel@edgewall.com>

@@ -1,0 +1,219 @@
+#!@PYTHON@
+#
+# Copyright (C) 2002
+#
+# This file is part of the email2trac utils
+#
+# This program is free software; you can redistribute it and/or modify it 
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation; either version 2, or (at your option) any
+# later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+#
+# vi:
+#	set ts=4
+"""
+Author: Bas van der Vlies
+Date  : 29 September 2205
+Desc. : Delete Spam tickets from database. Else we get an lot of 
+        tickets
+
+Usage :
+	delete_spam [ -f/--file <configfile> -p/--project <name>]
+
+defaults:
+	configfile = /etc/email2trac.conf
+
+SVN Info:
+        $Id$
+"""
+
+import os
+import sys
+import getopt
+import shutil
+import ConfigParser
+
+trac_default_version = 0.10
+
+def ReadConfig(file, name):
+	"""
+	Parse the config file
+	"""
+
+	if not os.path.isfile(file):
+		print 'File %s does not exists' %file
+		sys.exit(1)
+
+	config = ConfigParser.ConfigParser()
+	try:
+		config.read(file)
+	except ConfigParser.MissingSectionHeaderError,detail:
+		print detail
+	  	sys.exit(1)
+
+  	# Use given project name else use defaults
+  	#
+	if name:
+		if not config.has_section(name):
+			print "Not an valid project name: %s" %name
+			print "Valid names: %s" %config.sections()
+			sys.exit(1)
+
+		project =  dict()
+		for option in  config.options(name):
+			project[option] = config.get(name, option) 
+
+	else:
+		project = config.defaults()
+
+	return project
+
+
+
+def new_delete_spam(project, debug):
+	"""
+	This only works for trac versions higher or equal then 0.10
+	"""
+	env = Environment(project, create=0)
+	db = env.get_db_cnx()
+
+	cursor = db.cursor()
+	cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
+	while 1: 
+		row = cursor.fetchone()
+		if not row:
+			break 
+
+		spam_id =  row[0]
+
+		if debug:
+			print "Deleting ticket %s" %spam_id
+
+		try:
+			tkt = Ticket(env, spam_id, db)
+		except util.TracError, detail:
+		        print detail
+			continue
+
+		tkt.delete()
+
+def old_delete_spam(project, debug):
+	"""
+	This only works for trac versions before 0.10
+	"""
+	env = Environment(project, create=0)
+	db = env.get_db_cnx() 
+	
+	attachment_dir = os.path.join(env.path, 'attachments', 'ticket') 
+	cursor = db.cursor()
+	tkt_cursor = db.cursor() 
+	
+	# Delete the attachments associated with Spam tickets
+	#
+	cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
+	while 1:
+		row = cursor.fetchone()
+		if not row:
+			break
+		spam_id =  row[0] 
+	
+		if debug:
+			print spam_id 
+
+			sql_cmd = "SELECT *  FROM attachment WHERE type='ticket' and id='%s';" %spam_id
+			tkt_cursor.execute(sql_cmd) 
+			row = tkt_cursor.fetchone()
+			print row 
+			
+			sql_cmd = "SELECT * FROM ticket_change WHERE ticket='%s';" %spam_id 
+			tkt_cursor.execute(sql_cmd) 
+			row = tkt_cursor.fetchone()
+			print row 
+			
+			sql_cmd = "SELECT * FROM ticket_custom WHERE ticket='%s';" %spam_id
+			tkt_cursor.execute(sql_cmd) 
+			row = tkt_cursor.fetchone()
+			print row 
+			
+		sql_cmd = "DELETE FROM attachment WHERE type='ticket' and id='%s';" %spam_id
+		tkt_cursor.execute(sql_cmd) 
+
+		sql_cmd = "DELETE FROM ticket_change WHERE ticket='%s';" %spam_id
+		tkt_cursor.execute(sql_cmd) 
+			
+		sql_cmd = "DELETE FROM ticket_custom WHERE ticket='%s';" %spam_id
+		tkt_cursor.execute(sql_cmd) 
+			
+		# Ticket commit 
+		# 
+		db.commit() 
+
+		dir = os.path.join(attachment_dir, str(spam_id)) 
+		if os.path.exists(dir):
+			if debug:
+				print 'delete %s : %s' %(spam_id, dir)
+			try: 
+				shutil.rmtree(dir) 
+			except OSError, detail: 
+				print 'Contact system-administrator: %s' %detail
+				continue
+
+	cursor.execute("DELETE FROM ticket WHERE  component = 'Spam';") 
+	db.commit()
+
+if __name__ == '__main__':
+	# Default config file
+	#
+	configfile = '@email2trac_conf@'
+
+
+	try:
+		 opts, args = getopt.getopt(sys.argv[1:], 'hf:p:', ['help', 'file=', 'project='])
+	except getopt.error,detail:
+		print __doc__
+		print detail
+		sys.exit(1)
+
+	project_name = None
+	for opt,value in opts:
+		if opt in [ '-h', '--help']:
+			print __doc__ 
+			sys.exit(0) 
+		elif opt in ['-f', '--file']:
+			configfile = value
+		elif opt in ['-p', '--project']:
+			project_name = value
+	
+	settings = ReadConfig(configfile, project_name)
+	if not settings.has_key('project'):
+		print __doc__
+		print 'No project defined in config file, eg:\n\t project: /data/trac/bas'
+		sys.exit(1)
+
+	if settings.has_key('trac_version'):
+		version = float(settings['trac_version'])
+	else:
+		version = trac_default_version
+
+	from trac.env import Environment
+	from trac.ticket import Ticket
+	from trac import util
+
+	if version == 0.10:
+		new_delete_spam(settings['project'], int(settings['debug']))
+		#new_delete_spam(settings['project'], 1)
+		#old_delete_spam(settings['project'], 0)
+	elif version == 0.9:
+		old_delete_spam(settings['project'], int(settings['debug']))
+
+	print 'Spam is deleted succesfully..' 
+# EOB

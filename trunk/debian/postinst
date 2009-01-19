@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Authors: Bas van der Vlies
+#
+# SVN Info:
+#	$Id$
+
+dpkg-statoverride --remove /usr/bin/run_email2trac >/dev/null 2>&1 || true
+dpkg-statoverride --update --add root root 04111 /usr/bin/run_email2trac

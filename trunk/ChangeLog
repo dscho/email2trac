@@ -1,0 +1,617 @@
+2009-01-19
+  * applied patch to support RFC 3676 (format=flowed), closes #94, #99
+    This patch adds a new option: reflow (default: False/0)
+    Author: ben at fetchsoftworks dot com
+    Applied by : Bas van der Vlies
+
+  * Fixed a bug in reply_all option, closes #95
+    Reported by: gmcgrath at princeton dot edu
+    Fixed by: Bas van der Vlies
+
+  * Applied a patch for default values for custom ticket fields, closes #101
+    Author: ben at fetchsoftworks dot com
+    Applied by: Bas van der Vlies
+
+  * Fixed a bug that a ticket was not updated when we only update ticket 
+    field(s) via email (empty body email), closes #113
+    Reported by: winnie at debian dot org
+    Fixed by: Bas van der Vlies
+ 
+  * Better support for inline attachments and multiple body parts, closes #105,
+    #80. Inline images in email are also shown in the ticket with the trac
+    [[Image(..)]] macro.
+    Author: ben at fetchsoftworks dot com
+
+  * More versatile support for Apple attachments. closes #106
+    for explanation read: 
+    - https://subtrac.sara.nl/oss/email2trac/wiki/Email2tracConfiguration#AppleAttachmentsoptions
+    Author: ben at fetchsoftworks dot com
+
+  * Applied a patch that solves problems with Window attachments, closes #110,
+    #93.
+    Author: martin.poeschmann add eiskonzept dot com  	
+    Applied by: Bas van der Vlies
+
+2008-10-13
+  * Fixed a bug in email_header formating. When an email2trac ticket 
+    was updated via the web interface it would trigger a description 
+    field update.
+
+    Fixed by: Bas van der Vlies
+
+  * Reopen closed ticket if an update is received via email, closes #70
+    Requested by: Garrett McGrath gmcgrath add princeton dot edu
+    Fixed by: Bas van der Vlies
+
+
+  * The [DEFAULT] section did not work any more due to change to internal
+    trac parser, closes ticket #73
+    Reported by: email2trac at bulk dot squeakyblue dot com
+    Fixed by: Bas van der Vlies
+   
+  * black_list paramter must be comma-separated as mentioned in the 
+    documentation (#75) and removed the default value 
+    "MAILER-DAEMON@" (#74)
+    Reported by: email2trac at bulk dot squeakyblue dot com
+    Fixed by: Bas van der Vlies
+
+  * If a blank email is sent with just an attachment, a blank 
+    comment is appended to the comments. fixed closes #89
+
+    Reported/Fixed by: ???
+    Applied by: Bas van der Vlies
+
+  * added white_list parameter.  If set then only mail is accepted if
+    sender matches.
+    Author: Bas van der Vlies, jon dot wbstr at gmail dot com
+
+  * added recipient_list parameter.  If set then only mail is accepted if
+    to-field matches. This only uses when people use a drop box to accept
+    email for several email addresses, (closes #77)
+    Author: Bas van der Vlies, jon dot wbstr at gmail dot com
+
+  * alternate notify template did not work for trac version 0.11 
+    (#90).
+    Reported/Fixed by: hju at jochenkuhl dot de
+    Applied by       : Bas van der Vlies
+
+  * added 'alternate_notify_template_update'. When set this notify 
+    template name will be used for ticket updates (#90).
+    Author: Bas van der Vlies, hju at jochenkuhl dot de
+    
+   
+2008-05-30
+  * Fixed debian control file. Package can be build on any platform and
+    not only on i386 platforms:
+
+    Author: Christian Iversen ci add sikkerhed dot org
+    Applied by: Bas van der Vlies
+
+  * We now use the trac configuration parser routine
+    Author: andrei2102 add gmail dot com
+    Applied by: Bas van der Vlies
+
+  * Added new command line option -n/--dry-run. This option only show
+    what commands will be executed.
+    Author: Bas van der Vlies
+
+  * the default values for tickets can now also be set in 
+   'email2trac.conf'. So you can use different values when an email
+    is converted to a ticket. The ticket value is set to this rules
+     - email2trac.conf
+     - trac.ini
+
+    email2trac.conf use same format as trac.ini, eg email2trac.conf:
+      [project]
+      default_component : test
+
+    closes request #55, for more info see:
+    - https://subtrac.sara.nl/oss/email2trac/wiki/Email2tracConfiguration
+
+     Requested by: greg dot deakyne at etapestry dot com
+     Implemented by: Bas van der Vlies
+
+  * Fixed a bug in ticket_update. It failed when project did not have 
+    ticket component field,  closes bug #62
+    Reported by: gernot dot hillier add siemens dot com
+    Fixed by: Bas van der Vlies
+	  
+  * run_email2trac.c:
+     - can no longer segfault after a failed malloc.
+     - after set*id failure, you'll get a diagnostic (or at least 
+       nonzero exit status) and it won't attempt the exec.
+
+    Author: Jim Meyering jim add meyering dot net
+    Applied by: Bas van der Vlies
+
+  * Made some approvements to spam function:
+     - If the he X-Spam-Score header is present, but has no value 
+	email2trac will crash, closes #63
+
+     - Added config option which header field we must check 
+       for determing if mail is Spam, eg:
+        - spam_header : X-Spam-Level (default: X-Spam-Score)
+ 
+    Author: email2trac at bulk dot squeakyblue dot com
+    Applied by: Bas van der Vlies
+
+
+  * black_list  is now a configuration option and is used to deny
+    email addesses, default value is: MAILER-DAEMON@
+
+    Can specifiy more then one email adress seperated by ',', eg:
+    black_list : basv@sara.nl, walter@sara.nl
+
+    closes #39, #56
+    
+    Author: Bas van der Vlies
+
+  * if mailto_link + german umlaut problem is fixed, closes #60
+    Reported by: alex at pirsig dot net
+    Fixed by: Bas van der Vlies
+    
+
+2008-02-04
+	* Added version check and exit if we do not support the trac version
+	  closes bug #23
+	  Reported By: Marc Zahnlecker m.zahnlecker at lxbyte dot de
+
+	  Fixed By: Bas van der Vlies
+
+	* Added check if syslog module is available. If it is not available
+          disable the syslog functionality.
+	  Author: michael.th add gmx dot net 
+
+	  Implemented by: Bas van der Vlies
+
+	* Added strip_quotes function, default settings:
+		strip_quotes: <int> (default: 0) 
+		mail_quote: <quote chars> (default: "> ")
+	  Author: nicolasm @ opera dot com
+
+	  Implemented by: Bas van der Vlies
+
+	* Added patch to make notify email work with trac 0.11 dev.
+	  Author: tbaschak add ktc dot mb dot ca	
+	  Author: andrei2102 add gmail dot com 
+
+	  Implemented by: Bas van der Vlies
+
+	* greedy matching in Subject line, We must stop after the first ':'
+	  else we get wrong values for ticket fields when we update a ticket
+	  via mail, closes ticket #37
+	  Reported by: dmaziuk at bmrb dot wisc dot edu
+	  Fixed    by: Bas van der Vlies
+
+	* added IGNORECASE flag to regular expression for black list. This
+	  is a quick fix, still want to implement this as configuration 
+	  option, closed bug #39
+
+	  Reported By: jodok at lovelysystems dot com
+	  Fixed by   : Bas van der Vlies
+
+	* When a known user mails a ticket. We will set the Reporter to
+	  its login name, closes bug #33, #41
+
+	  Also add configuration option: 
+	  	ignore_trac_user_settings : 0 (default value)
+
+	  This option will skip the email address to trac user login name
+	  mapping.
+
+	  Reported by: anonymous
+	  Fixed by   : Bas van der Vlies
+
+	
+	* SPAM detection was only for new mails not for ticket updates,
+	  closed ticket #44
+
+	  Reported by: Bas van der Vlies
+	  Fixed by   : Bas van der Vlies
+	  
+	   
+2007-07-18
+
+	* Implemented python_egg_cache environment variable. Some trac
+	  installations may depend on it, closes ticket #10, eg:
+	  	python_egg_cache : /var/cache/eggcache
+
+	  Reported By: Anonymous
+	  Fixed by   : Bas van der Vlies <basv@sara.nl>
+
+	* Implemented update ticket fields via email subject line, eg:
+	  	Re: [email2trac] #7?owner=bas,priority=minor: Error in parsing
+
+	  	- Sets the owner of the ticket to: bas
+		- Sets the priority of the ticket to: minor
+	 
+	  For some ticket fields there are only a limited number of allowed
+	  values. The supplied value will be checked against this list. If it
+	  is not vaild value the field update will be ignored.
+
+	  Requested by  : trac at yadan dotnet, Jan Parchmann, see ticket #7
+	  Implemented by: Bas van der Vlies <basv@sara.nl>
+
+	* Dropped support for version trac version 0.8. Removed all 0.8
+	  specific code.  
+	  Fixed by: Bas van der Vlies <basv@sara.nl>
+
+	* Added a new config parameter: tmpdir: /var/tmp, default is '/tmp'
+	  All functions now use this new parameter and use OS independent 
+	  path functions. 
+	  Implemented by: Bas van der Vlies <basv@sara.nl>
+
+	* fixed and a creating directory problem email2trac.spec file
+	  Fixed by: artrus at netzero dot net
+
+	* set_owner function is obsolete. When component is set the trac code
+	  will set the owner to the component owner. 
+	  Fixed by    : Bas van der Vlies <basv@sara.nl>
+
+	* Also show email headers in a ticket update.
+	  Requested by: Ramon Bastiaans 
+	  Fixed by    : Bas van der Vlies <basv@sara.nl>
+
+	* A date patch so it works with trac version 0.11 for ticket updates. 
+	  Also applied for other trac versions.
+	  Thanks to: tbaschak at ktc dot mb dot ca
+
+2007-04-27
+
+	* Added check to catch an error when attachment size
+	  is too large, bug #1153
+	  Author: Bas van der Vlies
+
+	* Wrap long line into user given length, use_textwrap: 72. Wraps lines
+	  greater then 72 chars, #1123
+	  Author: Bas van der Vlies & 
+	          Rainer Sokoll (r.sokoll at intershop dot de)
+
+	* Fixed a dutch spelling, #1295
+	  Author: Rainer Sokoll (r.sokoll at intershop dot de)
+
+        * email2trac.py : blacklist (don't create ticket) mail from
+	  MAILER-DAEMON to avoid loops
+	  Author: Michel Jouvin <jouvin at lal dot in2p3 dot fr>
+
+	* msg.bad.txt : add an example of message from MAILER-DAEMON
+	  Author: Michel Jouvin <jouvin at lal dot in2p3 dot fr>
+
+2006-12-08
+	* email2trac.py:
+	  - Added verbatim_format option default is: 1
+	  Added by : Bas van der Vlies
+
+	  - Added strip_signature option default is: 0 
+	  Added by : Bas van der Vlies
+
+	  - Fixed some unicode errors, thanks to japanes SPAM. 
+	    If we can not unicode email message then display which
+	    charset must be installed in ticket description. Else we 
+	    trac crashed with unicode errors ;-(
+	  Fixed by: Bas van der Vlies
+
+	  - Fixed statements: str + unicode, raises an exception if 
+	    non-ascii value in unicode object.
+
+	  - Forgot to unicode the author. So we got an error if we use 
+	    the mailto_link option in email2trac.conf. 
+	  Fixed by: Bas van der Vlies
+
+	* delete_spam.py:
+	  - Now works for version 0.10 with new API-functions
+	  Fixed by: Bas van der Vlies
+
+	* Makefile.in
+	  - Added install-conf. Install email2trac.conf if there is none
+	    installed.
+	  Fixed by: Bas van der Vlies
+
+2006-10-27
+
+	* run_email2trac.c. 
+	
+	  - Setgid() must be called before setuid().
+	  Reported by:  Anonymous
+	  Fixed    by:  Bas van der Vlies
+
+	* email2trac.py, 
+	
+	  - Fixed an error in Ticket Update. When ticket
+	  does not exists, proceed as if it is a new ticket
+	  Fixed    by:  Bas van der Vlies
+
+	  - Fixed a strang bug in 0.9 version, if ticket update 
+	  is enabled and email has attachment(s). We are not allowed to 
+	  set the description and author field of the attachment else 
+	  the comment text is lost ;-(
+	  Fixed    by:  Bas van der Vlies
+
+	  - Fixed an error if enable_syslog and drop_spam is set. We get
+	  an exception in the syslog if we use sys.exit(0), replaced by
+	  return.
+	  Fixed    by:  Bas van der Vlies
+
+	* delete_spam.py. 
+	
+	  - Trac version 0.10 made it easier to delete tickets.
+	  Fixed    by:  Bas van der Vlies
+	
+2006-10-10
+	* Fixed race conditions in delete_spam.py and added some 
+	  debug code.
+	  Fixed by   : Bas van der Vlies
+
+	* Added author and description field when attachment is
+	  added to ticket. This is for trac version greater than
+	  0.8.
+	  Fixed by   : Bas van der Vlies
+	  Thanks to Matthew Good for the hint
+
+	* Added drop_spam option, default = 0. If set then
+	  mail marked as Spam is not accepted.
+	  Added by   : Bas van der Vlies
+
+	* Do not send notification if message is marked as Spam 
+	  and drop_spam is not set.
+	  Fixed by   : Bas van der Vlies
+
+2006-10-02
+	* Fixes possible segmentation faults in run_email2trac.c 
+	  Reported by: bcornec
+	  Fixed by   : Bas van der Vlies
+
+	* Can set DEBUG level while configuring package, eg:
+	  DEBUG=1 ./configure ( default : 0)
+	  Reported by: syd at plug dot ca
+	  Fixed By   : Bas van der Vlies
+
+	* delete_spam.py did not delete everything from the SQL tables
+	  Reported by: brent at rcfile dot org
+	  Fixed by   : Bas van der Vlies
+
+	* Do not send notification when message is marked as Spam
+	  Fixed by   : Bas van der Vlies
+	  
+2006-08-28
+	* fixes an error in the 'reply_all' setting
+	  Thanks to and Patch by: ncarlson@ibsys.com
+
+	* Added RPM spec file 
+	  Thanks to:  Jon Topper <jon@topper.me.uk>
+
+2006-07-14
+	* Use X11R5 install-sh to install email2trac components to hide
+          native install program differences.
+	  Author: Michel Jouvin <jouvin@lal.in2p3.fr>
+
+	* Fixed an error in saving attachments for new tickets for trac 
+	  versions greater then 0.9.
+	  Fixed by: Bas van der Vlies
+
+	* When something went wrong save the offending email for debug
+	  purposes.
+	  Fixed by: Bas van der Vlies
+
+	* delete_spam.py 
+	   - did not clean up the attachment table. So we got nasty new 
+	     mails with fake attachments.
+	   - It works now for versions higher then 0.8
+
+	* Finally understand the unicode/encode functions and hopefully
+	  fixed the errors.
+	  Fixed by: Bas van der Vlies
+
+	* Remove the temporarly created attachment files.
+	  Fixed by: Bas van der Vlies
+	
+2006-07-06
+	* Fixed an error in already added attachments. Do not close
+	  the database connection.
+	  Fixed by: Walter de Jong en Bas van der Vlies
+
+	* Added enable_syslog option. If enabled log errors to syslog
+	  instead of stderr. If enabled no errors are send back to the 
+	  user.
+	  Implemented by: Bas van der Vlies
+
+	* Fixed an error with updating tickets with attachments for trac 
+	  versions 0.9 and 0.10. Field "id" is not known when a existing
+	  ticket is fetched (Error = KeyError: 'id')
+	  Fixed By: See tickets #258 and #449 on trac-hacks
+
+	* Fixed and spell error, self.mail_addr must be self.email_addr
+	  Fixed by: Bas van der Vlies
+
+	* Catch a LookupError in unicode/encode conversion in function 
+	  get_body_text()
+	  Fixed by: Bas van der Vlies
+
+	* Description field was always changed when updating the ticket 
+	  via the web. Asked the mailing list for a solution and got one
+	  ;-)
+	  Patch/Suggestion by: Christian Boos
+	  Applied by: Bas van der Vlies
+
+	* Fixed an encoding problem when email_header is set to 1
+	  Fixed by: Bas van der Vlies
+
+	* Fixed a bug in to_unicode() function.
+	  Fixed by: Bas van der Vlies
+
+	* Fixed an unicodedata.normalize TypeError bug for filenames in the 
+	  attachment function
+	  Fixed by: Bas van der Vlies
+
+
+2006-06-02
+	* Added ticketing merging. To enable it there are two options for
+	  both options enable 'ticket_update' in email2trac.conf
+	  1 - Configure trac notification, eg: 
+	  	* (ticket address: ticket@test.nl)
+	  	[notification]
+		smtp_enabled = true
+		smtp_always_cc = test@test.nl
+		smtp_server = localhost
+		smtp_from =  ticket@test.nl
+	  	always_notify_reporter = true
+
+	  2 - Use the mailto_cc in email2trac.conf if you want to sent
+	      an email to the user and the trac ticket email address.
+
+	  With both options you get the right format of the subject line.
+
+	* Use the short options for the install command. So it works for
+	  MacOSx Reported by: Nathaniel Irons.
+
+	* Updated inline documentation by Nathaniel Irons.
+	  	 
+2006-05-16
+	* Fixed a bug when there was no plain text body.
+	  Reported by: Greg Deakyne
+	* Fixed a small bug if default component owner is unknown.
+	  Just fill in some bogus info.
+	* Use the short options for the install command. So it works for
+	  MacOSx
+	  Reported by: Nathaniel Irons
+	* Messages that has X-Virus-found in header are marked as SPAM
+	  Implemented by: Walter de Jong
+	* Some modules are changed for version 0.10, Added and made some
+	  minor changes: Patch supplied by: Markus Tacker  
+	* Ported delete_spam.py to version 0.9 and higher:
+	  Reported by: Nathaniel Irons
+
+
+2006-03-08
+        - Fixed an bug for 0.9, there was a space in front of the ' ticket' directory.
+	  removed it.
+	  Reported by: mi-trachacks@moensolutions.com	
+	  Fixed by: Bas van der Vlies
+	* Fixed an exception error in delete_spam.py
+	  when shutil has not enough priveledges to remove the
+	  attachments it is reported
+	  Fixed by: Bas van der Vlies
+	* email2trac.py: When you include the body tag, some 
+	  mailers (like Thunderbird) will leave out the signature.
+          Therefore this version leaves out the body tag.
+	  Fixed by: Walter de Jong
+	* Added msg.txt for testing
+	  Fixed by: Bas van der Vlies
+
+2006-02-01  Bas van der Vlies <basv@sara.nl>:
+	* Added Tikcet notification, send email when there is
+	  a new ticket. Depends on notification setting in
+	  trac.ini. 
+	  Implemented by: Kilian Cavalotti 
+	* Can use different template for ticket notification,
+	  eg: alternate_notify_template: "a_tkt.css" 
+	  Implemented by: Kilian Cavalotti 
+	* Added reply_all config parameter. If set put all
+	  CC-addresses from orginal mail in ticket CC-field.
+	  Suggested by: Kilian Cavalotti
+	* Text in ticket description is also properly UTF-8
+	  encoded
+	  Implemented by: Kilian Cavalotti 
+	* Removed reply_address from config file. Is not
+	  necessary anymore. See Ticket notification.
+	* Added support for known users. If email address is
+	  known then use the trac known username instead
+	  of the email-address (only for trac version > 0.9)
+	  Implemented by: Kilian Cavalotti 
+	* Fixed an error in saving attachments for version < 0.9.
+	  Sometimes we got bogus attachments.
+	  Fixed by: Walter de Jong
+	* Added support to make an debian package
+	  Implemented by: Bas van der Vlies
+
+2006-01-21  Bas van der Vlies <basv@sara.nl>:
+	* Fixed run_email2trac.c, did not work
+	* Added TRAC_SCRIPT_NAME to Makefile.in to 
+	  solve run_email2trac problem
+
+	Both errors reported by: kilian.cavalotti@lip6.fr
+
+2006-01-20  Bas van der Vlies <basv@sara.nl>:
+	* A warning error is fixed by kilian.cavalotti@lip6.fr
+	* Several errors in make install ;-(, reported by
+	  tacker
+
+2006-01-15  Bas van der Vlies <basv@sara.nl>:
+	* Added configure script.
+
+2006-01-10  Bas van der Vlies <basv@sara.nl>:
+	* Removed project_root from source and config file
+	* Adjust code so we can use mulitple stanza's in config file, eg:
+	  [bas]
+	  project: /data/trac/bas
+	  spam_level: 3
+
+	  use option "-p|--project bas" to select the stanza
+
+2006-01-04  Bas van der Vlies <basv@sara.nl>:
+
+	* Fixed getopt for -f option
+	* Added suppport for different TRAC versions (0.8 and 0.9)
+
+2006-01-03  Michel Jouvin  <jouvin@lal.in2p3.fr>
+
+	* email2trac.py (ReadConfig) : allow project name relative to project root in configuration file
+	
+	* email2trac.py (TicketEmailParser.parse): save entire email for debugging only if debug >= 2
+
+	* run_email2trac.c: pass wrapper arguments to Python script, filtering out --file 
+
+	* email2trac.py (TicketEmailParser.debug_attachments): set tmp file created for debugging writable by anybody (to avoid problem if the script is run with a different uid during tests)
+
+	* email2trac.py (TicketEmailParser.parse): set tmp file created for debugging writable by anybody (to avoid problem if the script is run with a different uid during tests)
+
+2005-12-22  Michel Jouvin  <jouvin@lal.in2p3.fr>
+
+	* Makefile: add a Makefile to build and install email2trac
+
+	* email2trac.py: migrate to Trac 0.9 API
+
+2005-12-21  Michel Jouvin  <jouvin@lal.in2p3.fr>
+
+	* run_email2trac.c: add error messages if DEBUG macro defined
+
+	* run_email2trac.c: add error testing and specific return values for each error
+
+	* run_email2trac.c: Move site specific paramaters to run_email2trac.h
+
+	* run_email2trac.h: include file to define site specific paramaters
+
+0.2.4 01/11/2005
+	Added email_header option if set then show TO/CC fields in
+	description of the ticket.
+
+	Fixed an error in the mailto URL. This was an old error that 
+	supposed to be fixed but reoccured in this version.
+	
+0.2.3 31/10/2005
+	Fixed a bug with base64 encoded attachments/emails
+	Fixed by: Walter de Jong
+
+0.2.2 10/10/2005
+	according to RFC 2368 (titled "the mailto URL scheme") the mailto
+	URL can only work with short &body messages. It fails with long
+	messages and the link won't work. Therefore the mail body is
+	no longer copied into the mail reply.
+
+0.2.1 10/07/2005
+	body of reply email looks better
+
+
+0.2   10/07/2005
+	mailto is replaced by a html mailto to line. If 
+	you reply to the ticket via this link then an 
+	email client is started with some default values:
+		To: <reporter>
+		Subject: Re: <orginal subject>
+		Body: email_comment <orginal text>
+
+	email2trac.conf:
+		email_comment: # (default:  >)
+
+		
+

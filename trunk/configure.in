@@ -1,0 +1,77 @@
+#
+# Author: Bas van der Vlies <basv@sara.nl>
+# Desc. : Simple configure script for email2trac package
+# SVN INFO:
+#	$Id$
+#
+#
+AC_INIT(email2trac.py.in)
+AC_SUBST(prefix)
+AC_SUBST(exec_prefix)
+AC_SUBST(pyexecdir)
+AC_SUBST(trac_user)
+AC_SUBST(mta_user)
+AC_SUBST(sysconfdir)
+
+#DEBUG=0
+
+AM_PATH_PYTHON
+AC_PROG_GCC_TRADITIONAL
+
+if test "x$DEBUG" = "x";then
+  DEBUG=0
+fi
+AC_SUBST(DEBUG)
+
+# Now a user can specify the TRAC user
+#
+AC_ARG_WITH(trac_user,
+[
+  --with-trac_user=USER    Specify the name of the user that trac use,
+                          default=www-data],
+
+  [case "${withval}" in
+        *) trac_user="${withval}" ;;
+  esac],
+
+  [trac_user="www-data"]
+)dnl            
+
+# Now a user can specify MTA TRAC user
+#
+AC_ARG_WITH(mta_user,
+[
+  --with-mta_user=USER    Specify the name of the user that your MTA use,
+                          default=nobody],
+
+  [case "${withval}" in
+        *) mta_user="${withval}" ;;
+  esac],
+
+  [mta_user="nobody"]
+)dnl            
+
+dnl ##### Path to email2trac.conf
+dnl This ugly kludge to get the sysconfdir path is needed because
+dnl autoconf doesn't actually set the prefix variable until later.
+if test "$sysconfdir" = '${prefix}/etc'; then
+  if test "x$prefix" = xNONE; then
+    email2trac_conf="$ac_default_prefix/etc/email2trac.conf"
+  else
+    email2trac_conf="$prefix/etc/email2trac.conf"
+  fi
+else
+  email2trac_conf="$sysconfdir/email2trac.conf"
+fi
+AC_DEFINE_UNQUOTED(SYSTEM_EMAIL2TRAC_CONF, "$email2trac_conf",
+                   [Full path for the system-wide email2trac.conf file.])
+
+AC_SUBST(email2trac_conf)
+AC_SUBST(SYSTEM_EMAIL2TRAC_CONF)
+
+
+AC_OUTPUT(
+        Makefile
+	email2trac.py
+	delete_spam.py
+	)
