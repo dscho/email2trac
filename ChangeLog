@@ -1,4 +1,4 @@
-2009-01-XX
+2009-01-19
   * applied patch to support RFC 3676 (format=flowed), closes #94, #99
     This patch adds a new option: reflow (default: False/0)
     Author: ben at fetchsoftworks dot com
@@ -22,7 +22,7 @@
     [[Image(..)]] macro.
     Author: ben at fetchsoftworks dot com
 
-  * More versatile support for Mac attachments. closes #106
+  * More versatile support for Apple attachments. closes #106
     for explanation read: 
     - https://subtrac.sara.nl/oss/email2trac/wiki/Email2tracConfiguration#AppleAttachmentsoptions
     Author: ben at fetchsoftworks dot com
