@@ -1,3 +1,8 @@
+2009-XX-XX
+  * applied patch exit with non-zero return code on failure, closes #117
+    Author: admin-egon at ikw dot uos dot de
+    Applied by : Bas van der Vlies
+
 2009-01-19
   * applied patch to support RFC 3676 (format=flowed), closes #94, #99
     This patch adds a new option: reflow (default: False/0)

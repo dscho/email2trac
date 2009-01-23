@@ -470,8 +470,9 @@ class TicketEmailParser(object):
 		#   n : Name that the user has set in the settings tab
 		#   e : email address that the user has set in the settings tab 
 		#
+	    tmp_email_addrs = self.email_addr.lower()
 		users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
-				if e == self.email_addr ]
+				if e == tmp_email_addr ]
 
 		if len(users) == 1:
 			self.email_from = users[0][0]
@@ -1501,4 +1502,5 @@ if __name__ == '__main__':
 		if m:
 			tktparser.save_email_for_debug(m, True)
 
+		sys.exit(1)
 # EOB
