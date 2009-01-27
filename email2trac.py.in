@@ -326,7 +326,7 @@ class TicketEmailParser(object):
 
 		except KeyError, detail:
 			if self.DEBUG > 2 :
-				print '%s not defined, all messages are allowed.' %(keyword)
+				print 'TD: %s not defined, all messages are allowed.' %(keyword)
 
 			return default 
 
@@ -433,19 +433,6 @@ class TicketEmailParser(object):
 		return  self.email_to_unicode(str)
 
 
-	def set_owner(self, ticket):
-		"""
-		Select default owner for ticket component
-		"""
-		#### return self.get_config('ticket', 'default_component') 
-		cursor = self.db.cursor()
-		sql = "SELECT owner FROM component WHERE name='%s'" % ticket['component']
-		cursor.execute(sql)
-		try:
-			ticket['owner'] = cursor.fetchone()[0]
-		except TypeError, detail:
-			ticket['owner'] = None
-
 	def get_sender_info(self, message):
 		"""
 		Get the default author name and email address from the message
@@ -470,12 +457,12 @@ class TicketEmailParser(object):
 		#   n : Name that the user has set in the settings tab
 		#   e : email address that the user has set in the settings tab 
 		#
-	    tmp_email_addrs = self.email_addr.lower()
 		users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
-				if e == tmp_email_addr ]
+			if e and (e.lower() == self.email_addr.lower()) ]
 
 		if len(users) == 1:
 			self.email_from = users[0][0]
+			self.author = users[0][0]
 
 	def set_reply_fields(self, ticket, message):
 		"""
@@ -613,6 +600,8 @@ class TicketEmailParser(object):
 		will append the contents of this email to that ticket, instead of 
 		creating a new one.
 		"""
+		if self.DEBUG:
+			print "TD: ticket_update"
 
 		if not m['Subject']:
 			return False
@@ -676,7 +665,7 @@ class TicketEmailParser(object):
 			self.update_ticket_fields(tkt, update_fields)
 
 		message_parts = self.get_message_parts(m)
-		message_parts = self.unique_attachment_names(message_parts, tkt)
+		message_parts = self.unique_attachment_names(message_parts, ticket_id)
 
 		if self.EMAIL_HEADER:
 			message_parts.insert(0, self.email_header_txt(m))
@@ -684,17 +673,19 @@ class TicketEmailParser(object):
 		body_text = self.body_text(message_parts)
 
 		if body_text.strip() or update_fields:
-			tkt.save_changes(self.author, body_text, when)
+			if self.DRY_RUN:
+				print 'DRY_RUN: tkt.save_changes(self.author, comment) ', self.author
+			else:
+				tkt.save_changes(self.author, body_text, when)
 
-		tkt['id'] = ticket_id
 
 		if self.VERSION  == 0.9:
-			str = self.attachments(message_parts, tkt, True)
+			str = self.attachments(message_parts, ticket_id, True)
 		else:
-			str = self.attachments(message_parts, tkt)
+			str = self.attachments(message_parts, ticket_id)
 
 		if self.notification and not spam:
-			self.notify(tkt, False, when)
+			self.notify(tkt, ticket_id, False, when)
 
 		return True
 
@@ -754,18 +745,11 @@ class TicketEmailParser(object):
 		"""
 		Create a new ticket
 		"""
+		if self.DEBUG:
+			print "TD: new_ticket"
+
 		tkt = Ticket(self.env)
-
 		self.set_ticket_fields(tkt)
-
-		# Some defaults
-		#
-		#tkt['status'] = 'new'
-		#tkt['milestone'] = self.get_config('ticket', 'default_milestone')
-		#tkt['priority'] = self.get_config('ticket', 'default_priority')
-		#tkt['severity'] = self.get_config('ticket', 'default_severity')
-		#tkt['version'] = self.get_config('ticket', 'default_version')
-		#tkt['type'] = self.get_config('ticket', 'default_type')
 
 		# Old style setting for component, will be removed
 		#
@@ -779,7 +763,6 @@ class TicketEmailParser(object):
 			tkt['summary'] = u'(No subject)'
 		else:
 			tkt['summary'] = self.email_to_unicode(msg['Subject'])
-
 
 		self.set_reply_fields(tkt, msg)
 
@@ -808,9 +791,7 @@ class TicketEmailParser(object):
 			ticket_id = 'DRY_RUN'
 		else:
 			ticket_id = tkt.insert()
-			
-		tkt['id'] = ticket_id
-
+		
 		changed = False
 		comment = ''
 
@@ -824,25 +805,21 @@ class TicketEmailParser(object):
 			tkt['description'] = u'%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
 
-		str =  self.attachments(message_parts, tkt)
+		str =  self.attachments(message_parts, ticket_id)
 		if str:
 			changed = True
 			comment = '%s\n%s\n' %(comment, str)
 
 		if changed:
 			if self.DRY_RUN:
-				print 'DRY_RUN: tkt.save_changes(self.author, comment)'
+				print 'DRY_RUN: tkt.save_changes(self.author, comment) ', self.author
 			else:
 				tkt.save_changes(self.author, comment)
 				#print tkt.get_changelog(self.db, when)
 
-		if self.notification:
-			if self.DRY_RUN:
-				print 'DRY_RUN: self.notify(tkt, True)'
-			else:
-				if not spam:
-					self.notify(tkt, True)
-				#self.notify(tkt, False)
+		if self.notification and not spam:
+			self.notify(tkt, ticket_id, True)
+			#self.notify(ticket_id, False)
 
 	def parse(self, fp):
 		global m
@@ -851,7 +828,7 @@ class TicketEmailParser(object):
 		
 		if not m:
 			if self.DEBUG:
-				print "This is not a valid email message format"
+				print "TD: This is not a valid email message format"
 			return
 			
 		# Work around lack of header folding in Python; see http://bugs.python.org/issue4696
@@ -1102,7 +1079,7 @@ class TicketEmailParser(object):
 
 		return message_parts
 		
-	def unique_attachment_names(self, message_parts, tkt = None):
+	def unique_attachment_names(self, message_parts, tkt_id = None):
 		renamed_parts = []
 		attachment_names = set()
 		for part in message_parts:
@@ -1152,7 +1129,7 @@ class TicketEmailParser(object):
 			unique_filename = filename
 			filename, ext = os.path.splitext(filename)
 
-			while unique_filename in attachment_names or self.attachment_exists(tkt, unique_filename):
+			while unique_filename in attachment_names or self.attachment_exists(tkt_id, unique_filename):
 				num += 1
 				unique_filename = "%s-%s%s" % (filename, num, ext)
 				
@@ -1169,14 +1146,20 @@ class TicketEmailParser(object):
 		return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
 		
 			
-	def attachment_exists(self, tkt, filename):
-		if tkt is None:
+	def attachment_exists(self, tkt_id, filename):
+
+		if self.DEBUG:
+			print "TD: attachment_exists: Ticket number : %s, Filename : %s" %(tkt_id, filename)
+
+		# We have no valid ticket id
+		#
+		if not tkt_id:
 			return False
-			
+
 		try:
-			Attachment(self.env, 'ticket', tkt['id'], filename)
+			att = attachment.Attachment(self.env, 'ticket', tkt_id, filename)
 			return True
-		except ResourceNotFound:
+		except attachment.ResourceNotFound:
 			return False
 			
 	def body_text(self, message_parts):
@@ -1202,10 +1185,13 @@ class TicketEmailParser(object):
 		body_text = '\r\n'.join(body_text)
 		return body_text
 
-	def notify(self, tkt , new=True, modtime=0):
+	def notify(self, tkt, id, new=True, modtime=0):
 		"""
 		A wrapper for the TRAC notify function. So we can use templates
 		"""
+		if self.DRY_RUN:
+				print 'DRY_RUN: self.notify(tkt, True) ', self.author
+				return
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
@@ -1235,7 +1221,7 @@ class TicketEmailParser(object):
 			tn.notify(tkt, new, modtime) 
 
 		except Exception, e:
-			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(tkt['id'], e)
+			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(id, e)
 
 	def html_mailto_link(self, subject, id, body):
 		if not self.author:
@@ -1261,11 +1247,12 @@ class TicketEmailParser(object):
 		str = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(str, author)
 		return str
 
-	def attachments(self, message_parts, ticket, update=False):
+	def attachments(self, message_parts, tkt_id, update=False):
 		'''
 		save any attachments as files in the ticket's directory
 		'''
 		if self.DRY_RUN:
+			print "DRY_RUN: no attachments saved"
 			return ''
 
 		count = 0
@@ -1312,7 +1299,7 @@ class TicketEmailParser(object):
 			# Insert the attachment
 			# 
 			fd = open(path, 'rb')
-			att = attachment.Attachment(self.env, 'ticket', ticket['id'])
+			att = attachment.Attachment(self.env, 'ticket', tkt_id)
 
 			# This will break the ticket_update system, the body_text is vaporized
 			# ;-(
