@@ -145,6 +145,7 @@ class TicketEmailParser(object):
 		self.author = None
 		self.email_addr = None
 		self.email_from = None
+		self.id = None
 
 		self.VERSION = version
 		self.DRY_RUN = parameters['dry_run']
@@ -629,13 +630,13 @@ class TicketEmailParser(object):
 
 			# Strip '#' 
 			#
-			ticket_id = int(nr[1:])
+			self.id = int(nr[1:])
 
 		except AttributeError:
 			# Strip '#' and ':'
 			#
 			nr = result.group('ticketnr') 
-			ticket_id = int(nr[1:-1])
+			self.id = int(nr[1:-1])
 
 
 		# When is the change committed
@@ -648,8 +649,10 @@ class TicketEmailParser(object):
 			when = int(time.time())
 
 		try:
-			tkt = Ticket(self.env, ticket_id, self.db)
+			tkt = Ticket(self.env, self.id, self.db)
 		except util.TracError, detail:
+			# Not a valid ticket
+			self.id = None
 			return False
 
 		# reopen the ticket if it is was closed
@@ -665,7 +668,7 @@ class TicketEmailParser(object):
 			self.update_ticket_fields(tkt, update_fields)
 
 		message_parts = self.get_message_parts(m)
-		message_parts = self.unique_attachment_names(message_parts, ticket_id)
+		message_parts = self.unique_attachment_names(message_parts)
 
 		if self.EMAIL_HEADER:
 			message_parts.insert(0, self.email_header_txt(m))
@@ -680,12 +683,12 @@ class TicketEmailParser(object):
 
 
 		if self.VERSION  == 0.9:
-			str = self.attachments(message_parts, ticket_id, True)
+			str = self.attachments(message_parts, True)
 		else:
-			str = self.attachments(message_parts, ticket_id)
+			str = self.attachments(message_parts)
 
 		if self.notification and not spam:
-			self.notify(tkt, ticket_id, False, when)
+			self.notify(tkt, False, when)
 
 		return True
 
@@ -787,10 +790,8 @@ class TicketEmailParser(object):
 		utc = UTC()
 		when = datetime.now(utc)
 
-		if self.DRY_RUN:
-			ticket_id = 'DRY_RUN'
-		else:
-			ticket_id = tkt.insert()
+		if not self.DRY_RUN:
+			self.id = tkt.insert()
 		
 		changed = False
 		comment = ''
@@ -800,12 +801,12 @@ class TicketEmailParser(object):
 		if self.MAILTO:
 			changed = True
 			comment = u'\nadded mailto line\n'
-			#mailto = self.html_mailto_link(tkt['summary'], ticket_id, body_text)
-			mailto = self.html_mailto_link( m['Subject'], ticket_id, body_text)
+			mailto = self.html_mailto_link( m['Subject'], body_text)
+
 			tkt['description'] = u'%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
 
-		str =  self.attachments(message_parts, ticket_id)
+		str =  self.attachments(message_parts)
 		if str:
 			changed = True
 			comment = '%s\n%s\n' %(comment, str)
@@ -818,8 +819,7 @@ class TicketEmailParser(object):
 				#print tkt.get_changelog(self.db, when)
 
 		if self.notification and not spam:
-			self.notify(tkt, ticket_id, True)
-			#self.notify(ticket_id, False)
+			self.notify(tkt, True)
 
 	def parse(self, fp):
 		global m
@@ -1079,7 +1079,7 @@ class TicketEmailParser(object):
 
 		return message_parts
 		
-	def unique_attachment_names(self, message_parts, tkt_id = None):
+	def unique_attachment_names(self, message_parts):
 		renamed_parts = []
 		attachment_names = set()
 		for part in message_parts:
@@ -1129,7 +1129,7 @@ class TicketEmailParser(object):
 			unique_filename = filename
 			filename, ext = os.path.splitext(filename)
 
-			while unique_filename in attachment_names or self.attachment_exists(tkt_id, unique_filename):
+			while unique_filename in attachment_names or self.attachment_exists(unique_filename):
 				num += 1
 				unique_filename = "%s-%s%s" % (filename, num, ext)
 				
@@ -1146,18 +1146,18 @@ class TicketEmailParser(object):
 		return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
 		
 			
-	def attachment_exists(self, tkt_id, filename):
+	def attachment_exists(self, filename):
 
 		if self.DEBUG:
-			print "TD: attachment_exists: Ticket number : %s, Filename : %s" %(tkt_id, filename)
+			print "TD: attachment_exists: Ticket number : %s, Filename : %s" %(self.id, filename)
 
 		# We have no valid ticket id
 		#
-		if not tkt_id:
+		if not self.id:
 			return False
 
 		try:
-			att = attachment.Attachment(self.env, 'ticket', tkt_id, filename)
+			att = attachment.Attachment(self.env, 'ticket', self.id, filename)
 			return True
 		except attachment.ResourceNotFound:
 			return False
@@ -1185,7 +1185,7 @@ class TicketEmailParser(object):
 		body_text = '\r\n'.join(body_text)
 		return body_text
 
-	def notify(self, tkt, id, new=True, modtime=0):
+	def notify(self, tkt, new=True, modtime=0):
 		"""
 		A wrapper for the TRAC notify function. So we can use templates
 		"""
@@ -1221,33 +1221,29 @@ class TicketEmailParser(object):
 			tn.notify(tkt, new, modtime) 
 
 		except Exception, e:
-			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(id, e)
+			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(self.id, e)
 
-	def html_mailto_link(self, subject, id, body):
+	def html_mailto_link(self, subject, body):
+		"""
+		This function returns a HTML mailto tag with the ticket id and author email address
+		"""
 		if not self.author:
 			author = self.email_addr
 		else:	
 			author = self.author
 
-		# Must find a fix
-		#
-		#arr = string.split(body, '\n')
-		#arr = map(self.mail_line, arr)
-		#body = string.join(arr, '\n')
-		#body = '%s wrote:\n%s' %(author, body)
-
-		# Temporary fix
+		# use urllib to escape the chars
 		#
 		str = 'mailto:%s?Subject=%s&Cc=%s' %( 
 		       urllib.quote(self.email_addr), 
-			   urllib.quote('Re: #%s: %s' %(id, subject)),
+			   urllib.quote('Re: #%s: %s' %(self.id, subject)),
 			   urllib.quote(self.MAILTO_CC)
 			   )
 
 		str = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(str, author)
 		return str
 
-	def attachments(self, message_parts, tkt_id, update=False):
+	def attachments(self, message_parts, update=False):
 		'''
 		save any attachments as files in the ticket's directory
 		'''
@@ -1256,8 +1252,6 @@ class TicketEmailParser(object):
 			return ''
 
 		count = 0
-		first = 0 
-		number = 0 
 
 		# Get Maxium attachment size
 		#
@@ -1299,7 +1293,7 @@ class TicketEmailParser(object):
 			# Insert the attachment
 			# 
 			fd = open(path, 'rb')
-			att = attachment.Attachment(self.env, 'ticket', tkt_id)
+			att = attachment.Attachment(self.env, 'ticket', self.id)
 
 			# This will break the ticket_update system, the body_text is vaporized
 			# ;-(
