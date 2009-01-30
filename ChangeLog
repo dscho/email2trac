@@ -1,4 +1,4 @@
-2009-XX-XX
+2009-01-30
   * applied patch exit with non-zero return code on failure, closes #117
     Author: admin-egon at ikw dot uos dot de
     Applied by : Bas van der Vlies
@@ -16,7 +16,10 @@
     Reported by: Pusateri, Matthew <Matthew dot Pusateri at tekelec dot com
     Fixed by: Bas van der Vlies
 
-  * Ticket id is not reported as change anymore.
+  * Ticket id is not reported as ticket change, eg:
+    {{{
+        *   id  set to 118
+    }}}
     Author :  Bas van der Vlies
 
 2009-01-19
