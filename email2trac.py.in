@@ -225,7 +225,7 @@ class TicketEmailParser(object):
 			self.VERBATIM_FORMAT = 1
 
 		if parameters.has_key('reflow'):
-			self.REFLOW = int(parameter['reflow'])
+			self.REFLOW = int(parameters['reflow'])
 		else:
 			self.REFLOW = 1
 
