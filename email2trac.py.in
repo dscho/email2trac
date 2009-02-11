@@ -263,6 +263,10 @@ class TicketEmailParser(object):
 			self.python_egg_cache = str(parameters['python_egg_cache'])
 			os.environ['PYTHON_EGG_CACHE'] = self.python_egg_cache
 
+		self.WORKFLOW = None
+		if parameters.has_key('workflow'):
+			self.WORKFLOW = parameters['workflow']
+
 		# Use OS independend functions
 		#
 		self.TMPDIR = os.path.normcase('/tmp')
@@ -659,8 +663,39 @@ class TicketEmailParser(object):
 		# We must use the ticket workflow framework
 		#
 		if tkt['status'] in ['closed']:
-			tkt['status'] = 'reopened'
-			tkt['resolution'] = ''
+
+			#print controller.actions['reopen']
+			#
+			# As reference	
+			# req = Mock(href=Href('/'), abs_href=Href('http://www.example.com/'), authname='anonymous', perm=MockPerm(), args={})
+			#
+			#a = controller.render_ticket_action_control(req, tkt, 'reopen')
+			#print 'controller : ', a
+			#
+			#b = controller.get_all_status()
+			#print 'get all status: ', b
+			#
+			#b = controller.get_ticket_changes(req, tkt, 'reopen')
+			#print 'get_ticket_changes :', b
+
+			if self.WORKFLOW:
+				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
+				from trac.test import Mock, MockPerm
+
+				req = Mock(authname='anonymous', perm=MockPerm(), args={})
+
+				controller = ConfigurableTicketWorkflow(self.env)
+				fields = controller.get_ticket_changes(req, tkt, self.WORKFLOW)
+
+				if self.DEBUG:
+					print 'TD: Workflow ticket update fields: ', fields
+
+				for key in fields.keys():
+					tkt[key] = fields[key]
+
+			else:
+				tkt['status'] = 'reopened'
+				tkt['resolution'] = ''
 
 		# Must we update some ticket fields properties
 		#
@@ -680,7 +715,6 @@ class TicketEmailParser(object):
 				print 'DRY_RUN: tkt.save_changes(self.author, comment) ', self.author
 			else:
 				tkt.save_changes(self.author, body_text, when)
-
 
 		if self.VERSION  == 0.9:
 			str = self.attachments(message_parts, True)
