@@ -678,7 +678,7 @@ class TicketEmailParser(object):
 			#b = controller.get_ticket_changes(req, tkt, 'reopen')
 			#print 'get_ticket_changes :', b
 
-			if self.WORKFLOW:
+			if self.WORKFLOW and (self.VERSION in ['0.11']) :
 				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
 				from trac.test import Mock, MockPerm
 
