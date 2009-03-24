@@ -3,6 +3,10 @@
     Reported by: tomasz dot sterna at sensisoft dot com
     Fixed by: Bas van der Vlies
 
+   * implemented workflow for tickets that are reopend, closes #70
+     Reported by: hju att jochenkuhl dot de
+     Author by: Bas van der Vlies
+
 2009-01-30
   * applied patch exit with non-zero return code on failure, closes #117
     Author: admin-egon at ikw dot uos dot de
