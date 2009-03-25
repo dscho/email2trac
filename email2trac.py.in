@@ -599,48 +599,35 @@ class TicketEmailParser(object):
 				if self.DEBUG >= 10: 
 					print  'ticket_field\t %s = %s' %(field,  ticket[field])
 					
-	def ticket_update(self, m, spam):
+	def ticket_update(self, m, id, spam):
 		"""
 		If the current email is a reply to an existing ticket, this function
 		will append the contents of this email to that ticket, instead of 
 		creating a new one.
 		"""
 		if self.DEBUG:
-			print "TD: ticket_update"
+			print "TD: ticket_update: %s" %id
 
 		if not m['Subject']:
 			return False
 		else:
 			subject  = self.email_to_unicode(m['Subject'])
 
-		# [hic] #1529: Re: LRZ
-		# [hic] #1529?owner=bas,priority=medium: Re: LRZ
-		#
-		TICKET_RE = re.compile(r"""
-					(?P<ticketnr>[#][0-9]+:)
-					|(?P<ticketnr_fields>[#][\d]+\?.*?:)
-					""", re.VERBOSE)
-
-		result =  TICKET_RE.search(subject)
-		if not result:
-			return False
-
 		# Must we update ticket fields
 		#
 		update_fields = dict()
 		try:
-			nr, keywords = string.split(result.group('ticketnr_fields'), '?')
+			id, keywords = string.split(id, '?')
 			update_fields = self.str_to_dict(keywords)
 
 			# Strip '#' 
 			#
-			self.id = int(nr[1:])
+			self.id = int(id[1:])
 
-		except AttributeError:
+		except ValueError:
 			# Strip '#' and ':'
 			#
-			nr = result.group('ticketnr') 
-			self.id = int(nr[1:-1])
+			self.id = int(id[1:-1])
 
 
 		# When is the change committed
@@ -855,6 +842,44 @@ class TicketEmailParser(object):
 		if self.notification and not spam:
 			self.notify(tkt, True)
 
+
+	def blog(self, id): 
+		"""
+		The blog create/update function
+		"""
+		# import the modules
+		#
+		from tracfullblog.core import FullBlogCore
+		from tracfullblog.model import BlogPost, BlogCommen
+
+		# instantiate blog core
+		blog = FullBlogCore(self.env)
+		req = '' 
+		
+		if id: 
+
+			# update blog
+			#
+			comment = BlogComment(self.env, result.group('blog_id'))
+			comment.author = self.author
+			comment.comment = self.get_body_text(m)
+			blog.create_comment(req, comment)
+
+		else:
+			# create blog
+			#
+			import time
+			post = BlogPost(self.env, 'blog_'+time.strftime("%Y%m%d%H%M%S", time.gmtime()))
+
+			#post = BlogPost(self.env, blog._get_default_postname(self.env)) 
+			
+			post.author = self.author
+			post.title = self.email_to_unicode(m['Subject'])
+			post.body = self.get_body_text(m) 
+			
+			blog.create_post(req, post, self.author, u'Created by email2trac', False)
+
+
 	def parse(self, fp):
 		global m
 
@@ -910,13 +935,50 @@ class TicketEmailParser(object):
 		else:
 			self.notification = 0
 
-		# Must we update existing tickets
-		#
-		if self.TICKET_UPDATE > 0:
-			if self.ticket_update(m, spam_msg):
-				return True
+		print self.get_config('components', 'tracext.google.ads.*')
 
-		self.new_ticket(m, spam_msg)
+		# Check if  FullBlogPlugin is installed
+		#
+		blog_enabled = None
+		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
+			blog_enabled = True
+			
+		# Find out if this is a ticket or a blog
+		if not m['Subject']:
+			return False
+		else:
+			subject  = self.email_to_unicode(m['Subject'])		
+
+		# 
+		# [hic] #1529: Re: LRZ
+		# [hic] #1529?owner=bas,priority=medium: Re: LRZ
+		#
+		TICKET_RE = re.compile(r"""
+			(?P<blog>blog:(?P<blog_id>\w*))
+			|(?P<ticket_id>[#][\d]+:)
+			|(?P<ticket_fields>[#][\d]+\?.*?:)
+			""", re.VERBOSE)
+
+		result =  TICKET_RE.search(subject)
+
+		if result:
+			if result.group('blog') and blog_enabled:
+				self.blog(result.group('blog_id'))
+
+			# update ticket + fields
+			#
+			if result.group('ticket_fields') and self.TICKET_UPDATE:
+				self.ticket_update(m, result.group('ticket_fields'), spam_msg)
+
+			# Update ticket
+			#
+			elif result.group('ticket_id') and self.TICKET_UPDATE:
+				self.ticket_update(m, result.group('ticket_id'), spam_msg)
+
+		# Create ticket
+		#
+		else:
+			self.new_ticket(m, spam_msg)
 
 	def strip_signature(self, text):
 		"""
@@ -1482,6 +1544,8 @@ if __name__ == '__main__':
 			from trac.web.href import Href
 			from trac import config as trac_config
 			from trac import util
+
+
 			#
 			# return  util.text.to_unicode(str)
 			#

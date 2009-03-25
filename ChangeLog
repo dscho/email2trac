@@ -7,6 +7,9 @@
      Reported by: hju att jochenkuhl dot de
      Author by: Bas van der Vlies
 
+   * added FullBlogPlugin support. So we can update/create the blogs via email, #116
+     Authors: Bas van der Vlies & lucas dot eisenzimmer at t-systems-mms dot com
+
 2009-01-30
   * applied patch exit with non-zero return code on failure, closes #117
     Author: admin-egon at ikw dot uos dot de

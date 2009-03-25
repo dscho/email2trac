@@ -5,8 +5,12 @@ email2trac (0.80-1) stable; urgency=low
    Fixed by: Bas van der Vlies
 
  * implemented workflow for tickets that are reopend, closes #70
-   Reported by: hju att jochenkuhl dot de
+   Reported by: hju at jochenkuhl dot de
    Author by: Bas van der Vlies
+
+ * added FullBlogPlugin support. So we can update/create the blogs
+   via email, #116
+   Authors: Bas van der Vlies & lucas dot eisenzimmer at t-systems-mms dot com 
 
  -- root <root@subtrac2.rc.sara.nl>  Tue, 24 Mar 2009 15:26:08 +0100
 
