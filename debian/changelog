@@ -12,6 +12,10 @@ email2trac (0.80-1) stable; urgency=low
    via email, #116
    Authors: Bas van der Vlies & lucas dot eisenzimmer at t-systems-mms dot com 
 
+ * email2trac require at least python version 2.4, closes #131
+   Reported by: otto at bergerdata dot de
+   Fixed by: Bas van der Vlies
+
  -- root <root@subtrac2.rc.sara.nl>  Tue, 24 Mar 2009 15:26:08 +0100
 
 email2trac (0.70-1) stable; urgency=low
