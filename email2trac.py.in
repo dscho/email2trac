@@ -524,14 +524,13 @@ class TicketEmailParser(object):
 		"""
 		Transfrom a str of the form [<key>=<value>]+ to dict[<key>] = <value>
 		""" 
-		# Skip the last ':' character
-		#
-		fields = string.split(str[:-1], ',')
+
+		fields = string.split(str, ',')
 
 		result = dict()
 		for field in fields:
 			try: 
-				index, value = string.split(field,'=')
+				index, value = string.split(field, '=')
 
 				# We can not change the description of a ticket via the subject
 				# line. The description is the body of the email
@@ -618,6 +617,10 @@ class TicketEmailParser(object):
 		update_fields = dict()
 		try:
 			id, keywords = string.split(id, '?')
+
+			# Skip the last ':' character
+			#
+			keywords = keywords[:-1]
 			update_fields = self.str_to_dict(keywords)
 
 			# Strip '#' 
@@ -765,7 +768,7 @@ class TicketEmailParser(object):
 
 
 
-	def new_ticket(self, msg, spam):
+	def new_ticket(self, msg, subject, spam, set_fields = None):
 		"""
 		Create a new ticket
 		"""
@@ -786,9 +789,16 @@ class TicketEmailParser(object):
 		if not msg['Subject']:
 			tkt['summary'] = u'(No subject)'
 		else:
-			tkt['summary'] = self.email_to_unicode(msg['Subject'])
+			tkt['summary'] = self.email_to_unicode(subject)
 
 		self.set_reply_fields(tkt, msg)
+
+		if set_fields:
+			rest, keywords = string.split(set_fields, '?')
+
+			if keywords:
+				update_fields = self.str_to_dict(keywords)
+				self.update_ticket_fields(tkt, update_fields)
 
 		# produce e-mail like header
 		#
@@ -935,8 +945,6 @@ class TicketEmailParser(object):
 		else:
 			self.notification = 0
 
-		print self.get_config('components', 'tracext.google.ads.*')
-
 		# Check if  FullBlogPlugin is installed
 		#
 		blog_enabled = None
@@ -955,8 +963,9 @@ class TicketEmailParser(object):
 		#
 		TICKET_RE = re.compile(r"""
 			(?P<blog>blog:(?P<blog_id>\w*))
-			|(?P<ticket_id>[#][\d]+:)
-			|(?P<ticket_fields>[#][\d]+\?.*?:)
+			|(?P<new_fields>[#][?].*)
+			|(?P<reply>[#][\d]+:)
+			|(?P<reply_fields>[#][\d]+\?.*?:)
 			""", re.VERBOSE)
 
 		result =  TICKET_RE.search(subject)
@@ -967,18 +976,23 @@ class TicketEmailParser(object):
 
 			# update ticket + fields
 			#
-			if result.group('ticket_fields') and self.TICKET_UPDATE:
-				self.ticket_update(m, result.group('ticket_fields'), spam_msg)
+			if result.group('reply_fields') and self.TICKET_UPDATE:
+				self.ticket_update(m, result.group('reply_fields'), spam_msg)
 
 			# Update ticket
 			#
-			elif result.group('ticket_id') and self.TICKET_UPDATE:
-				self.ticket_update(m, result.group('ticket_id'), spam_msg)
+			elif result.group('reply') and self.TICKET_UPDATE:
+				self.ticket_update(m, result.group('reply'), spam_msg)
+
+			# New ticket + fields
+			#
+			elif result.group('new_fields'):
+				self.new_ticket(m, subject[:result.start('new_fields')], spam_msg, result.group('new_fields'))
 
 		# Create ticket
 		#
 		else:
-			self.new_ticket(m, spam_msg)
+			self.new_ticket(m, subject, spam_msg)
 
 	def strip_signature(self, text):
 		"""

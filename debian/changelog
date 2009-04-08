@@ -16,32 +16,39 @@ email2trac (0.80-1) stable; urgency=low
    Reported by: otto at bergerdata dot de
    Fixed by: Bas van der Vlies
 
- -- root <root@subtrac2.rc.sara.nl>  Tue, 24 Mar 2009 15:26:08 +0100
+ * We can now set ticket fields for a new ticket via the 'subject' line:
+    - Subject: <description> #?<field=value>[,<field=value>]* 
+   closes #130
+
+   Requested by: Steve
+   Implemented by: Bas van der Vlies
+
+ -- Bas van der Vlies <basv@ssara.nl>  Tue, 24 Mar 2009 15:26:08 +0100
 
 email2trac (0.70-1) stable; urgency=low
 
   * New stable version
 
- -- root <root@subtrac2.rc.sara.nl>  Tue, 27 Jan 2009 15:42:32 +0100
+ -- Bas van der Vlies <basv@sara.nl>  Tue, 27 Jan 2009 15:42:32 +0100
 
 email2trac (0.60-1) stable; urgency=low
 
   *  New stable version
 
- -- root <root@subtrac2.rc.sara.nl>  Thu, 20 Nov 2008 11:29:59 +0100
+ -- Bas van der Vlies <root@subtrac2.rc.sara.nl>  Thu, 20 Nov 2008 11:29:59 +0100
 
 email2trac (0.40-1) stable; urgency=low
 
   * New Version, see ChangeLog 
 
- -- root <root@subtrac2.rc.sara.nl>  Fri, 10 Oct 2008 17:24:09 +0200
+ -- Bas van der Vlies <root@subtrac2.rc.sara.nl>  Fri, 10 Oct 2008 17:24:09 +0200
 
 email2trac (0.30-3) stable; urgency=low
 
   * Non-maintainer upload.
   * Reopen ticket if an email update is received 
 
- -- root <root@subtrac2.rc.sara.nl>  Mon, 04 Aug 2008 16:14:12 +0200
+ -- Bas van der Vlies <root@subtrac2.rc.sara.nl>  Mon, 04 Aug 2008 16:14:12 +0200
 
 email2trac (0.30-2) stable; urgency=low
 
@@ -65,13 +72,13 @@ email2trac (0.13.0-1) stable; urgency=low
 
   * New version with a lot of improvements
 
- -- root <root@rc.sara.nl>  Mon,  4 Feb 2008 11:27:27 +0100
+ -- Bas van der Vlies <root@rc.sara.nl>  Mon,  4 Feb 2008 11:27:27 +0100
 
 email2trac (0.10.0-2) stable; urgency=low
 
   *  Added extra info to syslog when exception occurs
 
- -- root <root@rc.sara.nl>  Fri,  3 Aug 2007 09:45:26 +0200
+ -- Bas van der Vlies <root@rc.sara.nl>  Fri,  3 Aug 2007 09:45:26 +0200
 
 email2trac (0.10.0-1) stable; urgency=low
 

@@ -10,9 +10,16 @@
    * added FullBlogPlugin support. So we can update/create the blogs via email, #116
      Authors: Bas van der Vlies & lucas dot eisenzimmer at t-systems-mms dot com
    
-    * email2trac require at least python version 2.4, closes #131
-      Reported by: otto at bergerdata dot de
-      Fixed by: Bas van der Vlies
+   * email2trac require at least python version 2.4, closes #131
+     Reported by: otto at bergerdata dot de
+     Fixed by: Bas van der Vlies
+
+   * We can now set ticket fields for a new ticket via the 'subject' line:
+       - Subject: <description> #?<field=value>[,<field=value>]*
+     closes #130 
+     
+     Requested by: Steve
+     Implemented by: Bas van der Vlies
 
 2009-01-30
   * applied patch exit with non-zero return code on failure, closes #117
