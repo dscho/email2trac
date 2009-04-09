@@ -607,11 +607,6 @@ class TicketEmailParser(object):
 		if self.DEBUG:
 			print "TD: ticket_update: %s" %id
 
-		if not m['Subject']:
-			return False
-		else:
-			subject  = self.email_to_unicode(m['Subject'])
-
 		# Must we update ticket fields
 		#
 		update_fields = dict()
@@ -951,7 +946,6 @@ class TicketEmailParser(object):
 		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
 			blog_enabled = True
 			
-		# Find out if this is a ticket or a blog
 		if not m['Subject']:
 			return False
 		else:
@@ -968,6 +962,8 @@ class TicketEmailParser(object):
 			|(?P<reply_fields>[#][\d]+\?.*?:)
 			""", re.VERBOSE)
 
+		# Find out if this is a ticket or a blog
+		#
 		result =  TICKET_RE.search(subject)
 
 		if result:
