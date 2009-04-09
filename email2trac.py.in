@@ -789,7 +789,7 @@ class TicketEmailParser(object):
 		if not msg['Subject']:
 			tkt['summary'] = u'(No subject)'
 		else:
-			tkt['summary'] = self.email_to_unicode(subject)
+			tkt['summary'] = subject
 
 		self.set_reply_fields(tkt, msg)
 
