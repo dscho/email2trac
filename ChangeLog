@@ -1,3 +1,8 @@
+2009-XX-XX
+  * Fixed an error in blog update function
+    Fixed by: Bas van der Vlies
+
+
 2009-04-09
   * Fixed in parsing the reflow parameter, closes #123
     Reported by: tomasz dot sterna at sensisoft dot com

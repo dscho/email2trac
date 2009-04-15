@@ -1,3 +1,10 @@
+email2trac (0.81-1) stable; urgency=low
+
+  * Fixed an error in blog update function
+    Fixed by: Bas van der Vlies
+
+ -- Bas van der Vlies <basv@sara.nl>  Wed, 15 Apr 2009 10:02:38 +0200
+
 email2trac (0.80-1) stable; urgency=low
 
   * Fixed in parsing the reflow parameter, closes #123
