@@ -865,7 +865,7 @@ class TicketEmailParser(object):
 
 			# update blog
 			#
-			comment = BlogComment(self.env, result.group('blog_id'))
+			comment = BlogComment(self.env, id)
 			comment.author = self.author
 			comment.comment = self.get_body_text(m)
 			blog.create_comment(req, comment)
