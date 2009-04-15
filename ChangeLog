@@ -7,7 +7,9 @@
      Reported by: hju att jochenkuhl dot de
      Author by: Bas van der Vlies
 
-   * added FullBlogPlugin support. So we can update/create the blogs via email, #116
+   * added FullBlogPlugin support. So we can update/create the blogs 
+     via email, #116
+     mail with subject line: <blog:.*> will create/update a blog entry.
      Authors: Bas van der Vlies & lucas dot eisenzimmer at t-systems-mms dot com
    
    * email2trac require at least python version 2.4, closes #131
