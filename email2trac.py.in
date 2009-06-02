@@ -473,7 +473,11 @@ class TicketEmailParser(object):
 		"""
 		Set all the right fields for a new ticket
 		"""
-		ticket['reporter'] = self.email_from
+
+		## Only use name or email adress
+		#ticket['reporter'] = self.email_from
+		ticket['reporter'] = self.author
+
 
 		# Put all CC-addresses in ticket CC field
 		#
@@ -1459,7 +1463,7 @@ def ReadConfig(file, name):
 			project[option] = value 
 
 	else:
-		# use some trac internales to get the defaults
+		# use some trac internals to get the defaults
 		#
 		project = config.parser.defaults()
 
