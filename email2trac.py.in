@@ -1232,7 +1232,10 @@ class TicketEmailParser(object):
 					pass
 					
 			if self.QUOTE_ATTACHMENT_FILENAMES:
-				filename = urllib.quote(filename)
+				try:
+					filename = urllib.quote(filename)
+				except KeyError, detail:
+					filename = urllib.quote(filename.encode('utf-8'))
 
 			# Make the filename unique for this ticket
 			num = 0

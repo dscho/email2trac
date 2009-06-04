@@ -6,6 +6,12 @@ email2trac (0.82-1) stable; urgency=low
 
     All Fixes by: Bas van der Vlies
 
+  * Error in urllib.quote(filename) could not handle unicode 
+    filenames, closes #138
+    
+    Reported by: debacle at debian dot org
+    Applied  by: Bas van der Vlies
+
  -- root <root@subtrac2.rc.sara.nl>  Thu, 04 Jun 2009 14:48:11 +0200
 
 email2trac (0.80-1) stable; urgency=low

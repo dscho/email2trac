@@ -6,6 +6,11 @@
 
     All Fixes by: Bas van der Vlies
 
+  * Error in urllib.quote(filename) could not handle unicode 
+    filenames, closes #138
+    Reported by: debacle at debian dot org
+    Applied  by: Bas van der Vlies
+
 2009-04-09
   * Fixed in parsing the reflow parameter, closes #123
     Reported by: tomasz dot sterna at sensisoft dot com
