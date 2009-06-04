@@ -1,9 +1,12 @@
-email2trac (0.81-1) stable; urgency=low
+email2trac (0.82-1) stable; urgency=low
 
+  * updated aclocal.m4 to support python versions 2.5 and 2.6, closes #137
+  * use the email addres in the reporter field, closes #136
   * Fixed an error in blog update function
-    Fixed by: Bas van der Vlies
 
- -- Bas van der Vlies <basv@sara.nl>  Wed, 15 Apr 2009 10:02:38 +0200
+    All Fixes by: Bas van der Vlies
+
+ -- root <root@subtrac2.rc.sara.nl>  Thu, 04 Jun 2009 14:48:11 +0200
 
 email2trac (0.80-1) stable; urgency=low
 
