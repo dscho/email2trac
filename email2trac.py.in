@@ -822,9 +822,16 @@ class TicketEmailParser(object):
 
 		if not self.DRY_RUN:
 			self.id = tkt.insert()
-		
+	
 		changed = False
 		comment = ''
+
+		# some routines in trac are dependend on ticket id	
+		# like alternate notify template
+		#
+		if self.notify_template:
+			tkt['id'] = ticket_id 
+			changed = True
 
 		# Rewrite the description if we have mailto enabled
 		#
