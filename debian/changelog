@@ -1,4 +1,4 @@
-email2trac (0.82-1) stable; urgency=low
+email2trac (0.82-2) stable; urgency=low
 
   * updated aclocal.m4 to support python versions 2.5 and 2.6, closes #137
   * use the email addres in the reporter field, closes #136
@@ -6,13 +6,24 @@ email2trac (0.82-1) stable; urgency=low
 
     All Fixes by: Bas van der Vlies
 
+  * if alternate notify template is set then also set ticket id. It will show
+    up as ticket change, closes #142
+    Reported by: hju att jochenkuhl dot de
+    Fixed by: Bas van der Vlies
+
   * Error in urllib.quote(filename) could not handle unicode 
     filenames, closes #138
     
     Reported by: debacle at debian dot org
     Applied  by: Bas van der Vlies
 
- -- root <root@subtrac2.rc.sara.nl>  Thu, 04 Jun 2009 14:48:11 +0200
+  
+  * Fixed an error when debug is on and the body message contains unicode
+    strings, closes #144
+    Reported by: trumbitta at gmail dot com
+    Applied by: Bas van der Vlies
+
+ -- Bas van der Vlies <basv@sara.nl>  Thu, 04 Jun 2009 14:48:11 +0200
 
 email2trac (0.80-1) stable; urgency=low
 

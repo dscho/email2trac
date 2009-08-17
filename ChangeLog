@@ -6,10 +6,20 @@
 
     All Fixes by: Bas van der Vlies
 
+  * if alternate notify template is set then also set ticket id. It will show
+    up as ticket change, closes #142
+    Reported by: hju att jochenkuhl dot de
+    Fixed by: Bas van der Vlies
+
   * Error in urllib.quote(filename) could not handle unicode 
     filenames, closes #138
     Reported by: debacle at debian dot org
     Applied  by: Bas van der Vlies
+
+  * Fixed an error when debug is on and the body message contains unicode
+    strings, closes #144
+    Reported by: trumbitta at gmail dot com
+    Applied by: Bas van der Vlies
 
 2009-04-09
   * Fixed in parsing the reflow parameter, closes #123

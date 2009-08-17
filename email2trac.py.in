@@ -390,6 +390,10 @@ class TicketEmailParser(object):
 		fx = open(body_file, 'wb')
 		if not message_body:
 			message_body = '(None)'
+
+		message_body = message_body.encode('utf-8')
+		#message_body = unicode(message_body, 'iso-8859-15')
+
 		fx.write(message_body)
 		fx.close()
 		try:
@@ -830,7 +834,7 @@ class TicketEmailParser(object):
 		# like alternate notify template
 		#
 		if self.notify_template:
-			tkt['id'] = ticket_id 
+			tkt['id'] = self.id
 			changed = True
 
 		# Rewrite the description if we have mailto enabled
