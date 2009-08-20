@@ -1,5 +1,4 @@
-2009-XX-XX
-
+2009-08-20
   * updated aclocal.m4 to support python versions 2.5 and 2.6, closes #137
   * use the email addres in the reporter field, closes #136
   * Fixed an error in blog update function
@@ -20,6 +19,8 @@
     strings, closes #144
     Reported by: trumbitta at gmail dot com
     Applied by: Bas van der Vlies
+
+ * default trac version for email2trac is now updated to 0.11
 
 2009-04-09
   * Fixed in parsing the reflow parameter, closes #123

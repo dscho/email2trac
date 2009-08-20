@@ -104,7 +104,7 @@ from trac import config as trac_config
 
 # Some global variables
 #
-trac_default_version = '0.10'
+trac_default_version = '0.11'
 m = None 
 
 # A UTC class needed for trac version 0.11, added by

@@ -23,6 +23,9 @@ email2trac (0.90-1) stable; urgency=low
     Reported by: trumbitta at gmail dot com
     Applied by: Bas van der Vlies
 
+
+ * default trac version for email2trac is now updated to 0.11
+
  -- Bas van der Vlies <basv@sara.nl>  Thu, 04 Jun 2009 14:48:11 +0200
 
 email2trac (0.80-1) stable; urgency=low
