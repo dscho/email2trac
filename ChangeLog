@@ -1,3 +1,10 @@
+2009-XX-XX
+  * Implemented a new feature to drop the HTML version of multipart/alternative
+    message part. Such a message part containts the same info, but have are sent
+    in different formats and client can decided what version is used, closes #30
+
+    Implemented by: Bas van der Vlies
+
 2009-08-20
   * updated aclocal.m4 to support python versions 2.5 and 2.6, closes #137
   * use the email addres in the reporter field, closes #136

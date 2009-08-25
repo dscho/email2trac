@@ -1,3 +1,13 @@
+email2trac (1.0.0-1) stable; urgency=low
+
+  * Implemented a new feature to drop the HTML version of multipart/alternative
+    message part. Such a message part containts the same info, but have are sent
+    in different formats and client can decided what version is used, closes #30
+
+    Implemented by: Bas van der Vlies
+
+ -- Bas van der Vlies <basv@sara.nl>  Tue, 25 Aug 2009 11:50:40 +0200
+
 email2trac (0.90-1) stable; urgency=low
 
   * updated aclocal.m4 to support python versions 2.5 and 2.6, closes #137
@@ -23,8 +33,7 @@ email2trac (0.90-1) stable; urgency=low
     Reported by: trumbitta at gmail dot com
     Applied by: Bas van der Vlies
 
-
- * default trac version for email2trac is now updated to 0.11
+  * default trac version for email2trac is now updated to 0.11
 
  -- Bas van der Vlies <basv@sara.nl>  Thu, 04 Jun 2009 14:48:11 +0200
 
