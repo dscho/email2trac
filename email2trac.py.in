@@ -54,10 +54,9 @@ How to use
 	spam_level   : 4               # OPTIONAL, if set check for SPAM mail 
 	reply_all    : 1               # OPTIONAL, if set then fill in ticket CC field
 	umask        : 022             # OPTIONAL, if set then use this umask for creation of the attachments
-	mailto_link  : 1               # OPTIONAL, if set then [mailto:<>] in description 
 	mailto_cc    : basv@sara.nl    # OPTIONAL, use this address as CC in mailto line
 	ticket_update: 1               # OPTIONAL, if set then check if this is an update for a ticket
-	trac_version : 0.9             # OPTIONAL, default is 0.10
+	trac_version : 0.9             # OPTIONAL, default is 0.11
 
 	[jouvin]                       # OPTIONAL project declaration, if set both fields necessary
 	project      : /data/trac/jouvin # use -p|--project jouvin.  
