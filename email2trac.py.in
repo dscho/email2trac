@@ -27,39 +27,24 @@ A simple MTA filter to create Trac tickets from inbound emails.
 Copyright 2005, Daniel Lundin <daniel@edgewall.com>
 Copyright 2005, Edgewall Software
 
-Changed By: Bas van der Vlies <basv@sara.nl>
-Date      : 13 September 2005
-Descr.    : Added config file and command line options, spam level
-            detection, reply address and mailto option. Unicode support
-
-Changed By: Walter de Jong <walter@sara.nl>
-Descr.    : multipart-message code and trac attachments
-
+Authors:
+  Bas van der Vlies <basv@sara.nl>
+  Walter de Jong <walter@sara.nl>
 
 The scripts reads emails from stdin and inserts directly into a Trac database.
-MIME headers are mapped as follows:
-
-	* From:      => Reporter
-	             => CC (Optional via reply_all option)
-	* Subject:   => Summary
-	* Body       => Description
-	* Component  => Can be set to SPAM via spam_level option
 
 How to use
 ----------
- * Create an config file:
-	[DEFAULT]                      # REQUIRED
-	project      : /data/trac/test # REQUIRED
-	debug        : 1               # OPTIONAL, if set print some DEBUG info
-	spam_level   : 4               # OPTIONAL, if set check for SPAM mail 
-	reply_all    : 1               # OPTIONAL, if set then fill in ticket CC field
-	umask        : 022             # OPTIONAL, if set then use this umask for creation of the attachments
-	mailto_cc    : basv@sara.nl    # OPTIONAL, use this address as CC in mailto line
-	ticket_update: 1               # OPTIONAL, if set then check if this is an update for a ticket
-	trac_version : 0.9             # OPTIONAL, default is 0.11
+ * See https://subtrac.sara.nl/oss/email2trac/
 
-	[jouvin]                       # OPTIONAL project declaration, if set both fields necessary
-	project      : /data/trac/jouvin # use -p|--project jouvin.  
+ * Create an config file:
+    [DEFAULT]                        # REQUIRED
+    project      : /data/trac/test   # REQUIRED
+    debug        : 1                 # OPTIONAL, if set print some DEBUG info
+    trac_version : 0.9               # OPTIONAL, default is 0.11 
+
+    [jouvin]                         # OPTIONAL project declaration, if set both fields necessary
+    project      : /data/trac/jouvin # use -p|--project jouvin.  
         
  * default config file is : /etc/email2trac.conf
 
