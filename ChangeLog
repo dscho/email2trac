@@ -4,6 +4,9 @@
     in different formats and the client can decide which version to use.
     closes #30
 
+    to enable in email2trac.conf:
+	- drop_alternative_html_version: 1
+
     Implemented by: Bas van der Vlies
 
 2009-08-20
