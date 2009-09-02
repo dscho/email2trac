@@ -935,7 +935,6 @@ class TicketEmailParser(object):
 
 		elif self.spam(m) == 'spam':
 			spam_msg = True
-
 		else:
 			spam_msg = False
 
