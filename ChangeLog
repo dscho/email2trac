@@ -1,4 +1,4 @@
-2009-XX-XX
+2009-09-02
   * Implemented a new feature to drop the HTML version of multipart/alternative
     message part. Such a message part contains the same info. The info is sent
     in different formats and the client can decide which version to use.
