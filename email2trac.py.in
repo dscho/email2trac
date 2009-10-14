@@ -126,10 +126,11 @@ class TicketEmailParser(object):
 
 		# Some useful mail constants
 		#
-		self.author = None
+		self.email_name = None
 		self.email_addr = None
 		self.email_from = None
-		self.id = None
+		self.author     = Nome
+		self.id         = None
 
 		self.VERSION = version
 		self.DRY_RUN = parameters['dry_run']
@@ -440,7 +441,7 @@ class TicketEmailParser(object):
 		self.to_name, self.to_email_addr = email.Utils.parseaddr (self.email_to) 
 
 		self.email_from = self.email_to_unicode(message['from'])
-		self.author, self.email_addr  = email.Utils.parseaddr(self.email_from)
+		self.email_name, self.email_addr  = email.Utils.parseaddr(self.email_from)
 
 		# Trac can not handle author's name that contains spaces
 		#
