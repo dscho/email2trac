@@ -1,3 +1,20 @@
+email2trac (1.1.0-1) stable; urgency=low
+
+  * Workflow option did not work, closes #157 
+    Reported by: thomas dot moschny at gmx dot de
+    Fixed  by: Bas van der Vlies & Thomas Moschny
+    
+  * When a ticket is updated via email. We must set a changelog id,
+    closes #156
+    Reported by: Chris dot Nelson at SIXNET dot com 
+    Fixed by: Bas van der Vlies
+
+ * Changed all 'str =' assignments to 's =' to solve conflicts with
+   the builtin str function
+    Fixed by: Bas van der Vlies
+
+ -- Bas van der Vlies <bas@sara.nl>  Thu, 22 Oct 2009 17:47:50 +0200
+
 email2trac (1.0.0-1) stable; urgency=low
 
   * Implemented a new feature to drop the HTML version of multipart/alternative

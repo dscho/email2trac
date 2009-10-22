@@ -129,7 +129,7 @@ class TicketEmailParser(object):
 		self.email_name = None
 		self.email_addr = None
 		self.email_from = None
-		self.author     = Nome
+		self.author     = None
 		self.id         = None
 
 		self.VERSION = version
@@ -343,7 +343,7 @@ class TicketEmailParser(object):
 		understands it.
 		"""
 		results =  email.Header.decode_header(message_str)
-		str = None
+		s = None
 		for text,format in results:
 			if format:
 				try:
@@ -361,13 +361,13 @@ class TicketEmailParser(object):
 				temp = string.strip(text)
 				temp = unicode(text, 'iso-8859-15')
 
-			if str:
-				str = '%s %s' %(str, temp)
+			if s:
+				s = '%s %s' %(s, temp)
 			else:
-				str = '%s' %temp
+				s = '%s' %temp
 
-		#str = str.encode('utf-8')
-		return str
+		#s = s.encode('utf-8')
+		return s
 
 	def debug_body(self, message_body, tempfile=False):
 		if tempfile:
@@ -422,14 +422,14 @@ class TicketEmailParser(object):
 		"""
 		Display To and CC addresses in description field
 		"""
-		str = ''
+		s = ''
 		#if m['To'] and len(m['To']) > 0 and m['To'] != 'hic@sara.nl':
 		if m['To'] and len(m['To']) > 0:
-			str = "'''To:''' %s\r\n" %(m['To'])
+			s = "'''To:''' %s\r\n" %(m['To'])
 		if m['Cc'] and len(m['Cc']) > 0:
-			str = "%s'''Cc:''' %s\r\n" % (str, m['Cc'])
+			s = "%s'''Cc:''' %s\r\n" % (s, m['Cc'])
 
-		return  self.email_to_unicode(str)
+		return  self.email_to_unicode(s)
 
 
 	def get_sender_info(self, message):
@@ -518,12 +518,12 @@ class TicketEmailParser(object):
 		except OSError:
 			pass
 
-	def str_to_dict(self, str):
+	def str_to_dict(self, s):
 		"""
-		Transfrom a str of the form [<key>=<value>]+ to dict[<key>] = <value>
+		Transfrom a string of the form [<key>=<value>]+ to dict[<key>] = <value>
 		""" 
 
-		fields = string.split(str, ',')
+		fields = string.split(s, ',')
 
 		result = dict()
 		for field in fields:
@@ -642,6 +642,10 @@ class TicketEmailParser(object):
 			self.id = None
 			return False
 
+		# How many changes has this ticket
+		cnum = len(tkt.get_changelog())
+
+
 		# reopen the ticket if it is was closed
 		# We must use the ticket workflow framework
 		#
@@ -661,7 +665,7 @@ class TicketEmailParser(object):
 			#b = controller.get_ticket_changes(req, tkt, 'reopen')
 			#print 'get_ticket_changes :', b
 
-			if self.WORKFLOW and (self.VERSION in ['0.11']) :
+			if self.WORKFLOW and (self.VERSION in [0.11]) :
 				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
 				from trac.test import Mock, MockPerm
 
@@ -695,14 +699,17 @@ class TicketEmailParser(object):
 
 		if body_text.strip() or update_fields:
 			if self.DRY_RUN:
-				print 'DRY_RUN: tkt.save_changes(self.author, comment) ', self.author
+				print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
 			else:
-				tkt.save_changes(self.author, body_text, when)
+				#tkt.save_changes(self.author, body_text, when)
+				tkt.save_changes(self.author, body_text, when, None, str(cnum))
+				a =1
+			
 
 		if self.VERSION  == 0.9:
-			str = self.attachments(message_parts, True)
+			s = self.attachments(message_parts, True)
 		else:
-			str = self.attachments(message_parts)
+			s = self.attachments(message_parts)
 
 		if self.notification and not spam:
 			self.notify(tkt, False, when)
@@ -837,10 +844,10 @@ class TicketEmailParser(object):
 			tkt['description'] = u'%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
 
-		str =  self.attachments(message_parts)
-		if str:
+		has_attachments =  self.attachments(message_parts)
+		if has_attachments:
 			changed = True
-			comment = '%s\n%s\n' %(comment, str)
+			comment = '%s\n%s\n' %(comment, has_attachments)
 
 		if changed:
 			if self.DRY_RUN:
@@ -1375,14 +1382,14 @@ class TicketEmailParser(object):
 
 		# use urllib to escape the chars
 		#
-		str = 'mailto:%s?Subject=%s&Cc=%s' %( 
+		s = 'mailto:%s?Subject=%s&Cc=%s' %( 
 		       urllib.quote(self.email_addr), 
 			   urllib.quote('Re: #%s: %s' %(self.id, subject)),
 			   urllib.quote(self.MAILTO_CC)
 			   )
 
-		str = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(str, author)
-		return str
+		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(str, author)
+		return s
 
 	def attachments(self, message_parts, update=False):
 		'''
