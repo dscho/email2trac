@@ -628,7 +628,6 @@ class TicketEmailParser(object):
 
 		# When is the change committed
 		# 
-		#
 		if self.VERSION == 0.11:
 			utc = UTC()
 			when = datetime.now(utc)
@@ -701,9 +700,7 @@ class TicketEmailParser(object):
 			if self.DRY_RUN:
 				print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
 			else:
-				#tkt.save_changes(self.author, body_text, when)
 				tkt.save_changes(self.author, body_text, when, None, str(cnum))
-				a =1
 			
 
 		if self.VERSION  == 0.9:
