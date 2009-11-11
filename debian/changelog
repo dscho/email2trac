@@ -1,4 +1,4 @@
-email2trac (1.1.0-1) stable; urgency=low
+email2trac (1.1.0-2) stable; urgency=low
 
   * Workflow option did not work, closes #157 
     Reported by: thomas dot moschny at gmx dot de
@@ -11,7 +11,7 @@ email2trac (1.1.0-1) stable; urgency=low
 
  * Changed all 'str =' assignments to 's =' to solve conflicts with
    the builtin str function
-    Fixed by: Bas van der Vlies
+   Fixed by: Bas van der Vlies
 
  -- Bas van der Vlies <bas@sara.nl>  Thu, 22 Oct 2009 17:47:50 +0200
 

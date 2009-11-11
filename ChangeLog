@@ -1,5 +1,18 @@
 XXXX-XX-XX
 
+  * Workflow option did not work, closes #157
+    Reported by: thomas dot moschny at gmx dot de
+    Fixed  by: Bas van der Vlies & Thomas Moschny
+
+  * When a ticket is updated via email. We must set a changelog id,
+    closes #156
+    Reported by: Chris dot Nelson at SIXNET dot com
+    Fixed by: Bas van der Vlies
+
+ * Changed all 'str =' assignments to 's =' to solve conflicts with
+   the builtin str function
+    Fixed by: Bas van der Vlies
+
 2009-09-02
   * Implemented a new feature to drop the HTML version of multipart/alternative
     message part. Such a message part contains the same info. The info is sent

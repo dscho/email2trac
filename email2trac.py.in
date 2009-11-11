@@ -1385,7 +1385,7 @@ class TicketEmailParser(object):
 			   urllib.quote(self.MAILTO_CC)
 			   )
 
-		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(str, author)
+		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
 		return s
 
 	def attachments(self, message_parts, update=False):
