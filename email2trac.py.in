@@ -249,10 +249,6 @@ class TicketEmailParser(object):
 		else:
 			self.APPLEDOUBLE = 'warn'
 
-		if parameters.has_key('python_egg_cache'):
-			self.python_egg_cache = str(parameters['python_egg_cache'])
-			os.environ['PYTHON_EGG_CACHE'] = self.python_egg_cache
-
 		self.WORKFLOW = None
 		if parameters.has_key('workflow'):
 			self.WORKFLOW = parameters['workflow']
@@ -1607,6 +1603,13 @@ if __name__ == '__main__':
 		if settings.has_key('enable_syslog'):
 			if SYSLOG_AVAILABLE:
 				ENABLE_SYSLOG =  float(settings['enable_syslog']) 
+
+
+		# Must be set before environment is created
+		#
+		if settings.has_key('python_egg_cache'):
+			python_egg_cache = str(settings['python_egg_cache'])
+			os.environ['PYTHON_EGG_CACHE'] = python_egg_cache
 
 		env = Environment(settings['project'], create=0)
 		tktparser = TicketEmailParser(env, settings, float(version))

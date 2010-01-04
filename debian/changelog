@@ -13,6 +13,11 @@ email2trac (1.1.0-2) stable; urgency=low
    the builtin str function
    Fixed by: Bas van der Vlies
 
+ * Python egg cache enviroment setting was ignored by email2trac. 
+   closes #163
+   Author: Dennis McRitchie ( dmcr at Princeton dot EDU )
+   Applied by: Bas van der Vlies
+   
  -- Bas van der Vlies <bas@sara.nl>  Thu, 22 Oct 2009 17:47:50 +0200
 
 email2trac (1.0.0-1) stable; urgency=low
