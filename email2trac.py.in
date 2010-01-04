@@ -836,11 +836,12 @@ class TicketEmailParser(object):
 
 			tkt['description'] = u'%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
-
-		has_attachments =  self.attachments(message_parts)
-		if has_attachments:
-			changed = True
-			comment = '%s\n%s\n' %(comment, has_attachments)
+		
+		#  Disabled
+		#has_attachments =  self.attachments(message_parts)
+		#if has_attachments:
+		#	changed = True
+		#	comment = '%s\n%s\n' %(comment, has_attachments)
 
 		if changed:
 			if self.DRY_RUN:
