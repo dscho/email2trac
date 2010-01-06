@@ -828,7 +828,7 @@ class TicketEmailParser(object):
 			tkt['id'] = self.id
 			changed = True
 
-		# Rewrite the description if we have mailto enabled
+		## Rewrite the description if we have mailto enabled
 		#
 		if self.MAILTO:
 			changed = True
@@ -837,9 +837,12 @@ class TicketEmailParser(object):
 
 			tkt['description'] = u'%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
-		
+	
+		## Save the attachments to the ticket	
+		#
+		has_attachments =  self.attachments(message_parts)
+
 		#  Disabled
-		#has_attachments =  self.attachments(message_parts)
 		#if has_attachments:
 		#	changed = True
 		#	comment = '%s\n%s\n' %(comment, has_attachments)
@@ -1200,6 +1203,7 @@ class TicketEmailParser(object):
 			# Decode the filename
 			if filename:
 				filename = self.email_to_unicode(filename)			
+
 			# If no name, use a default one
 			else:
 				filename = 'untitled-part'
