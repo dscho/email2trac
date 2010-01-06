@@ -131,6 +131,8 @@ class TicketEmailParser(object):
 		self.email_from = None
 		self.author     = None
 		self.id         = None
+		
+		self.STRIP_CONTENT_TYPES = list()
 
 		self.VERSION = version
 		self.DRY_RUN = parameters['dry_run']
@@ -235,19 +237,18 @@ class TicketEmailParser(object):
 			self.USE_TEXTWRAP = 0
 
 		if parameters.has_key('binhex'):
-			self.BINHEX = parameters['binhex']
-		else:
-			self.BINHEX = 'warn'
+			self.STRIP_CONTENT_TYPES.append('application/mac-binhex40')
 
 		if parameters.has_key('applesingle'):
-			self.APPLESINGLE = parameters['applesingle']
-		else:
-			self.APPLESINGLE = 'warn'
+			self.STRIP_CONTENT_TYPES.append('application/applefile')
 
 		if parameters.has_key('appledouble'):
-			self.APPLEDOUBLE = parameters['appledouble']
-		else:
-			self.APPLEDOUBLE = 'warn'
+			self.STRIP_CONTENT_TYPES.append('application/applefile')
+
+		if parameters.has_key('strip_content_types'):
+			items = parameters['strip_content_types'].split(',')
+			for item in items:
+				self.STRIP_CONTENT_TYPES.append(item.strip())
 
 		self.WORKFLOW = None
 		if parameters.has_key('workflow'):
@@ -1087,12 +1088,7 @@ class TicketEmailParser(object):
 		body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
 		"""
 		message_parts = []
-		
-		# This is used to figure out when we are inside an AppleDouble container
-		# AppleDouble containers consists of two parts: Mac-specific file data, and platform-independent data
-		# We strip away Mac-specific stuff
-		appledouble_parts = []
-
+	
 		ALTERNATIVE_MULTIPART = False
 
 		for part in msg.walk():
@@ -1100,63 +1096,34 @@ class TicketEmailParser(object):
 				print 'TD: Message part: Main-Type: %s' % part.get_content_maintype()
 				print 'TD: Message part: Content-Type: %s' % part.get_content_type()
 
-
-			# Check whether we just finished processing an AppleDouble container
-			if part not in appledouble_parts:
-				appledouble_parts = []
-
 			## Check content type
-			#
-			if part.get_content_type() == 'application/mac-binhex40':
-				#
-				# Special handling for BinHex attachments. Options are drop (leave out with no warning), warn (and leave out), and keep
-				#
-				if self.BINHEX == 'warn':
-					message_parts.append("'''A BinHex attachment named '%s' was ignored (use MIME encoding instead).'''" % part.get_filename())
-					continue
-				elif self.BINHEX == 'drop':
-					continue
+			# 
+			if part.get_content_type() in self.STRIP_CONTENT_TYPES:
 
-			elif part.get_content_type() == 'application/applefile':
-				#
-				# Special handling for the Mac-specific part of AppleDouble/AppleSingle attachments. Options are strip (leave out with no warning), warn (and leave out), and keep
-				#
-				
-				if part in appledouble_parts: 
-					if self.APPLEDOUBLE == 'warn':
-						message_parts.append("'''The resource fork of an attachment named '%s' was removed.'''" % part.get_filename())
-						continue
-					elif self.APPLEDOUBLE == 'strip':
-						continue
-				else:
-					if self.APPLESINGLE == 'warn':
-						message_parts.append("'''An AppleSingle attachment named '%s' was ignored (use MIME encoding instead).'''" % part.get_filename())
-						continue
-					elif self.APPLESINGLE == 'drop':
-						continue
+				if self.DEBUG:
+					print "TD: A %s attachment named '%s' was skipped" %(part.get_content_type(), part.get_filename())
 
-			elif part.get_content_type() == 'multipart/appledouble':
-				#
-				# If we entering an AppleDouble container, set up appledouble_parts so that we know what to do with its subparts
-				#
-				appledouble_parts = part.get_payload()
 				continue
 
-			elif part.get_content_type() == 'multipart/alternative':
+			## Catch some mulitpart execptions
+			#
+			if part.get_content_type() == 'multipart/alternative':
 				ALTERNATIVE_MULTIPART = True
 				continue
 
-			# Skip multipart containers
+			## Skip multipart containers
 			#
 			if part.get_content_maintype() == 'multipart':
 				if self.DEBUG:
 					print "TD: Skipping multipart container"
 				continue
 			
-			# Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
+			## Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
+			#
 			inline = self.inline_part(part)
 
-			# Drop HTML message
+			## Drop HTML message
+			#
 			if ALTERNATIVE_MULTIPART and self.DROP_ALTERNATIVE_HTML_VERSION:
 				if part.get_content_type() == 'text/html':
 					if self.DEBUG:
@@ -1165,7 +1132,8 @@ class TicketEmailParser(object):
 			        	ALTERNATIVE_MULTIPART = False
 					continue
 
-			# Inline text parts are where the body is
+			## Inline text parts are where the body is
+			#
 			if part.get_content_type() == 'text/plain' and inline:
 				if self.DEBUG:
 					print 'TD:               Inline body part'
@@ -1191,7 +1159,7 @@ class TicketEmailParser(object):
 				if self.USE_TEXTWRAP:
 					body_text = self.wrap_text(body_text)
 
-				# Get contents charset (iso-8859-15 if not defined in mail headers)
+				## Get contents charset (iso-8859-15 if not defined in mail headers)
 				#
 				charset = part.get_content_charset()
 				if not charset:
