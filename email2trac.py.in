@@ -142,11 +142,6 @@ class TicketEmailParser(object):
 		if parameters.has_key('umask'):
 			os.umask(int(parameters['umask'], 8))
 
-		if parameters.has_key('quote_attachment_filenames'):
-			self.QUOTE_ATTACHMENT_FILENAMES = int(parameters['quote_attachment_filenames'])
-		else:
-			self.QUOTE_ATTACHMENT_FILENAMES = 1
-
 		if parameters.has_key('debug'):
 			self.DEBUG = int(parameters['debug'])
 		else:
@@ -799,9 +794,17 @@ class TicketEmailParser(object):
 		head = ''
 		if self.EMAIL_HEADER > 0:
 			head = self.email_header_txt(msg)
-			
+
+					
 		message_parts = self.get_message_parts(msg)
+		if self.DEBUG:
+			print 'TD: self.get_message_parts ',
+			print message_parts
+
 		message_parts = self.unique_attachment_names(message_parts)
+		if self.DEBUG:
+			print 'TD: self.unique_attachment_names',
+			print message_parts
 		
 		if self.EMAIL_HEADER > 0:
 			message_parts.insert(0, self.email_header_txt(msg))
@@ -1190,22 +1193,24 @@ class TicketEmailParser(object):
 		return message_parts
 		
 	def unique_attachment_names(self, message_parts):
+		"""
+		"""
 		renamed_parts = []
 		attachment_names = set()
+
 		for part in message_parts:
 			
-			# If not an attachment, leave it alone
+			## If not an attachment, leave it alone
+			#
 			if not isinstance(part, tuple):
 				renamed_parts.append(part)
 				continue
 				
 			(filename, part) = part
-			# Decode the filename
-			if filename:
-				filename = self.email_to_unicode(filename)			
 
-			# If no name, use a default one
-			else:
+			## If no filename, use a default one
+			#
+			if not filename:
 				filename = 'untitled-part'
 
 				# Guess the extension from the content type, use non strict mode
@@ -1218,34 +1223,31 @@ class TicketEmailParser(object):
 
 				filename = '%s%s' % (filename, ext)
 
-			# Discard relative paths in attachment names
-			filename = filename.replace('\\', '/').replace(':', '/') 
-			filename = os.path.basename(filename)
-
+# We now use the attachment insert function
+#
+			## Discard relative paths in attachment names
+			#
+			#filename = filename.replace('\\', '/').replace(':', '/') 
+			#filename = os.path.basename(filename)
+			#
 			# We try to normalize the filename to utf-8 NFC if we can.
 			# Files uploaded from OS X might be in NFD.
 			# Check python version and then try it
 			#
-			if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
-				try:
-					filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
-				except TypeError:
-					pass
-					
-			if self.QUOTE_ATTACHMENT_FILENAMES:
-				try:
-					filename = urllib.quote(filename)
-				except KeyError, detail:
-					filename = urllib.quote(filename.encode('utf-8'))
+			#if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
+			#	try:
+			#		filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
+			#	except TypeError:
+			#		pass
 
 			# Make the filename unique for this ticket
 			num = 0
 			unique_filename = filename
-			filename, ext = os.path.splitext(filename)
+			dummy_filename, ext = os.path.splitext(filename)
 
 			while unique_filename in attachment_names or self.attachment_exists(unique_filename):
 				num += 1
-				unique_filename = "%s-%s%s" % (filename, num, ext)
+				unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
 				
 			if self.DEBUG:
 				print 'TD: Attachment with filename %s will be saved as %s' % (filename, unique_filename)
@@ -1253,7 +1255,7 @@ class TicketEmailParser(object):
 			attachment_names.add(unique_filename)
 
 			renamed_parts.append((filename, unique_filename, part))
-		
+	
 		return renamed_parts
 			
 	def inline_part(self, part):
@@ -1417,6 +1419,7 @@ class TicketEmailParser(object):
 				att.description = self.email_to_unicode('Added by email2trac')
 
 			att.insert(filename, fd, file_size)
+
 			#except  util.TracError, detail:
 			#	print detail
 

@@ -32,6 +32,13 @@ email2trac (1.1.0-4) stable; urgency=low
    Will strip attachments that has these content_types.
    Authors:  otto at bergerdata dot de and Bas van der Vlies
 
+ * FIxed an error when files where added with characters that needed to be 
+   escaped. Both email2trac and trac escaped the filenames. We removed the 
+   code from email2trac an let trac handle the escaping, closes #149
+
+   Reported by: hju att jochenkuhl dot de
+   Fixed by: Bas van der Vlies
+   
  -- Bas van der Vlies <bas@sara.nl>  Thu, 22 Oct 2009 17:47:50 +0200
 
 email2trac (1.0.0-1) stable; urgency=low
