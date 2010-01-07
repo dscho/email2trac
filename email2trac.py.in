@@ -41,7 +41,7 @@ How to use
     [DEFAULT]                        # REQUIRED
     project      : /data/trac/test   # REQUIRED
     debug        : 1                 # OPTIONAL, if set print some DEBUG info
-    trac_version : 0.9               # OPTIONAL, default is 0.11 
+    trac_version : 0.10              # OPTIONAL, default is 0.11 
 
     [jouvin]                         # OPTIONAL project declaration, if set both fields necessary
     project      : /data/trac/jouvin # use -p|--project jouvin.  
@@ -259,6 +259,11 @@ class TicketEmailParser(object):
 			self.IGNORE_TRAC_USER_SETTINGS = int(parameters['ignore_trac_user_settings'])
 		else:
 			self.IGNORE_TRAC_USER_SETTINGS = 0
+
+		if parameters.has_key('subject_field_separator'):
+			self.SUBJECT_FIELD_SEPARATOR = parameters['subject_field_separator'].strip()
+		else:
+			self.SUBJECT_FIELD_SEPARATOR = '&'
 
 	def spam(self, message):
 		"""
@@ -515,7 +520,7 @@ class TicketEmailParser(object):
 		Transfrom a string of the form [<key>=<value>]+ to dict[<key>] = <value>
 		""" 
 
-		fields = string.split(s, ',')
+		fields = string.split(s, self.SUBJECT_FIELD_SEPARATOR)
 
 		result = dict()
 		for field in fields:
@@ -533,7 +538,6 @@ class TicketEmailParser(object):
 
 			except ValueError:
 				pass
-
 		return result
 
 	def update_ticket_fields(self, ticket, user_dict, use_default=None): 

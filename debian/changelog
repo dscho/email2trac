@@ -38,6 +38,15 @@ email2trac (1.1.0-4) stable; urgency=low
 
    Reported by: hju att jochenkuhl dot de
    Fixed by: Bas van der Vlies
+
+ * Added a new parameter:
+     * subject_field_separator, default value is &
+
+   This is used to set tickets fields via the subject line. It used to
+   be , .For backwards compatibility we introduced this parameter. 
+   closes #166
+   Suggested by: Dennis McRitchie ( dmcr at Princeton dot EDU )
+   Fixed by    : Bas van der Vlies
    
  -- Bas van der Vlies <bas@sara.nl>  Thu, 22 Oct 2009 17:47:50 +0200
 
