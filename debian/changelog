@@ -47,6 +47,11 @@ email2trac (1.1.0-4) stable; urgency=low
    closes #166
    Suggested by: Dennis McRitchie ( dmcr at Princeton dot EDU )
    Fixed by    : Bas van der Vlies
+
+ * Prevent a mail loop for new tickets when ticket email address is set 
+   in CC and reply_all is set.
+   Reported by: otto at bergerdata dot de
+   Fixed vy   : Bas van der Vlies
    
  -- Bas van der Vlies <bas@sara.nl>  Thu, 22 Oct 2009 17:47:50 +0200
 

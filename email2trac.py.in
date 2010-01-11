@@ -485,10 +485,10 @@ class TicketEmailParser(object):
 
 			## Build a list of forbidden CC addresses
 			#
-			to_addrs = email.Utils.getaddresses( message.get_all('to', []) )
-			to_list = list()
-			for n,e in to_addrs:
-				to_list.append(e)
+			#to_addrs = email.Utils.getaddresses( message.get_all('to', []) )
+			#to_list = list()
+			#for n,e in to_addrs:
+			#	to_list.append(e)
 				
 			# Remove reporter email address if notification is 
 			# on
@@ -499,11 +499,16 @@ class TicketEmailParser(object):
 				except ValueError, detail:
 					pass
 
+			## This address is forbidden for CC-field, cuases mail-loop
+			#
+			smtp_from = self.get_config('notification', 'smtp_from')
+
 			for name,addr in cc_addrs:
 		
 				## Prevent mail loop
 				#
-				if addr in to_list:
+				#if addr in to_list:
+				if addr == smtp_from:
 					if self.DEBUG:
 						print "Skipping %s mail address for CC-field" %(addr)
 					continue
