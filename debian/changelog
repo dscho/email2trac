@@ -52,6 +52,10 @@ email2trac (1.1.0-5) stable; urgency=low
     the ticket email address.
      - For a new ticket and reply_all is set.
      - If the ticket CC field is updated via the subject line. 
+
+    Also prevent setting the reporter address to the ticket email 
+    address.
+
     closes #172
     Reported by: otto at bergerdata dot de
     Fixed vy   : Bas van der Vlies

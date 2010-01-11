@@ -440,9 +440,13 @@ class TicketEmailParser(object):
 		self.email_from = self.email_to_unicode(message['from'])
 		self.email_name, self.email_addr  = email.Utils.parseaddr(self.email_from)
 
-		# Trac can not handle author's name that contains spaces
-		#
-		self.author = self.email_addr
+		## Trac can not handle author's name that contains spaces
+		#  and forbid the ticket email address as author field
+
+		if self.author == self.trac_smtp_from:
+			self.author = "email2trac"
+		else:
+			self.author = self.email_addr
 
 		if self.IGNORE_TRAC_USER_SETTINGS:
 			return
@@ -499,16 +503,13 @@ class TicketEmailParser(object):
 				except ValueError, detail:
 					pass
 
-			## This address is forbidden for CC-field, cuases mail-loop
-			#
-			smtp_from = self.get_config('notification', 'smtp_from')
-
 			for name,addr in cc_addrs:
 		
 				## Prevent mail loop
 				#
 				#if addr in to_list:
-				if addr == smtp_from:
+
+				if addr == self.trac_smtp_from:
 					if self.DEBUG:
 						print "Skipping %s mail address for CC-field" %(addr)
 					continue
@@ -603,14 +604,12 @@ class TicketEmailParser(object):
 			#
 			if field == 'cc': 
 
-				smtp_from = self.get_config('notification', 'smtp_from')
-
 				cc_list = user_dict['cc'].split(',')
 
-				if smtp_from in cc_list:
+				if self.trac_smtp_from in cc_list:
 					if self.DEBUG > 10:
-						print 'TD: MAIL LOOP: %s is not allowed as CC address' %(smtp_from)
-					cc_list.remove(smtp_from)
+						print 'TD: MAIL LOOP: %s is not allowed as CC address' %(self.trac_smtp_from)
+					cc_list.remove(self.trac_smtp_from)
 
 				value = ','.join(cc_list)
 				
@@ -999,6 +998,8 @@ class TicketEmailParser(object):
 			self.notification = 1
 		else:
 			self.notification = 0
+
+		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
 
 		# Check if  FullBlogPlugin is installed
 		#
