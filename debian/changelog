@@ -1,4 +1,4 @@
-email2trac (1.1.0-4) stable; urgency=low
+email2trac (1.1.0-5) stable; urgency=low
 
   * Workflow option did not work, closes #157 
     Reported by: thomas dot moschny at gmx dot de
