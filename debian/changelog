@@ -48,8 +48,11 @@ email2trac (1.1.0-4) stable; urgency=low
    Suggested by: Dennis McRitchie ( dmcr at Princeton dot EDU )
    Fixed by    : Bas van der Vlies
 
- * Prevent a mail loop for new tickets when ticket email address is set 
-   in CC and reply_all is set.
+ * Prevent mail loop. We could set the CC ticket field to 
+   the ticket email address.
+    - For a new ticket and reply_all is set.
+    - If the ticket CC field is updated via the subject line. 
+   closes #172
    Reported by: otto at bergerdata dot de
    Fixed vy   : Bas van der Vlies
    

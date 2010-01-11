@@ -577,6 +577,8 @@ class TicketEmailParser(object):
 			   1) Skip the value (use_default=None)
 			   2) Set default value for field (use_default=1)
 		"""
+		if self.DEBUG:
+			print "TD: update_ticket_fields"
 
 		# Build a system dictionary from the ticket fields 
 		# with field as index and option as value
@@ -590,12 +592,28 @@ class TicketEmailParser(object):
 				sys_dict[field['name']] = None
 				pass
 
-		# Check user supplied fields an compare them with the
+		## Check user supplied fields an compare them with the
 		# system one's
 		#
 		for field,value in user_dict.items():
 			if self.DEBUG >= 10: 
 				print  'user_field\t %s = %s' %(field,value)
+
+			## To prevent mail loop
+			#
+			if field == 'cc': 
+
+				smtp_from = self.get_config('notification', 'smtp_from')
+
+				cc_list = user_dict['cc'].split(',')
+
+				if smtp_from in cc_list:
+					if self.DEBUG > 10:
+						print 'TD: MAIL LOOP: %s is not allowed as CC address' %(smtp_from)
+					cc_list.remove(smtp_from)
+
+				value = ','.join(cc_list)
+				
 
 			if sys_dict.has_key(field):
 
