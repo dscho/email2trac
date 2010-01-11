@@ -265,6 +265,8 @@ class TicketEmailParser(object):
 		else:
 			self.SUBJECT_FIELD_SEPARATOR = '&'
 
+		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
+
 	def spam(self, message):
 		"""
 		# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
@@ -443,7 +445,7 @@ class TicketEmailParser(object):
 		## Trac can not handle author's name that contains spaces
 		#  and forbid the ticket email address as author field
 
-		if self.author == self.trac_smtp_from:
+		if self.email_addr == self.trac_smtp_from:
 			self.author = "email2trac"
 		else:
 			self.author = self.email_addr
@@ -999,7 +1001,6 @@ class TicketEmailParser(object):
 		else:
 			self.notification = 0
 
-		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
 
 		# Check if  FullBlogPlugin is installed
 		#
