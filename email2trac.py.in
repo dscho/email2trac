@@ -464,6 +464,8 @@ class TicketEmailParser(object):
 		"""
 		Set all the right fields for a new ticket
 		"""
+		if self.DEBUG: 
+			print 'TD: set_reply_fields'
 
 		## Only use name or email adress
 		#ticket['reporter'] = self.email_from
@@ -473,30 +475,49 @@ class TicketEmailParser(object):
 		# Put all CC-addresses in ticket CC field
 		#
 		if self.REPLY_ALL:
-			#tos = message.get_all('to', [])
-			ccs = message.get_all('cc', [])
 
-			addrs = email.Utils.getaddresses(ccs)
-			if not addrs:
+			email_cc = ''
+
+			cc_addrs = email.Utils.getaddresses( message.get_all('cc', []) )
+
+			if not cc_addrs:
 				return
 
+			## Build a list of forbidden CC addresses
+			#
+			to_addrs = email.Utils.getaddresses( message.get_all('to', []) )
+			to_list = list()
+			for n,e in to_addrs:
+				to_list.append(e)
+				
 			# Remove reporter email address if notification is 
 			# on
 			#
 			if self.notification:
 				try:
-					addrs.remove((self.author, self.email_addr))
+					cc_addrs.remove((self.author, self.email_addr))
 				except ValueError, detail:
 					pass
 
-			for name,mail in addrs:
-				try:
-					mail_list = '%s, %s' %(mail_list, mail)
-				except UnboundLocalError, detail:
-					mail_list = mail
+			for name,addr in cc_addrs:
+		
+				## Prevent mail loop
+				#
+				if addr in to_list:
+					if self.DEBUG:
+						print "Skipping %s mail address for CC-field" %(addr)
+					continue
 
-			if mail_list:
-				ticket['cc'] = self.email_to_unicode(mail_list)
+				if email_cc:
+					email_cc = '%s, %s' %(email_cc, addr)
+				else:
+					email_cc = addr
+
+			if email_cc:
+				if self.DEBUG:
+					print 'TD: set_reply_fields: %s' %email_cc
+
+				ticket['cc'] = self.email_to_unicode(email_cc)
 
 	def save_email_for_debug(self, message, tempfile=False):
 		if tempfile:
