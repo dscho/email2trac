@@ -9,52 +9,52 @@ email2trac (1.1.0-5) stable; urgency=low
     Reported by: Chris dot Nelson at SIXNET dot com 
     Fixed by: Bas van der Vlies
 
- * Changed all 'str =' assignments to 's =' to solve conflicts with
-   the builtin str function
-   Fixed by: Bas van der Vlies
+  * Changed all 'str =' assignments to 's =' to solve conflicts with
+    the builtin str function
+    Fixed by: Bas van der Vlies
 
- * Python egg cache enviroment setting was ignored by email2trac. 
-   closes #163
-   Author: Dennis McRitchie ( dmcr at Princeton dot EDU )
-   Applied by: Bas van der Vlies
+  * Python egg cache enviroment setting was ignored by email2trac. 
+    closes #163
+    Author: Dennis McRitchie ( dmcr at Princeton dot EDU )
+    Applied by: Bas van der Vlies
 
- * Disabled code so the following line will not be displayed anymore 
-   as comment in a ticket:
-     * This message has x attachment(s)
-   Suggested by: dereks at realloc dot net, closes ticket #165
-   Fixed by    : Bas van der Vlies
+  * Disabled code so the following line will not be displayed anymore 
+    as comment in a ticket:
+     - This message has x attachment(s)
+    Suggested by: dereks at realloc dot net, closes ticket #165
+    Fixed by    : Bas van der Vlies
 
 
- * Added a new parameter strip_content_types. So we can strip attachments 
-   based on content type, eg:
-     * strip_content_types: application/pgp-signature, application/mac-binhex40
+  * Added a new parameter strip_content_types. So we can strip attachments 
+    based on content type, eg:
+     - strip_content_types: application/pgp-signature, application/mac-binhex40
 
-   Will strip attachments that has these content_types.
-   Authors:  otto at bergerdata dot de and Bas van der Vlies
+    Will strip attachments that has these content_types.
+    Authors:  otto at bergerdata dot de and Bas van der Vlies
 
- * FIxed an error when files where added with characters that needed to be 
-   escaped. Both email2trac and trac escaped the filenames. We removed the 
-   code from email2trac an let trac handle the escaping, closes #149
+  * FIxed an error when files where added with characters that needed to be 
+    escaped. Both email2trac and trac escaped the filenames. We removed the 
+    code from email2trac an let trac handle the escaping, closes #149
 
-   Reported by: hju att jochenkuhl dot de
-   Fixed by: Bas van der Vlies
+    Reported by: hju att jochenkuhl dot de
+    Fixed by: Bas van der Vlies
 
- * Added a new parameter:
-     * subject_field_separator, default value is &
+  * Added a new parameter:
+     - subject_field_separator, default value is &
 
-   This is used to set tickets fields via the subject line. It used to
-   be , .For backwards compatibility we introduced this parameter. 
-   closes #166
-   Suggested by: Dennis McRitchie ( dmcr at Princeton dot EDU )
-   Fixed by    : Bas van der Vlies
+    This is used to set tickets fields via the subject line. It used to
+    be , .For backwards compatibility we introduced this parameter. 
+    closes #166
+    Suggested by: Dennis McRitchie ( dmcr at Princeton dot EDU )
+    Fixed by    : Bas van der Vlies
 
- * Prevent mail loop. We could set the CC ticket field to 
-   the ticket email address.
-    - For a new ticket and reply_all is set.
-    - If the ticket CC field is updated via the subject line. 
-   closes #172
-   Reported by: otto at bergerdata dot de
-   Fixed vy   : Bas van der Vlies
+  * Prevent mail loop. We could set the CC ticket field to 
+    the ticket email address.
+     - For a new ticket and reply_all is set.
+     - If the ticket CC field is updated via the subject line. 
+    closes #172
+    Reported by: otto at bergerdata dot de
+    Fixed vy   : Bas van der Vlies
    
  -- Bas van der Vlies <bas@sara.nl>  Thu, 22 Oct 2009 17:47:50 +0200
 
