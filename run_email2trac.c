@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
   int status;
 
   char   **trac_script_args;
+  char   *python_egg_cache;
   struct passwd *TRAC; 
   struct passwd *MTA;
   struct stat script_attrs;
@@ -79,16 +80,19 @@ int main(int argc, char** argv) {
       i++;
       continue;
     }
+    else if ( (strcmp(argv[i],"--eggcache") == 0) ||
+         (strcmp(argv[i],"-e") == 0) ) {
+      i++;
+      python_egg_cache = argv[i];
+      continue;
+    }
     
     trac_script_args[j] = argv[i];
     j++;
   }
   trac_script_args[j] = NULL;
 
-  
   /* Check caller */
-
-
   check_username(MTA_USER);
   MTA = getpwnam(MTA_USER);
 
@@ -101,7 +105,6 @@ int main(int argc, char** argv) {
     if ( DEBUG ) printf("Invalid caller UID (%d)\n",caller);
     return -2;     /* 254 : Invalid caller */
   }
-  
   
   /* set UID/GID to Trac (or apache) user */
   check_username(TRAC_USER);
@@ -121,8 +124,14 @@ int main(int argc, char** argv) {
     return -4;    /* 252 : script not found */
   }
  
+  /* Set PYTHON_EGG_CACHE env variable if we have been told to do so */
+  if ( strlen(python_egg_cache) > 0 ) {
+    setenv("PYTHON_EGG_CACHE",python_egg_cache ,1);
+  }
+
   /* Execute script */
   status = execv(trac_script, trac_script_args);
+  
   if ( DEBUG ) printf("Script %s execution failure (error=%d). Check permission and interpreter path.\n",trac_script,status);
   return -1;     /* 255 : should never reach this point */
 
