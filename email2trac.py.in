@@ -1157,9 +1157,10 @@ class TicketEmailParser(object):
 		for line in text.splitlines():
 			match = INLINE_EXP.match(line)
 			if match:
-				print match.groups()
 				keyword, value = match.groups()
 				self.properties[keyword] = value.strip()
+				if self.DEBUG:
+					print "TD: inline properties: %s : %s" %(keyword,value)
 			else:
 				body.append(line)
 				
