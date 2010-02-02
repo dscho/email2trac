@@ -374,54 +374,6 @@ class TicketEmailParser(object):
 		#s = s.encode('utf-8')
 		return s
 
-	def debug_body(self, message_body, tempfile=False):
-		if tempfile:
-			import tempfile
-			body_file = tempfile.mktemp('.email2trac')
-		else:
-			body_file = os.path.join(self.TMPDIR, 'body.txt')
-
-		print 'TD: writing body (%s)' % body_file
-		fx = open(body_file, 'wb')
-		if not message_body:
-			message_body = '(None)'
-
-		message_body = message_body.encode('utf-8')
-		#message_body = unicode(message_body, 'iso-8859-15')
-
-		fx.write(message_body)
-		fx.close()
-		try:
-			os.chmod(body_file,S_IRWXU|S_IRWXG|S_IRWXO)
-		except OSError:
-			pass
-
-	def debug_attachments(self, message_parts):
-		n = 0
-		for part in message_parts:
-			# Skip inline text parts
-			if not isinstance(part, tuple):
-				continue
-				
-			(original, filename, part) = part
-
-			n = n + 1
-			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
-			print 'TD: part%d: filename: %s' % (n, part.get_filename())
-
-			part_file = os.path.join(self.TMPDIR, filename)
-			#part_file = '/var/tmp/part%d' % n
-			print 'TD: writing part%d (%s)' % (n,part_file)
-			fx = open(part_file, 'wb')
-			text = part.get_payload(decode=1)
-			if not text:
-				text = '(None)'
-			fx.write(text)
-			fx.close()
-			try:
-				os.chmod(part_file,S_IRWXU|S_IRWXG|S_IRWXO)
-			except OSError:
-				pass
 
 	def email_header_txt(self, m):
 		"""
@@ -532,6 +484,55 @@ class TicketEmailParser(object):
 					print 'TD: set_reply_fields: %s' %email_cc
 
 				ticket['cc'] = self.email_to_unicode(email_cc)
+
+	def debug_body(self, message_body, tempfile=False):
+		if tempfile:
+			import tempfile
+			body_file = tempfile.mktemp('.email2trac')
+		else:
+			body_file = os.path.join(self.TMPDIR, 'body.txt')
+
+		print 'TD: writing body (%s)' % body_file
+		fx = open(body_file, 'wb')
+		if not message_body:
+			message_body = '(None)'
+
+		message_body = message_body.encode('utf-8')
+		#message_body = unicode(message_body, 'iso-8859-15')
+
+		fx.write(message_body)
+		fx.close()
+		try:
+			os.chmod(body_file,S_IRWXU|S_IRWXG|S_IRWXO)
+		except OSError:
+			pass
+
+	def debug_attachments(self, message_parts):
+		n = 0
+		for part in message_parts:
+			# Skip inline text parts
+			if not isinstance(part, tuple):
+				continue
+				
+			(original, filename, part) = part
+
+			n = n + 1
+			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
+			print 'TD: part%d: filename: %s' % (n, part.get_filename())
+
+			part_file = os.path.join(self.TMPDIR, filename)
+			#part_file = '/var/tmp/part%d' % n
+			print 'TD: writing part%d (%s)' % (n,part_file)
+			fx = open(part_file, 'wb')
+			text = part.get_payload(decode=1)
+			if not text:
+				text = '(None)'
+			fx.write(text)
+			fx.close()
+			try:
+				os.chmod(part_file,S_IRWXU|S_IRWXG|S_IRWXO)
+			except OSError:
+				pass
 
 	def save_email_for_debug(self, message, tempfile=False):
 
