@@ -226,6 +226,12 @@ class TicketEmailParser(object):
 		else:
 			self.STRIP_QUOTES = 0
 
+		self.properties = dict()
+		if parameters.has_key('inline_properties'):
+			self.INLINE_PROPERTIES = int(parameters['inline_properties'])
+		else:
+			self.INLINE_PROPERTIES = 0
+
 		if parameters.has_key('use_textwrap'):
 			self.USE_TEXTWRAP = int(parameters['use_textwrap'])
 		else:
@@ -528,6 +534,7 @@ class TicketEmailParser(object):
 				ticket['cc'] = self.email_to_unicode(email_cc)
 
 	def save_email_for_debug(self, message, tempfile=False):
+
 		if tempfile:
 			import tempfile
 			msg_file = tempfile.mktemp('.email2trac')
@@ -543,6 +550,12 @@ class TicketEmailParser(object):
 			os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
 		except OSError:
 			pass
+
+		message_parts = self.get_message_parts(message)
+		message_parts = self.unique_attachment_names(message_parts)
+		body_text = self.body_text(message_parts)
+		self.debug_body(body_text, True)
+		self.debug_attachments(message_parts)
 
 	def str_to_dict(self, s):
 		"""
@@ -724,7 +737,7 @@ class TicketEmailParser(object):
 				tkt['status'] = 'reopened'
 				tkt['resolution'] = ''
 
-		# Must we update some ticket fields properties
+		# Must we update some ticket fields properties via subjectline
 		#
 		if update_fields:
 			self.update_ticket_fields(tkt, update_fields)
@@ -732,12 +745,17 @@ class TicketEmailParser(object):
 		message_parts = self.get_message_parts(m)
 		message_parts = self.unique_attachment_names(message_parts)
 
+		# Must we update some ticket fields properties via body_text
+		#
+		if self.properties:
+				self.update_ticket_fields(tkt, self.properties)
+
 		if self.EMAIL_HEADER:
 			message_parts.insert(0, self.email_header_txt(m))
 
 		body_text = self.body_text(message_parts)
 
-		if body_text.strip() or update_fields:
+		if body_text.strip() or update_fields or self.properties: 
 			if self.DRY_RUN:
 				print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
 			else:
@@ -844,8 +862,13 @@ class TicketEmailParser(object):
 		if self.EMAIL_HEADER > 0:
 			head = self.email_header_txt(msg)
 
-					
 		message_parts = self.get_message_parts(msg)
+
+		# Must we update some ticket fields properties via body_text
+		#
+		if self.properties:
+				self.update_ticket_fields(tkt, self.properties)
+
 		if self.DEBUG:
 			print 'TD: self.get_message_parts ',
 			print message_parts
@@ -946,6 +969,11 @@ class TicketEmailParser(object):
 			
 			blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
+	def save_message_for_debug(self):
+		"""
+		Save the messages. So we can use it for debug purposes
+		"""
+		
 
 	def parse(self, fp):
 		global m
@@ -961,12 +989,7 @@ class TicketEmailParser(object):
 		m.replace_header('Subject', m['Subject'].replace('\r', '').replace('\n', ''))
 
 		if self.DEBUG > 1:	  # save the entire e-mail message text
-			message_parts = self.get_message_parts(m)
-			message_parts = self.unique_attachment_names(message_parts)
 			self.save_email_for_debug(m, True)
-			body_text = self.body_text(message_parts)
-			self.debug_body(body_text, True)
-			self.debug_attachments(message_parts)
 
 		self.db = self.env.get_db_cnx()
  		self.get_sender_info(m)
@@ -1029,8 +1052,13 @@ class TicketEmailParser(object):
 		result =  TICKET_RE.search(subject)
 
 		if result:
-			if result.group('blog') and blog_enabled:
-				self.blog(result.group('blog_id'))
+			if result.group('blog'):
+				if blog_enabled:
+					self.blog(result.group('blog_id'))
+				else:
+					if self.DEBUG:
+						print "Fullblog plugin is not installed"
+						return
 
 			# update ticket + fields
 			#
@@ -1113,6 +1141,30 @@ class TicketEmailParser(object):
 
 		return ('\n'.join(body))
 
+	def inline_properties(self, text): 
+		"""
+		Parse text if we use inline keywords to set ticket fields
+		"""
+		if self.DEBUG:
+			print 'TD: inline_properties function'
+
+		properties = dict()
+		body = list()
+
+		INLINE_EXP = re.compile('\s*[@]\s*([a-zA-Z]+)\s*:(.*)$')
+
+		for line in text.splitlines():
+			match = INLINE_EXP.match(line)
+			if match:
+				print match.groups()
+				keyword, value = match.groups()
+				self.properties[keyword] = value.strip()
+			else:
+				body.append(line)
+				
+		return '\n'.join(body)
+
+
 	def wrap_text(self, text, replace_whitespace = False):
 		"""
 		Will break a lines longer then given length into several small 
@@ -1143,7 +1195,7 @@ class TicketEmailParser(object):
 		parses the email message and returns a list of body parts and attachments
 		body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
 		"""
-		message_parts = []
+		message_parts = list()
 	
 		ALTERNATIVE_MULTIPART = False
 
@@ -1211,6 +1263,9 @@ class TicketEmailParser(object):
 
 				if self.STRIP_QUOTES: 
 					body_text = self.strip_quotes(body_text)
+
+				if self.INLINE_PROPERTIES: 
+					body_text = self.inline_properties(body_text)
 
 				if self.USE_TEXTWRAP:
 					body_text = self.wrap_text(body_text)
