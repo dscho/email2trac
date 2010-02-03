@@ -941,19 +941,23 @@ class TicketEmailParser(object):
 		# import the modules
 		#
 		from tracfullblog.core import FullBlogCore
-		from tracfullblog.model import BlogPost, BlogCommen
+		from tracfullblog.model import BlogPost, BlogComment
+		from trac.test import Mock, MockPerm
 
 		# instantiate blog core
 		blog = FullBlogCore(self.env)
-		req = '' 
-		
+		req = Mock(authname='anonymous', perm=MockPerm(), args={})
+
 		if id: 
 
 			# update blog
 			#
 			comment = BlogComment(self.env, id)
 			comment.author = self.author
-			comment.comment = self.get_body_text(m)
+
+			message_parts = self.get_message_parts(m)
+			comment.comment = self.body_text(message_parts)
+
 			blog.create_comment(req, comment)
 
 		else:
@@ -966,7 +970,9 @@ class TicketEmailParser(object):
 			
 			post.author = self.author
 			post.title = self.email_to_unicode(m['Subject'])
-			post.body = self.get_body_text(m) 
+
+			message_parts = self.get_message_parts(m)
+			post.body = self.body_text(message_parts)
 			
 			blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
