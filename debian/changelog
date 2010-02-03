@@ -5,6 +5,13 @@ email2trac (1.2.0-1) stable; urgency=low
     Author: pepl at cpan dot org
     Applied by: Bas van der Vlies
 
+  * Ticket fields can be set inline an email: closes #171
+     - controlled by parameter 'inline_properties', default behaviour off
+     - see https://subtrac.sara.nl/oss/email2trac/wiki/Email2tracParse#Updateticketfields
+
+    Author: samuel at hoffstaetter dot com
+    Applied by: Bas van der Vlies
+   
  -- Bas van der Vlies <basv@sara.nl>  Wed, 27 Jan 2010 16:17:41 +0100
 
 email2trac (1.1.0-6) stable; urgency=low
