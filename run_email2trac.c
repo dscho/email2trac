@@ -125,9 +125,11 @@ int main(int argc, char** argv) {
   }
  
   /* Set PYTHON_EGG_CACHE env variable if we have been told to do so */
+/*
   if ( strlen(python_egg_cache) > 0 ) {
     setenv("PYTHON_EGG_CACHE",python_egg_cache ,1);
   }
+*/
 
   /* Execute script */
   status = execv(trac_script, trac_script_args);

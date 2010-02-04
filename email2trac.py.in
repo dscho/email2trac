@@ -1299,7 +1299,10 @@ class TicketEmailParser(object):
 					message_parts.append('%s' %ubody_text)
 			else:
 				if self.DEBUG:
-					print 'TD:               Filename: %s' % part.get_filename()
+					try:
+						print 'TD:               Filename: %s' % part.get_filename()
+					except UnicodeEncodeError, detail:
+						print 'TD:               Filename: Can not be printed due to non-ascci characters'
 
 				message_parts.append((part.get_filename(), part))
 
