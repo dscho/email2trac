@@ -136,6 +136,7 @@ class TicketEmailParser(object):
 
 		self.VERSION = version
 		self.DRY_RUN = parameters['dry_run']
+		self.VERBOSE = parameters['verbose']
 
 		self.get_config = self.env.config.get
 
@@ -347,6 +348,9 @@ class TicketEmailParser(object):
         that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
 		understands it.
 		"""
+		if self.VERBOSE:
+			print "VB: email_to_unicode"
+
 		results =  email.Header.decode_header(message_str)
 		s = None
 		for text,format in results:
@@ -508,6 +512,11 @@ class TicketEmailParser(object):
 			pass
 
 	def debug_attachments(self, message_parts):
+		"""
+		"""
+		if self.VERBOSE:
+			print "VB: debug_attachments"
+		
 		n = 0
 		for part in message_parts:
 			# Skip inline text parts
@@ -1206,6 +1215,9 @@ class TicketEmailParser(object):
 		parses the email message and returns a list of body parts and attachments
 		body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
 		"""
+		if self.VERBOSE:
+			print "VB: get_message_parts()"
+
 		message_parts = list()
 	
 		ALTERNATIVE_MULTIPART = False
@@ -1307,7 +1319,10 @@ class TicketEmailParser(object):
 					except UnicodeEncodeError, detail:
 						print 'TD:               Filename: Can not be printed due to non-ascci characters'
 
-				message_parts.append((part.get_filename(), part))
+				## Convert 7-bit filename to 8 bits value
+				#
+				filename = self.email_to_unicode(part.get_filename())
+				message_parts.append((filename, part))
 
 		return message_parts
 		
@@ -1604,12 +1619,13 @@ if __name__ == '__main__':
 	component = ''
 	ticket_prefix = 'default'
 	dry_run = None
+	verbose = None
 
 	ENABLE_SYSLOG = 0
 
 
-	SHORT_OPT = 'chf:np:t:'
-	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=']
+	SHORT_OPT = 'chf:np:t:v'
+	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=', 'verbose']
 
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], SHORT_OPT, LONG_OPT)
@@ -1633,6 +1649,8 @@ if __name__ == '__main__':
 			project_name = value
 		elif opt in ['-t', '--ticket_prefix']:
 			ticket_prefix = value
+		elif opt in ['-v', '--version']:
+			verbose = True
 	
 	settings = ReadConfig(configfile, project_name)
 	if not settings.has_key('project'):
@@ -1647,6 +1665,7 @@ if __name__ == '__main__':
 	#
 	settings['ticket_prefix'] = ticket_prefix
 	settings['dry_run'] = dry_run
+	settings['verbose'] = verbose
 	
 	if settings.has_key('trac_version'):
 		version = settings['trac_version']
