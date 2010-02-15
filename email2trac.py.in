@@ -352,6 +352,7 @@ class TicketEmailParser(object):
 			print "VB: email_to_unicode"
 
 		results =  email.Header.decode_header(message_str)
+
 		s = None
 		for text,format in results:
 			if format:

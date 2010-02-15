@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
   int status;
 
   char   **trac_script_args;
-  char   *python_egg_cache;
+  char   *python_egg_cache = NULL;
   struct passwd *TRAC; 
   struct passwd *MTA;
   struct stat script_attrs;
@@ -125,11 +125,9 @@ int main(int argc, char** argv) {
   }
  
   /* Set PYTHON_EGG_CACHE env variable if we have been told to do so */
-/*
-  if ( strlen(python_egg_cache) > 0 ) {
+  if ( python_egg_cache != NULL ) {
     setenv("PYTHON_EGG_CACHE",python_egg_cache ,1);
   }
-*/
 
   /* Execute script */
   status = execv(trac_script, trac_script_args);
