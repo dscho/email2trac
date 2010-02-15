@@ -993,7 +993,10 @@ class TicketEmailParser(object):
 			return
 			
 		# Work around lack of header folding in Python; see http://bugs.python.org/issue4696
-		m.replace_header('Subject', m['Subject'].replace('\r', '').replace('\n', ''))
+		try:
+			m.replace_header('Subject', m['Subject'].replace('\r', '').replace('\n', ''))
+		except AttributeError, detail:
+			pass
 
 		if self.DEBUG > 1:	  # save the entire e-mail message text
 			self.save_email_for_debug(m, True)

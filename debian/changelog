@@ -11,6 +11,10 @@ email2trac (1.2.0-1) stable; urgency=low
 
     Author: samuel at hoffstaetter dot com
     Applied by: Bas van der Vlies
+
+  * Fixed a bug when there is no subject line in the message, closes #179
+    Reported by: xurizaemon
+    Fixed by: Bas van der Vlies
    
  -- Bas van der Vlies <basv@sara.nl>  Wed, 27 Jan 2010 16:17:41 +0100
 
