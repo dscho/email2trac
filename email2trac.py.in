@@ -779,9 +779,9 @@ class TicketEmailParser(object):
 			
 
 		if self.VERSION  == 0.9:
-			s = self.attachments(message_parts, True)
+			error_with_attachments = self.attachments(message_parts, True)
 		else:
-			s = self.attachments(message_parts)
+			error_with_attachments = self.attachments(message_parts)
 
 		if self.notification and not spam:
 			self.notify(tkt, False, when)
