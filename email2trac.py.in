@@ -267,6 +267,11 @@ class TicketEmailParser(object):
 		else:
 			self.IGNORE_TRAC_USER_SETTINGS = 0
 
+		if parameters.has_key('email_triggers_workflow'):
+			self.EMAIL_TRIGGERS_WORKFLOW = int(parameters['email_triggers_workflow'])
+		else:
+			self.EMAIL_TRIGGERS_WORKFLOW = 1
+
 		if parameters.has_key('subject_field_separator'):
 			self.SUBJECT_FIELD_SEPARATOR = parameters['subject_field_separator'].strip()
 		else:
@@ -713,7 +718,7 @@ class TicketEmailParser(object):
 		# reopen the ticket if it is was closed
 		# We must use the ticket workflow framework
 		#
-		if tkt['status'] in ['closed']:
+		if tkt['status'] in ['closed'] and self.EMAIL_TRIGGERS_WORKFLOW:
 
 			#print controller.actions['reopen']
 			#

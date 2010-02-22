@@ -24,7 +24,20 @@ email2trac (1.2.0-1) stable; urgency=low
     attachments. see #175.
     Reported by: oland dot wells add gmail.com
     Patches    : Bas van der Vlies
-   
+
+  * Show errors when we can not include attachments in the ticket, see #165
+    Requested by: hju add jochenkuhl dot de and  dereks add cool-st dot com
+    Fixed by: Bas van der Vlies
+
+  * Added a new option 'email_triggers_workflow'. When a ticket is closed and 
+    an update is received via email. The ticket will be reopened or triggers 
+    a ticket workflow. This action can be skipped if we set the 
+    email_triggers_workflow option to 0. The default value is 1, closes #180
+    Author: zac add sprackettd dot com
+    Applied by: Bas van der Vlies
+
+    
+
  -- Bas van der Vlies <basv@sara.nl>  Wed, 27 Jan 2010 16:17:41 +0100
 
 email2trac (1.1.0-6) stable; urgency=low
