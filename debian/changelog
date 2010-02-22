@@ -12,9 +12,18 @@ email2trac (1.2.0-1) stable; urgency=low
     Author: samuel at hoffstaetter dot com
     Applied by: Bas van der Vlies
 
-  * Fixed a bug when there is no subject line in the message, closes #179
+  * Fixed a bug when there is no subject field in the message, closes #179
     Reported by: xurizaemon
     Fixed by: Bas van der Vlies
+
+  * Added unicode support attachment filenames, closes #177
+    Reported by: obwandner add concertare dot de
+    Fixed by: Bas van der Vlies
+
+  * Email to blog did not work at all. It works but it can not handle 
+    attachments. see #175.
+    Reported by: oland dot wells add gmail.com
+    Patches    : Bas van der Vlies
    
  -- Bas van der Vlies <basv@sara.nl>  Wed, 27 Jan 2010 16:17:41 +0100
 

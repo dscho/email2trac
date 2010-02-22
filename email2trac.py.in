@@ -926,12 +926,11 @@ class TicketEmailParser(object):
 	
 		## Save the attachments to the ticket	
 		#
-		has_attachments =  self.attachments(message_parts)
+		error_with_attachments =  self.attachments(message_parts)
 
-		#  Disabled
-		#if has_attachments:
-		#	changed = True
-		#	comment = '%s\n%s\n' %(comment, has_attachments)
+		if error_with_attachments:
+			changed = True
+			comment = '%s\n%s\n' %(comment, error_with_attachments)
 
 		if changed:
 			if self.DRY_RUN:
@@ -1507,7 +1506,7 @@ class TicketEmailParser(object):
 		# Get Maxium attachment size
 		#
 		max_size = int(self.get_config('attachment', 'max_size'))
-		status   = ''
+		status   = None
 		
 		for part in message_parts:
 			# Skip body parts
@@ -1563,9 +1562,8 @@ class TicketEmailParser(object):
 			fd.close()
 			os.unlink(path)
 
-		# Return how many attachments
+		## return error
 		#
-		status = 'This message has %d attachment(s)\n%s' %(count, status)
 		return status
 
 
