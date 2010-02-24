@@ -1,4 +1,4 @@
-2010-02-??
+2010-02-24
   * Added an option to run_email2trac to set the PYTHON_EGG_CACHE
     environment variable (-e|--eggcache), closes #174
     Author: pepl at cpan dot org
