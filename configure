@@ -636,6 +636,7 @@ CPP
 GREP
 EGREP
 DEBUG
+INSTALL_USER
 email2trac_conf
 SYSTEM_EMAIL2TRAC_CONF
 LIBOBJS
@@ -3211,6 +3212,11 @@ if test "x$DEBUG" = "x";then
 fi
 
 
+if test "x$INSTALL_USER" = "x";then
+  INSTALL_USER="root"
+fi
+
+
 # Now a user can specify the TRAC user
 #
 
@@ -3947,13 +3953,14 @@ CPP!$CPP$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
 DEBUG!$DEBUG$ac_delim
+INSTALL_USER!$INSTALL_USER$ac_delim
 email2trac_conf!$email2trac_conf$ac_delim
 SYSTEM_EMAIL2TRAC_CONF!$SYSTEM_EMAIL2TRAC_CONF$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 63; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 64; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

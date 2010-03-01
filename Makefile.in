@@ -15,6 +15,7 @@ CONFIG=@sysconfdir@
 #
 TRAC_USER=@trac_user@
 MTA_USER=@mta_user@
+INSTALL_USER=@INSTALL_USER@
 DEBUG=@DEBUG@
 
 TRAC_SCRIPT_NAME=email2trac
@@ -37,13 +38,13 @@ install: all install-conf
 	for script in $(PYTHON_FILES) ; \
 	do \
           name=`basename $$script '.py'` ;\
-	  $(INSTALL) -m 755 -o root $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
+	  $(INSTALL) -m 755 -o $(INSTALL_USER) $$script  $(DESTDIR)$(EXEC_PREFIX)/$$name ;\
 	done
 
 install-conf:
 	if [ ! -f  $(DESTDIR)/$(CONFIG)/email2trac.conf ] ; \
 	then \
-		$(INSTALL) -c -m 644 -o root email2trac.conf $(DESTDIR)/$(CONFIG)/email2trac.conf ;\
+		$(INSTALL) -c -m 644 -o $(INSTALL_USER) email2trac.conf $(DESTDIR)/$(CONFIG)/email2trac.conf ;\
 	fi
  
 clean:

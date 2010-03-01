@@ -24,6 +24,11 @@ if test "x$DEBUG" = "x";then
 fi
 AC_SUBST(DEBUG)
 
+if test "x$INSTALL_USER" = "x";then
+  INSTALL_USER="root"
+fi
+AC_SUBST(INSTALL_USER)
+
 # Now a user can specify the TRAC user
 #
 AC_ARG_WITH(trac_user,
