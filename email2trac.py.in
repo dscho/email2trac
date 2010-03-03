@@ -848,6 +848,9 @@ class TicketEmailParser(object):
 			print "TD: new_ticket"
 
 		tkt = Ticket(self.env)
+
+		self.set_reply_fields(tkt, msg)
+
 		self.set_ticket_fields(tkt)
 
 		# Old style setting for component, will be removed
@@ -863,7 +866,6 @@ class TicketEmailParser(object):
 		else:
 			tkt['summary'] = subject
 
-		self.set_reply_fields(tkt, msg)
 
 		if set_fields:
 			rest, keywords = string.split(set_fields, '?')
