@@ -1056,9 +1056,10 @@ class TicketEmailParser(object):
 		blog_enabled = None
 		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
 			blog_enabled = True
-			
+
+		print m['Subject']	
 		if not m['Subject']:
-			return False
+			subject  = 'No Subject'
 		else:
 			subject  = self.email_to_unicode(m['Subject'])		
 

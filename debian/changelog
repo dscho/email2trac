@@ -14,6 +14,11 @@ email2trac (1.3.0-1) stable; urgency=low
     Reported by: shildebrand at venturebeat dot com
     Fixed by: Bas van der Vlies
 
+  * Fixed a bug when there is no subject field in the message, closes #179
+    The fix in the 1.2.0 version did not work.
+    Reported by: xurizaemon and John Donners (SARA)
+    Fixed by: Bas van der Vlies
+
  -- Bas van der Vlies <basv@sara.nl>  Wed, 03 Mar 2010 15:50:35 +0100
 
 email2trac (1.2.0-1) stable; urgency=low
