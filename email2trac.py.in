@@ -502,10 +502,14 @@ class TicketEmailParser(object):
 		else:
 			body_file = os.path.join(self.TMPDIR, 'body.txt')
 
-		print 'TD: writing body (%s)' % body_file
-		fx = open(body_file, 'wb')
+		if self.DRY_RUN:
+			print 'DRY-RUN: not saving body to %s' %(body_file)
+			return
+
+		print 'TD: writing body to %s' %(body_file)
+		fx = open(body_file, 'wb') 
 		if not message_body:
-			message_body = '(None)'
+				message_body = '(None)'
 
 		message_body = message_body.encode('utf-8')
 		#message_body = unicode(message_body, 'iso-8859-15')
@@ -524,26 +528,33 @@ class TicketEmailParser(object):
 			print "VB: debug_attachments"
 		
 		n = 0
-		for part in message_parts:
+		for item in message_parts:
 			# Skip inline text parts
-			if not isinstance(part, tuple):
+			if not isinstance(item, tuple):
 				continue
 				
-			(original, filename, part) = part
+			(original, filename, part) = item
 
 			n = n + 1
 			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
 			print 'TD: part%d: filename: %s' % (n, part.get_filename())
 
-			part_file = os.path.join(self.TMPDIR, filename)
-			#part_file = '/var/tmp/part%d' % n
+			part_file = os.path.join(self.TMPDIR, part.get_filename())
 			print 'TD: writing part%d (%s)' % (n,part_file)
+
+			if self.DRY_RUN:
+				print 'DRY_RUN: NOT saving attachments'
+				continue
+
 			fx = open(part_file, 'wb')
 			text = part.get_payload(decode=1)
+
 			if not text:
 				text = '(None)'
+
 			fx.write(text)
 			fx.close()
+
 			try:
 				os.chmod(part_file,S_IRWXU|S_IRWXG|S_IRWXO)
 			except OSError:
@@ -558,14 +569,19 @@ class TicketEmailParser(object):
 			#msg_file = '/var/tmp/msg.txt' 
 			msg_file = os.path.join(self.TMPDIR, 'msg.txt')
 
-		print 'TD: saving email to %s' % msg_file
-		fx = open(msg_file, 'wb')
-		fx.write('%s' % message)
-		fx.close()
-		try:
-			os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
-		except OSError:
-			pass
+		if self.DRY_RUN:
+			print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
+		else:
+			print 'TD: saving email to %s' %(msg_file)
+
+			fx = open(msg_file, 'wb')
+			fx.write('%s' % message)
+			fx.close()
+			
+			try:
+				os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
+			except OSError:
+				pass
 
 		message_parts = self.get_message_parts(message)
 		message_parts = self.unique_attachment_names(message_parts)
@@ -1057,7 +1073,6 @@ class TicketEmailParser(object):
 		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
 			blog_enabled = True
 
-		print m['Subject']	
 		if not m['Subject']:
 			subject  = 'No Subject'
 		else:
@@ -1325,7 +1340,7 @@ class TicketEmailParser(object):
 					try:
 						print 'TD:               Filename: %s' % part.get_filename()
 					except UnicodeEncodeError, detail:
-						print 'TD:               Filename: Can not be printed due to non-ascci characters'
+						print 'TD:               Filename: Can not be printed due to non-ascii characters'
 
 				## Convert 7-bit filename to 8 bits value
 				#
@@ -1340,15 +1355,15 @@ class TicketEmailParser(object):
 		renamed_parts = []
 		attachment_names = set()
 
-		for part in message_parts:
+		for item in message_parts:
 			
 			## If not an attachment, leave it alone
 			#
-			if not isinstance(part, tuple):
-				renamed_parts.append(part)
+			if not isinstance(item, tuple):
+				renamed_parts.append(item)
 				continue
 				
-			(filename, part) = part
+			(filename, part) = item
 
 			## If no filename, use a default one
 			#
@@ -1392,7 +1407,10 @@ class TicketEmailParser(object):
 				unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
 				
 			if self.DEBUG:
-				print 'TD: Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+				try:
+					print 'TD: Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+				except UnicodeEncodeError, detail:
+					print 'Filename can not be printed due to non-ascii characters'
 
 			attachment_names.add(unique_filename)
 
@@ -1407,7 +1425,11 @@ class TicketEmailParser(object):
 	def attachment_exists(self, filename):
 
 		if self.DEBUG:
-			print "TD: attachment_exists: Ticket number : %s, Filename : %s" %(self.id, filename)
+			s = 'TD: attachment already exists: Ticket id : '
+			try:
+				print "%s%s, Filename : %s" %(s, self.id, filename)
+			except UnicodeEncodeError, detail:
+				print "%s%s, Filename : Can not be printed due to non-ascii characters" %(s, self.id)
 
 		# We have no valid ticket id
 		#
