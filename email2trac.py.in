@@ -1515,12 +1515,12 @@ class TicketEmailParser(object):
 		max_size = int(self.get_config('attachment', 'max_size'))
 		status   = None
 		
-		for part in message_parts:
+		for p in message_parts:
 			# Skip body parts
 			if not isinstance(part, tuple):
 				continue
 				
-			(original, filename, part) = part
+			(original, filename, part) = p
 			#
 			# Must be tuneables HvB
 			#
