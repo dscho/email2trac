@@ -279,6 +279,8 @@ class TicketEmailParser(object):
 
 		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
 
+########## Email Header Field Functions ###########################################################
+
 	def spam(self, message):
 		"""
 		# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
@@ -495,6 +497,9 @@ class TicketEmailParser(object):
 
 				ticket['cc'] = self.email_to_unicode(email_cc)
 
+
+########## DEBUG functions  ###########################################################
+
 	def debug_body(self, message_body, tempfile=False):
 		if tempfile:
 			import tempfile
@@ -589,6 +594,8 @@ class TicketEmailParser(object):
 		self.debug_body(body_text, True)
 		self.debug_attachments(message_parts)
 
+########## Conversion functions  ###########################################################
+
 	def str_to_dict(self, s):
 		"""
 		Transfrom a string of the form [<key>=<value>]+ to dict[<key>] = <value>
@@ -613,6 +620,8 @@ class TicketEmailParser(object):
 			except ValueError:
 				pass
 		return result
+
+########## TRAC ticket functions  ###########################################################
 
 	def update_ticket_fields(self, ticket, user_dict, use_default=None): 
 		"""
@@ -967,6 +976,8 @@ class TicketEmailParser(object):
 		if self.notification and not spam:
 			self.notify(tkt, True)
 
+
+########## Fullblog functions  ###########################################################
 
 	def blog(self, id): 
 		"""
@@ -1399,7 +1410,7 @@ class TicketEmailParser(object):
 			unique_filename = filename
 			dummy_filename, ext = os.path.splitext(filename)
 
-			while unique_filename in attachment_names or self.attachment_exists(unique_filename):
+			while (unique_filename in attachment_names) or self.attachment_exists(unique_filename):
 				num += 1
 				unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
 				
@@ -1593,18 +1604,6 @@ class TicketEmailParser(object):
 		#
 		return status
 
-
-def mkdir_p(dir, mode):
-	'''do a mkdir -p'''
-
-	arr = string.split(dir, '/')
-	path = ''
-	for part in arr:
-		path = '%s/%s' % (path, part)
-		try:
-			stats = os.stat(path)
-		except OSError:
-			os.mkdir(path, mode)
 
 def ReadConfig(file, name):
 	"""
