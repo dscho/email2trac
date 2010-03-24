@@ -1010,11 +1010,6 @@ class TicketEmailParser(object):
 			
 			blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
-	def save_message_for_debug(self):
-		"""
-		Save the messages. So we can use it for debug purposes
-		"""
-		
 
 	def parse(self, fp):
 		global m
