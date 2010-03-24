@@ -952,7 +952,7 @@ class TicketEmailParser(object):
 		if self.MAILTO:
 			changed = True
 			comment = u'\nadded mailto line\n'
-			mailto = self.html_mailto_link( m['Subject'], body_text)
+			mailto = self.html_mailto_link( m['Subject'])
 
 			tkt['description'] = u'%s\r\n%s%s\r\n' \
 				%(head, mailto, body_text)
@@ -1208,6 +1208,8 @@ class TicketEmailParser(object):
 		else:
 			self.new_ticket(m, subject, spam_msg)
 
+########## BODY TEXT functions  ###########################################################
+
 	def strip_signature(self, text):
 		"""
 		Strip signature from message, inspired by Mailman software
@@ -1317,6 +1319,8 @@ class TicketEmailParser(object):
 		#
 		#return LINESEPARATOR.join(textwrap.fill(s,width) for s in str.split(LINESEPARATOR))
 		#
+
+########## EMAIL attachements functions ###########################################################
 
 	def inline_part(self, part):
 		"""
@@ -1531,6 +1535,8 @@ class TicketEmailParser(object):
 			return True
 		except attachment.ResourceNotFound:
 			return False
+
+########## TRAC Ticket Text ###########################################################
 			
 	def body_text(self, message_parts):
 		body_text = []
@@ -1554,6 +1560,28 @@ class TicketEmailParser(object):
 				
 		body_text = '\r\n'.join(body_text)
 		return body_text
+
+	def html_mailto_link(self, subject):
+		"""
+		This function returns a HTML mailto tag with the ticket id and author email address
+		"""
+		if not self.author:
+			author = self.email_addr
+		else:	
+			author = self.author
+
+		# use urllib to escape the chars
+		#
+		s = 'mailto:%s?Subject=%s&Cc=%s' %( 
+		       urllib.quote(self.email_addr), 
+			   urllib.quote('Re: #%s: %s' %(self.id, subject)),
+			   urllib.quote(self.MAILTO_CC)
+			   )
+
+		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
+		return s
+
+########## TRAC notify section ###########################################################
 
 	def notify(self, tkt, new=True, modtime=0):
 		"""
@@ -1593,26 +1621,9 @@ class TicketEmailParser(object):
 		except Exception, e:
 			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(self.id, e)
 
-	def html_mailto_link(self, subject, body):
-		"""
-		This function returns a HTML mailto tag with the ticket id and author email address
-		"""
-		if not self.author:
-			author = self.email_addr
-		else:	
-			author = self.author
 
-		# use urllib to escape the chars
-		#
-		s = 'mailto:%s?Subject=%s&Cc=%s' %( 
-		       urllib.quote(self.email_addr), 
-			   urllib.quote('Re: #%s: %s' %(self.id, subject)),
-			   urllib.quote(self.MAILTO_CC)
-			   )
 
-		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
-		return s
-
+########## Parse Config File  ###########################################################
 
 def ReadConfig(file, name):
 	"""
