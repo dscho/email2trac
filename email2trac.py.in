@@ -1755,6 +1755,7 @@ if __name__ == '__main__':
 			os.environ['PYTHON_EGG_CACHE'] = python_egg_cache
 
 		env = Environment(settings['project'], create=0)
+
 		tktparser = TicketEmailParser(env, settings, float(version))
 		tktparser.parse(sys.stdin)
 

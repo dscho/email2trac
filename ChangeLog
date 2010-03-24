@@ -1,3 +1,34 @@
+2010-03-24
+
+  * Added configure option '--with-install_user=<name>', default user is 'root'.
+    The specified user is used for installation so we can install the
+    package as non-root user, closes #182.
+
+    Reported by: shildebrand at venturebeat dot com
+    Fixed by: Bas van der Vlies
+
+  * Re-arranged some code so that we can override ticket fields in
+    email2trac.conf, eg:
+     - default_reporter : email2trac
+
+    Will set the reporter ticket field to email2trac for all mail, closes #182
+
+    Reported by: shildebrand at venturebeat dot com
+    Fixed by: Bas van der Vlies
+
+  * Fixed a bug when there is no subject field in the message, closes #179
+    The fix in the 1.2.0 version did not work.
+    Reported by: xurizaemon and John Donners (SARA)
+    Fixed by: Bas van der Vlies
+
+  * We do not write any files when dry run mode is enabled.
+    Fixed by: Bas van der Vlies
+
+  * Fixed several issues when DEBUG is enabled with printing no-ascii
+    characters, see #184
+    Reported by: hju add jochenkuhl dot de
+    Fixed by: Bas van der Vlies
+
 2010-02-24
   * Added an option to run_email2trac to set the PYTHON_EGG_CACHE
     environment variable (-e|--eggcache), closes #174
