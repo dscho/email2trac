@@ -816,24 +816,26 @@ class TicketEmailParser(object):
 
 			name = field['name'] 
 
-			# skip some fields like resolution
+			## skip some fields like resolution
 			#
 			if name in [ 'resolution' ]:
 				continue
 
-			# default trac value
+			## default trac value
 			#
 			if not field.get('custom'):
 				value = self.get_config('ticket', 'default_%s' %(name) )
 			else:
 				value = field.get('value')
 				options = field.get('options')
-				if value and options and value not in options:
+				if value and options and (value not in options):
 					value = options[int(value)]
 
 			if self.DEBUG > 10:
 				print 'trac.ini name %s = %s' %(name, value)
 
+			## email2trac.conf settings
+			#
 			prefix = self.parameters['ticket_prefix']
 			try:
 				value = self.parameters['%s_%s' %(prefix, name)]
@@ -850,8 +852,8 @@ class TicketEmailParser(object):
 
 		self.update_ticket_fields(ticket, user_dict, use_default=1)
 
-		# Set status ticket 
-		#`
+		## Set status ticket 
+		#
 		ticket['status'] = 'new'
 
 
