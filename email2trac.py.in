@@ -279,7 +279,7 @@ class TicketEmailParser(object):
 
 		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
 
-########## Email Header Field Functions ###########################################################
+########## Email Header Functions ###########################################################
 
 	def spam(self, message):
 		"""
@@ -348,44 +348,6 @@ class TicketEmailParser(object):
 				return True
 
 		return False
-
-	def email_to_unicode(self, message_str):
-		"""
-		Email has 7 bit ASCII code, convert it to unicode with the charset
-        that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
-		understands it.
-		"""
-		if self.VERBOSE:
-			print "VB: email_to_unicode"
-
-		results =  email.Header.decode_header(message_str)
-
-		s = None
-		for text,format in results:
-			if format:
-				try:
-					temp = unicode(text, format)
-				except UnicodeError, detail:
-					# This always works 
-					#
-					temp = unicode(text, 'iso-8859-15')
-				except LookupError, detail:
-					#text = 'ERROR: Could not find charset: %s, please install' %format
-					#temp = unicode(text, 'iso-8859-15')
-					temp = message_str
-				    	
-			else:
-				temp = string.strip(text)
-				temp = unicode(text, 'iso-8859-15')
-
-			if s:
-				s = '%s %s' %(s, temp)
-			else:
-				s = '%s' %temp
-
-		#s = s.encode('utf-8')
-		return s
-
 
 	def email_header_txt(self, m):
 		"""
@@ -595,6 +557,43 @@ class TicketEmailParser(object):
 		self.debug_attachments(message_parts)
 
 ########## Conversion functions  ###########################################################
+
+	def email_to_unicode(self, message_str):
+		"""
+		Email has 7 bit ASCII code, convert it to unicode with the charset
+		that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
+		understands it.
+		"""
+		if self.VERBOSE:
+			print "VB: email_to_unicode"
+
+		results =  email.Header.decode_header(message_str)
+
+		s = None
+		for text,format in results:
+			if format:
+				try:
+					temp = unicode(text, format)
+				except UnicodeError, detail:
+					# This always works 
+					#
+					temp = unicode(text, 'iso-8859-15')
+				except LookupError, detail:
+					#text = 'ERROR: Could not find charset: %s, please install' %format
+					#temp = unicode(text, 'iso-8859-15')
+					temp = message_str
+				    	
+			else:
+				temp = string.strip(text)
+				temp = unicode(text, 'iso-8859-15')
+
+			if s:
+				s = '%s %s' %(s, temp)
+			else:
+				s = '%s' %temp
+
+		#s = s.encode('utf-8')
+		return s
 
 	def str_to_dict(self, s):
 		"""
