@@ -804,9 +804,9 @@ class TicketEmailParser(object):
 			
 
 		if self.VERSION  == 0.9:
-			error_with_attachments = self.attachments(message_parts, True)
+			error_with_attachments = self.attach_attachments(message_parts, True)
 		else:
-			error_with_attachments = self.attachments(message_parts)
+			error_with_attachments = self.attach_attachments(message_parts)
 
 		if self.notification and not spam:
 			self.notify(tkt, False, when)
@@ -960,7 +960,7 @@ class TicketEmailParser(object):
 	
 		## Save the attachments to the ticket	
 		#
-		error_with_attachments =  self.attachments(message_parts)
+		error_with_attachments =  self.attach_attachments(message_parts)
 
 		if error_with_attachments:
 			changed = True
@@ -1240,6 +1240,13 @@ class TicketEmailParser(object):
 		#return LINESEPARATOR.join(textwrap.fill(s,width) for s in str.split(LINESEPARATOR))
 		#
 
+	def inline_part(self, part):
+		"""
+		"""
+		if self.VERBOSE:
+			print "VB: inline_part()"
+
+		return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
 
 	def get_message_parts(self, msg):
 		"""
@@ -1426,9 +1433,6 @@ class TicketEmailParser(object):
 	
 		return renamed_parts
 			
-	def inline_part(self, part):
-		return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
-		
 			
 	def attachment_exists(self, filename):
 
@@ -1531,12 +1535,15 @@ class TicketEmailParser(object):
 		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
 		return s
 
-	def attachments(self, message_parts, update=False):
+	def attach_attachments(self, message_parts, update=False):
 		'''
 		save any attachments as files in the ticket's directory
 		'''
+		if self.VERBOSE:
+			print "VB: attach_attachments()"
+
 		if self.DRY_RUN:
-			print "DRY_RUN: no attachments saved"
+			print "DRY_RUN: no attachments attached to tickets"
 			return ''
 
 		count = 0
