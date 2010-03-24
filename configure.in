@@ -11,6 +11,7 @@ AC_SUBST(exec_prefix)
 AC_SUBST(pyexecdir)
 AC_SUBST(trac_user)
 AC_SUBST(mta_user)
+AC_SUBST(install_user)
 AC_SUBST(sysconfdir)
 
 #DEBUG=0
@@ -24,10 +25,19 @@ if test "x$DEBUG" = "x";then
 fi
 AC_SUBST(DEBUG)
 
-if test "x$INSTALL_USER" = "x";then
-  INSTALL_USER="root"
-fi
-AC_SUBST(INSTALL_USER)
+# What user must be used for installation (default: root)
+#
+AC_ARG_WITH(install_user,
+[
+  --with-install_user=USER    Specify the name of the user that we must use for installation,
+                          default=root],
+
+  [case "${withval}" in
+        *) install_user="${withval}" ;;
+  esac],
+
+  [install_user="root"]
+)dnl            
 
 # Now a user can specify the TRAC user
 #

@@ -617,6 +617,7 @@ target_alias
 pyexecdir
 trac_user
 mta_user
+install_user
 PYTHON
 PYTHON_VERSION
 PYTHON_PREFIX
@@ -636,7 +637,6 @@ CPP
 GREP
 EGREP
 DEBUG
-INSTALL_USER
 email2trac_conf
 SYSTEM_EMAIL2TRAC_CONF
 LIBOBJS
@@ -1220,6 +1220,9 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
 
+  --with-install_user=USER    Specify the name of the user that we must use for installation,
+                          default=root
+
   --with-trac_user=USER    Specify the name of the user that trac use,
                           default=www-data
 
@@ -1656,6 +1659,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 
@@ -3212,10 +3216,18 @@ if test "x$DEBUG" = "x";then
 fi
 
 
-if test "x$INSTALL_USER" = "x";then
-  INSTALL_USER="root"
-fi
+# What user must be used for installation (default: root)
+#
 
+# Check whether --with-install_user was given.
+if test "${with_install_user+set}" = set; then
+  withval=$with_install_user; case "${withval}" in
+        *) install_user="${withval}" ;;
+  esac
+else
+  install_user="root"
+
+fi
 
 # Now a user can specify the TRAC user
 #
@@ -3934,6 +3946,7 @@ target_alias!$target_alias$ac_delim
 pyexecdir!$pyexecdir$ac_delim
 trac_user!$trac_user$ac_delim
 mta_user!$mta_user$ac_delim
+install_user!$install_user$ac_delim
 PYTHON!$PYTHON$ac_delim
 PYTHON_VERSION!$PYTHON_VERSION$ac_delim
 PYTHON_PREFIX!$PYTHON_PREFIX$ac_delim
@@ -3953,7 +3966,6 @@ CPP!$CPP$ac_delim
 GREP!$GREP$ac_delim
 EGREP!$EGREP$ac_delim
 DEBUG!$DEBUG$ac_delim
-INSTALL_USER!$INSTALL_USER$ac_delim
 email2trac_conf!$email2trac_conf$ac_delim
 SYSTEM_EMAIL2TRAC_CONF!$SYSTEM_EMAIL2TRAC_CONF$ac_delim
 LIBOBJS!$LIBOBJS$ac_delim
