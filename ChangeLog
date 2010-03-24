@@ -24,7 +24,7 @@
   * We do not write any files when dry run mode is enabled.
     Fixed by: Bas van der Vlies
 
-  * Fixed several issues when DEBUG is enabled with printing no-ascii
+  * Fixed several issues when DEBUG is enabled with printing non-ascii
     characters, see #184
     Reported by: hju add jochenkuhl dot de
     Fixed by: Bas van der Vlies
