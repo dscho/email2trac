@@ -976,6 +976,82 @@ class TicketEmailParser(object):
 			self.notify(tkt, True)
 
 
+	def attach_attachments(self, message_parts, update=False):
+		'''
+		save any attachments as files in the ticket's directory
+		'''
+		if self.VERBOSE:
+			print "VB: attach_attachments()"
+
+		if self.DRY_RUN:
+			print "DRY_RUN: no attachments attached to tickets"
+			return ''
+
+		count = 0
+
+		# Get Maxium attachment size
+		#
+		max_size = int(self.get_config('attachment', 'max_size'))
+		status   = None
+		
+		for item in message_parts:
+			# Skip body parts
+			if not isinstance(item, tuple):
+				continue
+				
+			(original, filename, part) = item
+			#
+			# Must be tuneables HvB
+			#
+			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, filename))
+			text = part.get_payload(decode=1)
+			if not text:
+				text = '(None)'
+			fd.write(text)
+			fd.close()
+
+			# get the file_size
+			#
+			stats = os.lstat(path) 
+			file_size = stats[stat.ST_SIZE]
+
+			# Check if the attachment size is allowed
+			#
+			if (max_size != -1) and (file_size > max_size):
+				status = '%s\nFile %s is larger then allowed attachment size (%d > %d)\n\n' \
+					%(status, original, file_size, max_size)
+
+				os.unlink(path)
+				continue
+			else:
+				count = count + 1
+					
+			# Insert the attachment
+			# 
+			fd = open(path, 'rb')
+			att = attachment.Attachment(self.env, 'ticket', self.id)
+
+			# This will break the ticket_update system, the body_text is vaporized
+			# ;-(
+			#
+			if not update:
+				att.author = self.author
+				att.description = self.email_to_unicode('Added by email2trac')
+
+			att.insert(filename, fd, file_size)
+
+			#except  util.TracError, detail:
+			#	print detail
+
+			# Remove the created temporary filename
+			#
+			fd.close()
+			os.unlink(path)
+
+		## return error
+		#
+		return status
+
 ########## Fullblog functions  ###########################################################
 
 	def blog(self, id): 
@@ -1020,6 +1096,9 @@ class TicketEmailParser(object):
 			
 			blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
+
+
+########## MAIN function  ###########################################################
 
 	def parse(self, fp):
 		global m
@@ -1533,82 +1612,6 @@ class TicketEmailParser(object):
 
 		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
 		return s
-
-	def attach_attachments(self, message_parts, update=False):
-		'''
-		save any attachments as files in the ticket's directory
-		'''
-		if self.VERBOSE:
-			print "VB: attach_attachments()"
-
-		if self.DRY_RUN:
-			print "DRY_RUN: no attachments attached to tickets"
-			return ''
-
-		count = 0
-
-		# Get Maxium attachment size
-		#
-		max_size = int(self.get_config('attachment', 'max_size'))
-		status   = None
-		
-		for item in message_parts:
-			# Skip body parts
-			if not isinstance(item, tuple):
-				continue
-				
-			(original, filename, part) = item
-			#
-			# Must be tuneables HvB
-			#
-			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, filename))
-			text = part.get_payload(decode=1)
-			if not text:
-				text = '(None)'
-			fd.write(text)
-			fd.close()
-
-			# get the file_size
-			#
-			stats = os.lstat(path) 
-			file_size = stats[stat.ST_SIZE]
-
-			# Check if the attachment size is allowed
-			#
-			if (max_size != -1) and (file_size > max_size):
-				status = '%s\nFile %s is larger then allowed attachment size (%d > %d)\n\n' \
-					%(status, original, file_size, max_size)
-
-				os.unlink(path)
-				continue
-			else:
-				count = count + 1
-					
-			# Insert the attachment
-			# 
-			fd = open(path, 'rb')
-			att = attachment.Attachment(self.env, 'ticket', self.id)
-
-			# This will break the ticket_update system, the body_text is vaporized
-			# ;-(
-			#
-			if not update:
-				att.author = self.author
-				att.description = self.email_to_unicode('Added by email2trac')
-
-			att.insert(filename, fd, file_size)
-
-			#except  util.TracError, detail:
-			#	print detail
-
-			# Remove the created temporary filename
-			#
-			fd.close()
-			os.unlink(path)
-
-		## return error
-		#
-		return status
 
 
 def ReadConfig(file, name):
