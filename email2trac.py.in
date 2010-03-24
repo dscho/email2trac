@@ -390,7 +390,7 @@ class TicketEmailParser(object):
 		Display To and CC addresses in description field
 		"""
 		s = ''
-		#if m['To'] and len(m['To']) > 0 and m['To'] != 'hic@sara.nl':
+
 		if m['To'] and len(m['To']) > 0:
 			s = "'''To:''' %s\r\n" %(m['To'])
 		if m['Cc'] and len(m['Cc']) > 0:
@@ -625,8 +625,8 @@ class TicketEmailParser(object):
 			   1) Skip the value (use_default=None)
 			   2) Set default value for field (use_default=1)
 		"""
-		if self.DEBUG:
-			print "TD: update_ticket_fields"
+		if self.VERBOSE:
+			print "VB: update_ticket_fields"
 
 		# Build a system dictionary from the ticket fields 
 		# with field as index and option as value
@@ -688,8 +688,8 @@ class TicketEmailParser(object):
 		will append the contents of this email to that ticket, instead of 
 		creating a new one.
 		"""
-		if self.DEBUG:
-			print "TD: ticket_update: %s" %id
+		if self.VERBOSE:
+			print "VB: ticket_update: %s" %id
 
 		# Must we update ticket fields
 		#
