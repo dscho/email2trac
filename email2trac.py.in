@@ -682,14 +682,18 @@ class TicketEmailParser(object):
 						#
 						if use_default:
 							value = self.get_config('ticket', 'default_%s' %(field) )
-							ticket[field] = value
 
 				except TypeError:
+					pass
+
+				## Only set if we have a value
+				#
+				if value:
 					ticket[field] = value
 
 				if self.DEBUG >= 10: 
 					print  'ticket_field\t %s = %s' %(field,  ticket[field])
-					
+
 	def ticket_update(self, m, id, spam):
 		"""
 		If the current email is a reply to an existing ticket, this function
@@ -834,11 +838,14 @@ class TicketEmailParser(object):
 			if not field.get('custom'):
 				value = self.get_config('ticket', 'default_%s' %(name) )
 			else:
+				##  Else we get the default value for reporter
+				#
 				value = field.get('value')
 				options = field.get('options')
-				if value and options and (value not in options):
-					value = options[int(value)]
 
+				if value and options and (value not in options):
+					 value = options[int(value)]
+	
 			if self.DEBUG > 10:
 				print 'trac.ini name %s = %s' %(name, value)
 
@@ -856,7 +863,8 @@ class TicketEmailParser(object):
 			if self.DEBUG:
 				print 'user_dict[%s] = %s' %(name, value)
 
-			user_dict[name] = value
+			if value:
+				user_dict[name] = value
 
 		self.update_ticket_fields(ticket, user_dict, use_default=1)
 

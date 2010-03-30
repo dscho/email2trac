@@ -1,3 +1,17 @@
+2010-03-20
+
+  * Fixed a bug reporter was always set to the default value specified
+    in trac.ini.
+
+    Reported by: Jean-Paul Duyx <jean-paul dot duyx at sara dot nl>
+    Fixed by: Bas van der Vlies
+
+  * If reported field is overriden then use it for all trac functions
+    including notification, closes #187
+
+    Reported by: shildebrand at venturebeat dot com
+    Fixed by: Bas van der Vlies
+
 2010-03-24
 
   * Added configure option '--with-install_user=<name>', default user is 'root'.
