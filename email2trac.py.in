@@ -967,9 +967,9 @@ class TicketEmailParser(object):
 
 		if changed:
 			if self.DRY_RUN:
-				print 'DRY_RUN: tkt.save_changes(self.author, comment) ', self.author
+				print 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
 			else:
-				tkt.save_changes(self.author, comment)
+				tkt.save_changes(tkt['reporter'], comment)
 				#print tkt.get_changelog(self.db, when)
 
 		if self.notification and not spam:
@@ -1588,7 +1588,7 @@ class TicketEmailParser(object):
 		A wrapper for the TRAC notify function. So we can use templates
 		"""
 		if self.DRY_RUN:
-				print 'DRY_RUN: self.notify(tkt, True) ', self.author
+				print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
 				return
 		try:
 			# create false {abs_}href properties, to trick Notify()
