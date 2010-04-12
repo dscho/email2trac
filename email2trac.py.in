@@ -504,9 +504,15 @@ class TicketEmailParser(object):
 
 			n = n + 1
 			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
-			print 'TD: part%d: filename: %s' % (n, part.get_filename())
+			print 'TD: part%d: filename: %s' % (n, filename)
 
-			part_file = os.path.join(self.TMPDIR, part.get_filename())
+			## Forbidden chars
+			#
+			filename = filename.replace('\\', '_')
+			filename = filename.replace('/', '_') 
+	
+
+			part_file = os.path.join(self.TMPDIR, filename)
 			print 'TD: writing part%d (%s)' % (n,part_file)
 
 			if self.DRY_RUN:
@@ -799,17 +805,25 @@ class TicketEmailParser(object):
 
 		body_text = self.body_text(message_parts)
 
-		if body_text.strip() or update_fields or self.properties: 
-			if self.DRY_RUN:
-				print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
-			else:
-				tkt.save_changes(self.author, body_text, when, None, str(cnum))
-			
-
 		if self.VERSION  == 0.9:
 			error_with_attachments = self.attach_attachments(message_parts, True)
 		else:
 			error_with_attachments = self.attach_attachments(message_parts)
+
+		if body_text.strip() or update_fields or self.properties: 
+			if self.DRY_RUN:
+				print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
+			else:
+				if error_with_attachments:
+					body_text = '%s\\%s' %(error_with_attachments, body_text)
+				
+				tkt.save_changes(self.author, body_text, when, None, str(cnum))
+			
+
+		#if self.VERSION  == 0.9:
+		#	error_with_attachments = self.attach_attachments(message_parts, True)
+		#else:
+		#	error_with_attachments = self.attach_attachments(message_parts)
 
 		if self.notification and not spam:
 			self.notify(tkt, False, when)
@@ -1046,10 +1060,10 @@ class TicketEmailParser(object):
 				att.author = self.author
 				att.description = self.email_to_unicode('Added by email2trac')
 
-			att.insert(filename, fd, file_size)
-
-			#except  util.TracError, detail:
-			#	print detail
+			try:
+				att.insert(filename, fd, file_size)
+			except OSError, detail:
+				status = '%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail)
 
 			# Remove the created temporary filename
 			#
@@ -1485,21 +1499,22 @@ class TicketEmailParser(object):
 
 				filename = '%s%s' % (filename, ext)
 
-			## Discard relative paths in attachment names
+			## Discard relative paths for windows/unix in attachment names
 			#
-			filename = filename.replace('\\', '/').replace(':', '/') 
-			filename = os.path.basename(filename)
+			#filename = filename.replace('\\', '/').replace(':', '/') 
+			filename = filename.replace('\\', '_')
+			filename = filename.replace('/', '_') 
 
 			#
 			# We try to normalize the filename to utf-8 NFC if we can.
 			# Files uploaded from OS X might be in NFD.
 			# Check python version and then try it
 			#
-			if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
-				try:
-					filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
-				except TypeError:
-					pass
+			#if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
+			#	try:
+			#		filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
+			#	except TypeError:
+			#		pass
 
 			# Make the filename unique for this ticket
 			num = 0
