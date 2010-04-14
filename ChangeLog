@@ -1,6 +1,11 @@
 2010-XX-XX
-  * Re-enabled some code that normalized the filenames for attachment
+  * email2trac crashed if there are '/' and '\' characters in a filename.
+    These characters are now being replace by '_', closes #196
+    Reported by: jcuppen add hethooghuis dot nl
+    Fixed by: Bas van der Vlies
 
+  * Problems with attachments were not reported for ticket updates 
+    Fixed by: Bas van der Vlies
 
 2010-03-20
 
