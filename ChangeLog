@@ -14,6 +14,11 @@
 
     Author: Bas van der Vlies
 
+  * Enhancement for ticket prefixes (email2trac.conf). The ticket 
+    fields status and resolution are not forbidden any more. 
+    Author: Konstantin Ryabitsev <icon add mricon dot com>
+    Applied by: Bas van der Vlies
+
 2010-03-20
 
   * Fixed a bug reporter was always set to the default value specified

@@ -842,11 +842,6 @@ class TicketEmailParser(object):
 
 			name = field['name'] 
 
-			## skip some fields like resolution
-			#
-			if name in [ 'resolution' ]:
-				continue
-
 			## default trac value
 			#
 			if not field.get('custom'):
@@ -882,9 +877,8 @@ class TicketEmailParser(object):
 
 		self.update_ticket_fields(ticket, user_dict, use_default=1)
 
-		## Set status ticket 
-		#
-		ticket['status'] = 'new'
+		if 'status' not in user_dict.keys():
+			ticket['status'] = 'new'
 
 
 
