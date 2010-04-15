@@ -115,7 +115,7 @@ def new_delete_spam(parameters):
 		if DRY_RUN:
 			print 'DRY_RUN: tkt.delete()'
 		else:
-			print 'For echt tkt.delete()'
+			tkt.delete()
 
 if __name__ == '__main__':
 	# Default config file
