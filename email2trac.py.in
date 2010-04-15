@@ -886,13 +886,65 @@ class TicketEmailParser(object):
 			ticket['status'] = 'new'
 
 
+	def ticket_update_by_subject(self, subject):
+		"""
+		This list of Re: prefixes is probably incomplete. Taken from
+		wikipedia. Here is how the subject is matched
+		  - Re: <subject> 
+		  - Re: (<Mail list label>:)+ <subject>
+
+		So we must have the last column
+		"""
+		if self.VERBOSE:
+			print "VB: ticket_update_by_subject()"
+
+		matched_id = None
+		if self.TICKET_UPDATE and self.TICKET_UPDATE_BY_SUBJECT:
+				
+			SUBJECT_RE = re.compile(r'^(RE|AW|VS|SV):(.*:)*\s*(.*)', re.IGNORECASE)
+			result = SUBJECT_RE.search(subject)
+
+			if result:
+				# This is a reply
+				orig_subject = result.group(3)
+
+				if self.DEBUG:
+					print 'TD: subject search string: %s' %(orig_subject)
+
+				cursor = self.db.cursor()
+				summaries = [orig_subject, '%%: %s' % orig_subject]
+
+				# hard-code the time to 30 days for now. Can easily be
+				# made configurable
+				lookback = int(time.mktime(time.gmtime())) - 2592000
+
+				for summary in summaries:
+					if self.DEBUG:
+						print 'TD: Looking for summary matching: "%s"' % summary
+					sql = """SELECT id FROM ticket
+						 	WHERE changetime >= %s AND summary LIKE %s
+							ORDER BY changetime DESC"""
+					cursor.execute(sql, [lookback, summary.strip()])
+
+					for row in cursor:
+						(matched_id,) = row
+						if self.DEBUG:
+							print 'TD: Found matching ticket id: %d' % matched_id
+						break
+
+					if matched_id:
+						matched_id = '#%d:' % matched_id
+						return matched_id
+
+		return matched_id
+
 
 	def new_ticket(self, msg, subject, spam, set_fields = None):
 		"""
 		Create a new ticket
 		"""
-		if self.DEBUG:
-			print "TD: new_ticket"
+		if self.VERBOSE:
+			print "VB: function new_ticket()"
 
 		tkt = Ticket(self.env)
 
@@ -1122,6 +1174,10 @@ class TicketEmailParser(object):
 ########## MAIN function  ###########################################################
 
 	def parse(self, fp):
+		"""
+		"""
+		if self.VERBOSE:
+			print "VB: main function parse()"
 		global m
 
 		m = email.message_from_file(fp)
@@ -1225,66 +1281,13 @@ class TicketEmailParser(object):
 				self.new_ticket(m, subject[:result.start('new_fields')], spam_msg, result.group('new_fields'))
 
 		else:
-			if self.TICKET_UPDATE and self.TICKET_UPDATE_BY_SUBJECT:
-				if self.DEBUG:
-					print 'TD: Will try to figure out ticket by subject'
-
-				# This list of Re: prefixes is probably incomplete. Taken from
-				# wikipedia. Here is how the subject is matched
-				#   Re: <subject> 
-				#   Re: (<Mail list label>:)+ <subject>
-				#
-				# So we must have column 3
-			
-				
-				SUBJECT_RE = re.compile(r'^(RE|AW|VS|SV):(.*:)*\s*(.*)', re.IGNORECASE)
-				result = SUBJECT_RE.search(subject)
-
-				if result:
-					# This is a reply
-					orig_subject = result.group(3)
-					if self.DEBUG:
-						print 'TD: subject search string: %s' %(orig_subject)
-
-					cursor = self.db.cursor()
-
-					summaries = [orig_subject, '%%: %s' % orig_subject]
-
-					# hard-code the time to 30 days for now. Can easily be
-					# made configurable
-					lookback = int(time.mktime(time.gmtime())) - 2592000
-
-					matched_id = 0
-					for summary in summaries:
-						if self.DEBUG:
-							print 'TD: Looking for summary matching: "%s"' % summary
-						sql = """SELECT id FROM ticket
-										  WHERE changetime >= %s
-											AND summary LIKE %s
-											ORDER BY changetime DESC"""
-						cursor.execute(sql, [lookback, summary.strip()])
-
-						for row in cursor:
-							(matched_id,) = row
-							if self.DEBUG:
-								print 'TD: Found matching ticket id: %d' % matched_id
-							break
-
-						if matched_id:
-							break
-
-					if matched_id:
-						# Change the id to string, as expected by ticket_update
-						matched_id = '#%d:' % matched_id
-						self.ticket_update(m, matched_id, spam_msg)
-						return
-
-				# Not a reply or no matches found, create a new ticket
-				self.new_ticket(m, subject, spam_msg)
-
+			result = self.ticket_update_by_subject(subject)
+			if result:
+				self.ticket_update(m, result, spam_msg)
 			else:
 				# No update by subject, so just create a new ticket
 				self.new_ticket(m, subject, spam_msg)
+
 
 ########## BODY TEXT functions  ###########################################################
 
@@ -1870,6 +1873,7 @@ if __name__ == '__main__':
 
 		if m:
 			tktparser.save_email_for_debug(m, True)
+
 
 		sys.exit(1)
 # EOB
