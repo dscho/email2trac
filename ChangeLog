@@ -7,6 +7,13 @@
   * Problems with attachments were not reported for ticket updates 
     Fixed by: Bas van der Vlies
 
+  * delete_spam changes:
+     - only support trac version greater then 0.10
+     - added -n/--dry-run option
+     - added -v/--verbose option
+
+    Author: Bas van der Vlies
+
 2010-03-20
 
   * Fixed a bug reporter was always set to the default value specified

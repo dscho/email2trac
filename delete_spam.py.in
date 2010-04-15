@@ -27,7 +27,7 @@ Desc. : Delete Spam tickets from database. Else we get an lot of
         tickets
 
 Usage :
-	delete_spam [ -f/--file <configfile> -p/--project <name>]
+	delete_spam [ -f/--file <configfile>  -n/--dry-run -p/--project <name> -v/--verbose]
 
 defaults:
 	configfile = /etc/email2trac.conf
@@ -79,10 +79,18 @@ def ReadConfig(file, name):
 
 
 
-def new_delete_spam(project, debug):
+def new_delete_spam(parameters):
 	"""
 	This only works for trac versions higher or equal then 0.10
 	"""
+
+	debug = int(parameters['debug'])
+	DRY_RUN = parameters['DRY_RUN']
+	VERBOSE = parameters['VERBOSE']
+
+	project = parameters['project']
+
+
 	env = Environment(project, create=0)
 	db = env.get_db_cnx()
 
@@ -95,7 +103,7 @@ def new_delete_spam(project, debug):
 
 		spam_id =  row[0]
 
-		if debug:
+		if debug or DRY_RUN or VERBOSE:
 			print "Deleting ticket %s" %spam_id
 
 		try:
@@ -104,71 +112,10 @@ def new_delete_spam(project, debug):
 		        print detail
 			continue
 
-		tkt.delete()
-
-def old_delete_spam(project, debug):
-	"""
-	This only works for trac versions before 0.10
-	"""
-	env = Environment(project, create=0)
-	db = env.get_db_cnx() 
-	
-	attachment_dir = os.path.join(env.path, 'attachments', 'ticket') 
-	cursor = db.cursor()
-	tkt_cursor = db.cursor() 
-	
-	# Delete the attachments associated with Spam tickets
-	#
-	cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
-	while 1:
-		row = cursor.fetchone()
-		if not row:
-			break
-		spam_id =  row[0] 
-	
-		if debug:
-			print spam_id 
-
-			sql_cmd = "SELECT *  FROM attachment WHERE type='ticket' and id='%s';" %spam_id
-			tkt_cursor.execute(sql_cmd) 
-			row = tkt_cursor.fetchone()
-			print row 
-			
-			sql_cmd = "SELECT * FROM ticket_change WHERE ticket='%s';" %spam_id 
-			tkt_cursor.execute(sql_cmd) 
-			row = tkt_cursor.fetchone()
-			print row 
-			
-			sql_cmd = "SELECT * FROM ticket_custom WHERE ticket='%s';" %spam_id
-			tkt_cursor.execute(sql_cmd) 
-			row = tkt_cursor.fetchone()
-			print row 
-			
-		sql_cmd = "DELETE FROM attachment WHERE type='ticket' and id='%s';" %spam_id
-		tkt_cursor.execute(sql_cmd) 
-
-		sql_cmd = "DELETE FROM ticket_change WHERE ticket='%s';" %spam_id
-		tkt_cursor.execute(sql_cmd) 
-			
-		sql_cmd = "DELETE FROM ticket_custom WHERE ticket='%s';" %spam_id
-		tkt_cursor.execute(sql_cmd) 
-			
-		# Ticket commit 
-		# 
-		db.commit() 
-
-		dir = os.path.join(attachment_dir, str(spam_id)) 
-		if os.path.exists(dir):
-			if debug:
-				print 'delete %s : %s' %(spam_id, dir)
-			try: 
-				shutil.rmtree(dir) 
-			except OSError, detail: 
-				print 'Contact system-administrator: %s' %detail
-				continue
-
-	cursor.execute("DELETE FROM ticket WHERE  component = 'Spam';") 
-	db.commit()
+		if DRY_RUN:
+			print 'DRY_RUN: tkt.delete()'
+		else:
+			print 'For echt tkt.delete()'
 
 if __name__ == '__main__':
 	# Default config file
@@ -177,21 +124,28 @@ if __name__ == '__main__':
 
 
 	try:
-		 opts, args = getopt.getopt(sys.argv[1:], 'hf:p:', ['help', 'file=', 'project='])
+		 opts, args = getopt.getopt(sys.argv[1:], 'hf:np:v', ['help', 'file=', 'dry-run', 'project=', 'verbose'])
 	except getopt.error,detail:
 		print __doc__
 		print detail
 		sys.exit(1)
 
+	DRY_RUN = False
+	VERBOSE = False
 	project_name = None
+
 	for opt,value in opts:
 		if opt in [ '-h', '--help']:
 			print __doc__ 
 			sys.exit(0) 
 		elif opt in ['-f', '--file']:
 			configfile = value
+		elif opt in ['-n', '--dry-run']:
+			DRY_RUN = True
 		elif opt in ['-p', '--project']:
 			project_name = value
+		elif opt in ['-v', '--verbose']:
+			VERBOSE = True
 	
 	settings = ReadConfig(configfile, project_name)
 	if not settings.has_key('project'):
@@ -204,16 +158,18 @@ if __name__ == '__main__':
 	else:
 		version = trac_default_version
 
+	settings['DRY_RUN'] = DRY_RUN
+	settings['VERBOSE'] = VERBOSE
+
 	from trac.env import Environment
 	from trac.ticket import Ticket
 	from trac import util
 
-	if version == 0.10:
-		new_delete_spam(settings['project'], int(settings['debug']))
-		#new_delete_spam(settings['project'], 1)
-		#old_delete_spam(settings['project'], 0)
-	elif version == 0.9:
-		old_delete_spam(settings['project'], int(settings['debug']))
+
+	if version < 0.10:
+		print 'Trac version %s is not suported' %(version)
+
+	new_delete_spam(settings)
 
 	print 'Spam is deleted succesfully..' 
 # EOB
