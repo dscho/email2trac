@@ -1230,15 +1230,22 @@ class TicketEmailParser(object):
 					print 'TD: Will try to figure out ticket by subject'
 
 				# This list of Re: prefixes is probably incomplete. Taken from
-				# wikipedia.
-				re_regex = re.compile(r'^(RE|AW|VS|SV):\s*(.*)', re.IGNORECASE)
-				result = re_regex.search(subject)
-				print result
+				# wikipedia. Here is how the subject is matched
+				#   Re: <subject> 
+				#   Re: (<Mail list label>:)+ <subject>
+				#
+				# So we must have column 3
+			
+				
+				SUBJECT_RE = re.compile(r'^(RE|AW|VS|SV):(.*:)*\s*(.*)', re.IGNORECASE)
+				result = SUBJECT_RE.search(subject)
 
 				if result:
 					# This is a reply
-					orig_subject = result.group(2)
-					print orig_subject
+					orig_subject = result.group(3)
+					if self.DEBUG:
+						print 'TD: subject search string: %s' %(orig_subject)
+
 					cursor = self.db.cursor()
 
 					summaries = [orig_subject, '%%: %s' % orig_subject]
