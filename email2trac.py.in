@@ -197,6 +197,11 @@ class TicketEmailParser(object):
 		else:
 			self.TICKET_UPDATE = 0
 
+		if parameters.has_key('ticket_update_by_subject'):
+			self.TICKET_UPDATE_BY_SUBJECT = int(parameters['ticket_update_by_subject'])
+		else:
+			self.TICKET_UPDATE_BY_SUBJECT = 0
+
 		if parameters.has_key('drop_spam'):
 			self.DROP_SPAM = int(parameters['drop_spam'])
 		else:
@@ -1219,10 +1224,60 @@ class TicketEmailParser(object):
 			elif result.group('new_fields'):
 				self.new_ticket(m, subject[:result.start('new_fields')], spam_msg, result.group('new_fields'))
 
-		# Create ticket
-		#
 		else:
-			self.new_ticket(m, subject, spam_msg)
+			if self.TICKET_UPDATE and self.TICKET_UPDATE_BY_SUBJECT:
+				if self.DEBUG:
+					print 'TD: Will try to figure out ticket by subject'
+
+				# This list of Re: prefixes is probably incomplete. Taken from
+				# wikipedia.
+				re_regex = re.compile(r'^(RE|AW|VS|SV):\s*(.*)', re.IGNORECASE)
+				result = re_regex.search(subject)
+				print result
+
+				if result:
+					# This is a reply
+					orig_subject = result.group(2)
+					print orig_subject
+					cursor = self.db.cursor()
+
+					summaries = [orig_subject, '%%: %s' % orig_subject]
+
+					# hard-code the time to 30 days for now. Can easily be
+					# made configurable
+					lookback = int(time.mktime(time.gmtime())) - 2592000
+
+					matched_id = 0
+					for summary in summaries:
+						if self.DEBUG:
+							print 'TD: Looking for summary matching: "%s"' % summary
+						sql = """SELECT id FROM ticket
+										  WHERE changetime >= %s
+											AND summary LIKE %s
+											ORDER BY changetime DESC"""
+						cursor.execute(sql, [lookback, summary.strip()])
+
+						for row in cursor:
+							(matched_id,) = row
+							if self.DEBUG:
+								print 'TD: Found matching ticket id: %d' % matched_id
+							break
+
+						if matched_id:
+							break
+
+					if matched_id:
+						# Change the id to string, as expected by ticket_update
+						matched_id = '#%d:' % matched_id
+						self.ticket_update(m, matched_id, spam_msg)
+						return
+
+				# Not a reply or no matches found, create a new ticket
+				self.new_ticket(m, subject, spam_msg)
+
+			else:
+				# No update by subject, so just create a new ticket
+				self.new_ticket(m, subject, spam_msg)
 
 ########## BODY TEXT functions  ###########################################################
 
