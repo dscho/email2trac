@@ -15,9 +15,20 @@
     Author: Bas van der Vlies
 
   * Enhancement for ticket prefixes (email2trac.conf). The ticket 
-    fields status and resolution are not forbidden any more. 
+    fields status and resolution are not forbidden any more. closes #195 
     Author: Konstantin Ryabitsev <icon add mricon dot com>
     Applied by: Bas van der Vlies
+
+  * Added a new option. It is all in the name:
+      * ticket_update_by_subject, default value is off
+
+    When this option is enabled and there is no ticket number found
+    in a reply mail. It will try to find a ticket summary that matches
+    the mail subject line. If found then append the mail to this 
+    ticket, closes #188
+    Author: Konstantin Ryabitsev <icon add mricon dot com> & Bas van der Vlies
+    Applied by: Bas van der Vlies
+    
 
 2010-03-20
 
