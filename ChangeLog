@@ -29,7 +29,6 @@
     Author: Konstantin Ryabitsev <icon add mricon dot com> & Bas van der Vlies
     Applied by: Bas van der Vlies
     
-
 2010-03-20
 
   * Fixed a bug reporter was always set to the default value specified
