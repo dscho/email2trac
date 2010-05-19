@@ -112,7 +112,7 @@ class UTC(tzinfo):
 class TicketEmailParser(object):
 	env = None
 	comment = '> '
-    
+
 	def __init__(self, env, parameters, version):
 		self.env = env
 
@@ -283,6 +283,8 @@ class TicketEmailParser(object):
 			self.SUBJECT_FIELD_SEPARATOR = '&'
 
 		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
+
+		self.system = None
 
 ########## Email Header Functions ###########################################################
 
@@ -610,6 +612,8 @@ class TicketEmailParser(object):
 		"""
 		Transfrom a string of the form [<key>=<value>]+ to dict[<key>] = <value>
 		""" 
+		if self.VERBOSE:
+			print "VB: str_to_dict"
 
 		fields = string.split(s, self.SUBJECT_FIELD_SEPARATOR)
 
@@ -1102,8 +1106,12 @@ class TicketEmailParser(object):
 			# Insert the attachment
 			# 
 			fd = open(path, 'rb')
-			att = attachment.Attachment(self.env, 'ticket', self.id)
-
+			if self.system == 'discussion':
+				att = attachment.Attachment(self.env, 'discussion', 'topic/%s'
+				  % (self.id,))
+			else:
+				att = attachment.Attachment(self.env, 'ticket', self.id)
+  
 			# This will break the ticket_update system, the body_text is vaporized
 			# ;-(
 			#
@@ -1125,7 +1133,7 @@ class TicketEmailParser(object):
 		#
 		return status
 
-########## Fullblog functions  ###########################################################
+########## Fullblog functions  #################################################
 
 	def blog(self, id): 
 		"""
@@ -1170,8 +1178,198 @@ class TicketEmailParser(object):
 			blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
 
+########## Discussion functions  ##############################################
 
-########## MAIN function  ###########################################################
+	def discussion_topic(self, content, subject):
+
+		# Import modules.
+		from tracdiscussion.api import DiscussionApi
+		from trac.util.datefmt import to_timestamp, utc
+
+		if self.DEBUG:
+			print 'TD: Creating a new topic in forum:', self.id
+
+		# Get dissussion API component.
+		api = self.env[DiscussionApi]
+		context = self._create_context(content, subject)
+
+		# Get forum for new topic.
+		forum = api.get_forum(context, self.id)
+
+		if not forum and self.DEBUG:
+			print 'ERROR: Replied forum doesn\'t exist'
+
+		# Prepare topic.
+		topic = {'forum' : forum['id'],
+				 'subject' : context.subject,
+				 'time': to_timestamp(datetime.now(utc)),
+				 'author' : self.author,
+				 'subscribers' : [self.email_addr],
+				 'body' : self.body_text(context.content_parts)}
+
+		# Add topic to DB and commit it.
+		self._add_topic(api, context, topic)
+		self.db.commit()
+
+	def discussion_topic_reply(self, content, subject):
+
+		# Import modules.
+		from tracdiscussion.api import DiscussionApi
+		from trac.util.datefmt import to_timestamp, utc
+
+		if self.DEBUG:
+			print 'TD: Replying to discussion topic', self.id
+
+		# Get dissussion API component.
+		api = self.env[DiscussionApi]
+		context = self._create_context(content, subject)
+
+		# Get replied topic.
+		topic = api.get_topic(context, self.id)
+
+		if not topic and self.DEBUG:
+			print 'ERROR: Replied topic doesn\'t exist'
+
+		# Prepare message.
+		message = {'forum' : topic['forum'],
+				   'topic' : topic['id'],
+				   'replyto' : -1,
+				   'time' : to_timestamp(datetime.now(utc)),
+				   'author' : self.author,
+				   'body' : self.body_text(context.content_parts)}
+
+		# Add message to DB and commit it.
+		self._add_message(api, context, message)
+		self.db.commit()
+
+	def discussion_message_reply(self, content, subject):
+
+		# Import modules.
+		from tracdiscussion.api import DiscussionApi
+		from trac.util.datefmt import to_timestamp, utc
+
+		if self.DEBUG:
+			print 'TD: Replying to discussion message', self.id
+
+		# Get dissussion API component.
+		api = self.env[DiscussionApi]
+		context = self._create_context(content, subject)
+
+		# Get replied message.
+		message = api.get_message(context, self.id)
+
+		if not message and self.DEBUG:
+			print 'ERROR: Replied message doesn\'t exist'
+
+		# Prepare message.
+		message = {'forum' : message['forum'],
+				   'topic' : message['topic'],
+				   'replyto' : message['id'],
+				   'time' : to_timestamp(datetime.now(utc)),
+				   'author' : self.author,
+				   'body' : self.body_text(context.content_parts)}
+
+		# Add message to DB and commit it.
+		self._add_message(api, context, message)
+		self.db.commit()
+
+	def _create_context(self, content, subject):
+
+		# Import modules.
+		from trac.mimeview import Context
+		from trac.web.api import Request
+		from trac.perm import PermissionCache
+
+		# TODO: Read server base URL from config.
+		# Create request object to mockup context creation.
+		#
+		environ = {'SERVER_PORT' : 80,
+				   'SERVER_NAME' : 'test',
+				   'REQUEST_METHOD' : 'POST',
+				   'wsgi.url_scheme' : 'http',
+				   'wsgi.input' : sys.stdin}
+		chrome =  {'links': {},
+				   'scripts': [],
+				   'ctxtnav': [],
+				   'warnings': [],
+				   'notices': []}
+
+		if self.env.base_url_for_redirect:
+			environ['trac.base_url'] = self.env.base_url
+
+		req = Request(environ, None)
+		req.chrome = chrome
+		req.tz = 'missing'
+		req.authname = self.author
+		req.perm = PermissionCache(self.env, self.author)
+
+		# Create and return context.
+		context = Context.from_request(req)
+		context.realm = 'discussion-email2trac'
+		context.cursor = self.db.cursor()
+		context.content = content
+		context.subject = subject
+
+		# Read content parts from content.
+		context.content_parts = self.get_message_parts(content)
+		context.content_parts = self.unique_attachment_names(
+		  context.content_parts)
+
+		return context
+
+	def _add_topic(self, api, context, topic):
+		context.req.perm.assert_permission('DISCUSSION_APPEND')
+
+		# Filter topic.
+		for discussion_filter in api.discussion_filters:
+			accept, topic_or_error = discussion_filter.filter_topic(
+			  context, topic)
+			if accept:
+				topic = topic_or_error
+			else:
+				raise TracError(topic_or_error)
+
+		# Add a new topic.
+		api.add_topic(context, topic)
+
+		# Get inserted topic with new ID.
+		topic = api.get_topic_by_time(context, topic['time'])
+
+		# Attach attachments.
+		self.id = topic['id']
+		self.attach_attachments(context.content_parts, self.VERSION == 0.9)
+
+		# Notify change listeners.
+		for listener in api.topic_change_listeners:
+			listener.topic_created(context, topic)
+
+	def _add_message(self, api, context, message):
+		context.req.perm.assert_permission('DISCUSSION_APPEND')
+
+		# Filter message.
+		for discussion_filter in api.discussion_filters:
+			accept, message_or_error = discussion_filter.filter_message(
+			  context, message)
+			if accept:
+				message = message_or_error
+			else:
+				raise TracError(message_or_error)
+
+		# Add message.
+		api.add_message(context, message)
+
+		# Get inserted message with new ID.
+		message = api.get_message_by_time(context, message['time'])
+
+		# Attach attachments.
+		self.id = message['topic']
+		self.attach_attachments(context.content_parts, self.VERSION == 0.9)
+
+		# Notify change listeners.
+		for listener in api.message_change_listeners:
+			listener.message_created(context, message)
+
+########## MAIN function  ######################################################
 
 	def parse(self, fp):
 		"""
@@ -1229,58 +1427,92 @@ class TicketEmailParser(object):
 		else:
 			self.notification = 0
 
-
-		# Check if  FullBlogPlugin is installed
-		#
-		blog_enabled = None
-		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
-			blog_enabled = True
-
 		if not m['Subject']:
 			subject  = 'No Subject'
 		else:
-			subject  = self.email_to_unicode(m['Subject'])		
+			subject  = self.email_to_unicode(m['Subject'])
 
-		# 
+		if self.DEBUG:
+			 print "TD:", subject
+
+		#
 		# [hic] #1529: Re: LRZ
 		# [hic] #1529?owner=bas,priority=medium: Re: LRZ
 		#
-		TICKET_RE = re.compile(r"""
-			(?P<blog>blog:(?P<blog_id>\w*))
-			|(?P<new_fields>[#][?].*)
-			|(?P<reply>[#][\d]+:)
-			|(?P<reply_fields>[#][\d]+\?.*?:)
-			""", re.VERBOSE)
-
-		# Find out if this is a ticket or a blog
+		ticket_regex = r'''
+			(?P<new_fields>[#][?].*)
+			|(?P<reply>(?P<id>[#][\d]+)(?P<fields>\?.*?:)*)
+			'''
+		# Check if  FullBlogPlugin is installed
 		#
-		result =  TICKET_RE.search(subject)
+		blog_enabled = None
+		blog_regex = ''
+		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
+			blog_enabled = True
+		        blog_regex = '''|(?P<blog>blog:(?P<blog_id>\w*))'''
 
+
+		# Check if DiscussionPlugin is installed
+		#
+		discussion_enabled = None
+		discussion_regex = ''
+		if self.get_config('components', 'tracdiscussion.api.*') in ['enabled']:
+			discussion_enabled = True
+			discussion_regex = r'''
+			|(?P<forum>Forum[ ][#](?P<forum_id>\d+)[ ]-[ ]?)
+			|(?P<topic>Topic[ ][#](?P<topic_id>\d+)[ ]-[ ]?)
+			|(?P<message>Message[ ][#](?P<message_id>\d+)[ ]-[ ]?)
+			'''
+
+
+		regex_str = ticket_regex + blog_regex + discussion_regex
+		SYSTEM_RE = re.compile(regex_str, re.VERBOSE)
+
+		# Find out if this is a ticket, a blog or a discussion
+		#
+		result =  SYSTEM_RE.search(subject)
 		if result:
-			if result.group('blog'):
-				if blog_enabled:
-					self.blog(result.group('blog_id'))
-				else:
-					if self.DEBUG:
-						print "Fullblog plugin is not installed"
-						return
-
 			# update ticket + fields
 			#
-			if result.group('reply_fields') and self.TICKET_UPDATE:
-				self.ticket_update(m, result.group('reply_fields'), spam_msg)
-
-			# Update ticket
-			#
-			elif result.group('reply') and self.TICKET_UPDATE:
+			if result.group('reply') and self.TICKET_UPDATE:
+				self.system = 'ticket'
 				self.ticket_update(m, result.group('reply'), spam_msg)
 
 			# New ticket + fields
 			#
 			elif result.group('new_fields'):
+				self.system = 'ticket'
 				self.new_ticket(m, subject[:result.start('new_fields')], spam_msg, result.group('new_fields'))
 
+			if blog_enabled: 
+				if result.group('blog'):
+					self.system = 'blog'
+					self.blog(result.group('blog_id'))
+
+			if discussion_enabled:
+				# New topic.
+				#
+				if result.group('forum'):
+					self.system = 'discussion'
+					self.id = int(result.group('forum_id'))
+					self.discussion_topic(m, subject[result.end('forum'):])
+
+				# Reply to topic.
+				#
+				elif result.group('topic'): 
+					self.system = 'discussion'
+					self.id = int(result.group('topic_id'))
+					self.discussion_topic_reply(m, subject[result.end('topic'):])
+
+				# Reply to topic message.
+				#
+				elif result.group('message'):
+					self.system = 'discussion'
+					self.id = int(result.group('message_id'))
+					self.discussion_message_reply(m, subject[result.end('message'):])
+
 		else:
+			self.system = 'ticket'
 			result = self.ticket_update_by_subject(subject)
 			if result:
 				self.ticket_update(m, result, spam_msg)
@@ -1600,9 +1832,9 @@ class TicketEmailParser(object):
 	def attachment_exists(self, filename):
 
 		if self.DEBUG:
-			s = 'TD: attachment already exists: Ticket id : '
+			s = 'TD: attachment already exists: Id : '
 			try:
-				print "%s%s, Filename : %s" %(s, self.id, filename)
+				print "%s%s, Filename : %s" % (s, self.id, filename)
 			except UnicodeEncodeError, detail:
 				print "%s%s, Filename : Can not be printed due to non-ascii characters" %(s, self.id)
 
@@ -1612,7 +1844,12 @@ class TicketEmailParser(object):
 			return False
 
 		try:
-			att = attachment.Attachment(self.env, 'ticket', self.id, filename)
+			if self.system == 'discussion':
+				att = attachment.Attachment(self.env, 'discussion', 'ticket/%s'
+				  % (self.id,), filename)
+			else:
+				att = attachment.Attachment(self.env, 'ticket', self.id,
+				  filename)
 			return True
 		except attachment.ResourceNotFound:
 			return False
@@ -1633,10 +1870,12 @@ class TicketEmailParser(object):
 			inline = self.inline_part(part)
 			
 			if part.get_content_maintype() == 'image' and inline:
-				body_text.append('[[Image(%s)]]' % filename)
+				if self.system != 'discussion':
+					body_text.append('[[Image(%s)]]' % filename)
 				body_text.append("")
 			else:
-				body_text.append('[attachment:"%s"]' % filename)
+				if self.system != 'discussion':
+					body_text.append('[attachment:"%s"]' % filename)
 				body_text.append("")
 				
 		body_text = '\r\n'.join(body_text)
@@ -1749,7 +1988,6 @@ if __name__ == '__main__':
 
 	ENABLE_SYSLOG = 0
 
-
 	SHORT_OPT = 'chf:np:t:v'
 	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=', 'verbose']
 
@@ -1822,6 +2060,8 @@ if __name__ == '__main__':
 			# see http://projects.edgewall.com/trac/changeset/2799
 			from trac.ticket.notification import TicketNotifyEmail
 			from trac import config as trac_config
+			from trac.core import TracError
+
 		elif version == '0.11':
 			from trac import attachment 
 			from trac.env import Environment
@@ -1829,6 +2069,7 @@ if __name__ == '__main__':
 			from trac.web.href import Href
 			from trac import config as trac_config
 			from trac import util
+			from trac.core import TracError
 
 
 			#
@@ -1850,6 +2091,10 @@ if __name__ == '__main__':
 		if settings.has_key('python_egg_cache'):
 			python_egg_cache = str(settings['python_egg_cache'])
 			os.environ['PYTHON_EGG_CACHE'] = python_egg_cache
+
+	
+		if int(settings['debug']) > 0:
+			print 'Loading environment', settings['project']
 
 		env = Environment(settings['project'], create=0)
 
