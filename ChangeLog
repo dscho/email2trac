@@ -21,6 +21,7 @@
 
   * Added a new option. It is all in the name:
       * ticket_update_by_subject, default value is off
+      * ticket_update_by_subject_lookback, default 30 days
 
     When this option is enabled and there is no ticket number found
     in a reply mail. It will try to find a ticket summary that matches
@@ -28,7 +29,13 @@
     ticket, closes #188
     Author: Konstantin Ryabitsev <icon add mricon dot com> & Bas van der Vlies
     Applied by: Bas van der Vlies
-    
+
+  * Added DiscussionPlugin support, closes 197. For description see:
+     - https://trac-hacks.org/wiki/DiscussionPlugin
+
+   Author: ibarton add fit dot vutbr dot cz (alias Blackhex)
+   Applied by with some modification: Bas van der Vlies
+
 2010-03-20
 
   * Fixed a bug reporter was always set to the default value specified

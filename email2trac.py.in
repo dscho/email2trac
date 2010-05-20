@@ -202,6 +202,11 @@ class TicketEmailParser(object):
 		else:
 			self.TICKET_UPDATE_BY_SUBJECT = 0
 
+		if parameters.has_key('ticket_update_by_subject_lookback'):
+			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = int(parameters['ticket_update_by_subject_lookback'])
+		else:
+			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = 30
+
 		if parameters.has_key('drop_spam'):
 			self.DROP_SPAM = int(parameters['drop_spam'])
 		else:
@@ -918,9 +923,11 @@ class TicketEmailParser(object):
 				cursor = self.db.cursor()
 				summaries = [orig_subject, '%%: %s' % orig_subject]
 
-				# hard-code the time to 30 days for now. Can easily be
-				# made configurable
-				lookback = int(time.mktime(time.gmtime())) - 2592000
+				##
+				# Convert days to seconds
+				lookback = int(time.mktime(time.gmtime())) - \
+						self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK * 24 * 3600
+
 
 				for summary in summaries:
 					if self.DEBUG:
