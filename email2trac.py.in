@@ -739,9 +739,12 @@ class TicketEmailParser(object):
 			self.id = int(id[1:])
 
 		except ValueError:
-			# Strip '#' and ':'
+			# Strip '#' 
 			#
-			self.id = int(id[1:-1])
+			self.id = int(id[1:])
+
+		if self.VERBOSE:
+			print "VB: ticket_update: %s" %id
 
 
 		# When is the change committed
