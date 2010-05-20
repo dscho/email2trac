@@ -1,3 +1,9 @@
+email2trac (1.4.1-1) stable; urgency=low
+
+  * delete_spam still used trac_version in /etc/email2trac.conf
+
+ -- Bas van der Vlies <basv@sara.nl>  Thu, 20 May 2010 15:40:20 +0200
+
 email2trac (1.4.0-3) stable; urgency=low
 
   * Automatically determine trac version

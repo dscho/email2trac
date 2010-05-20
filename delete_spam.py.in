@@ -42,7 +42,7 @@ import getopt
 import shutil
 import ConfigParser
 
-trac_default_version = 0.10
+from trac import __version__ as trac_version
 
 def ReadConfig(file, name):
 	"""
@@ -146,17 +146,21 @@ if __name__ == '__main__':
 			project_name = value
 		elif opt in ['-v', '--verbose']:
 			VERBOSE = True
+
+	## trac version is defined like this  X.version.X
+	#
+	version = int(trac_version.split('.')[1])
+	if VERBOSE:
+		print "Found trac version: %d" %version
+
+	if version < 10:
+		print 'Trac version %s is not suported' %(version)
 	
 	settings = ReadConfig(configfile, project_name)
 	if not settings.has_key('project'):
 		print __doc__
 		print 'No project defined in config file, eg:\n\t project: /data/trac/bas'
 		sys.exit(1)
-
-	if settings.has_key('trac_version'):
-		version = float(settings['trac_version'])
-	else:
-		version = trac_default_version
 
 	settings['DRY_RUN'] = DRY_RUN
 	settings['VERBOSE'] = VERBOSE
@@ -166,8 +170,6 @@ if __name__ == '__main__':
 	from trac import util
 
 
-	if version < 0.10:
-		print 'Trac version %s is not suported' %(version)
 
 	new_delete_spam(settings)
 
