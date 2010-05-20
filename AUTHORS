@@ -2,6 +2,9 @@ The email2trac package is written by:
   Bas van der Vlies <basv@sara.nl>
   Walter de Jong <walter@sara.nl>
 
+DiscussionPlugin support:
+  Blackhex <ibarton at fit dot vutbr dot cz> 
+
 regular patch contributor(s):
    Ben Artin <ben at fetchsoftworks dot com>
 
