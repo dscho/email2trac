@@ -41,7 +41,6 @@ How to use
     [DEFAULT]                        # REQUIRED
     project      : /data/trac/test   # REQUIRED
     debug        : 1                 # OPTIONAL, if set print some DEBUG info
-    trac_version : 0.10              # OPTIONAL, default is 0.11 
 
     [jouvin]                         # OPTIONAL project declaration, if set both fields necessary
     project      : /data/trac/jouvin # use -p|--project jouvin.  
@@ -74,6 +73,7 @@ from stat import *
 import mimetypes
 import traceback
 
+from trac import __version__ as trac_version
 
 # Will fail where unavailable, e.g. Windows
 #
@@ -2040,13 +2040,14 @@ if __name__ == '__main__':
 	settings['ticket_prefix'] = ticket_prefix
 	settings['dry_run'] = dry_run
 	settings['verbose'] = verbose
+
+
+	# Determine major trac version used to be in email2trac.conf
+	#
+	version = '0.%s' %(trac_version.split('.')[1])
+	if verbose:
+		print "Found trac version: %s" %(version)
 	
-	if settings.has_key('trac_version'):
-		version = settings['trac_version']
-	else:
-		version = trac_default_version
-
-
 	#debug HvB
 	#print settings
 

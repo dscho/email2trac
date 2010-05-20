@@ -1,4 +1,4 @@
-2010-XX-XX
+2010-05-20
   * email2trac crashed if there are '/' and '\' characters in a filename.
     These characters are now being replace by '_', closes #196
     Reported by: jcuppen add hethooghuis dot nl
@@ -35,6 +35,10 @@
 
    Author: ibarton add fit dot vutbr dot cz (alias Blackhex)
    Applied by with some modification: Bas van der Vlies
+
+  * Trac version is now automatically determined. No need anymore for
+    trac_version in /etc/email2trac.conf
+    Author: Bas van der Vlies
 
 2010-03-20
 
