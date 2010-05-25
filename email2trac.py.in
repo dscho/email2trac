@@ -947,7 +947,7 @@ class TicketEmailParser(object):
 						break
 
 					if matched_id:
-						matched_id = '#%d:' % matched_id
+						matched_id = '#%d' % matched_id
 						return matched_id
 
 		return matched_id

@@ -1,6 +1,7 @@
-email2trac (1.4.1-1) stable; urgency=low
+email2trac (1.4.2-1) stable; urgency=low
 
   * delete_spam still used trac_version in /etc/email2trac.conf
+  * fixed an error in ticket_update_by_subject function. 
 
  -- Bas van der Vlies <basv@sara.nl>  Thu, 20 May 2010 15:40:20 +0200
 

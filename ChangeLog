@@ -1,3 +1,10 @@
+2010-05-25
+  * delete_spam still used the trac_version in email2trac.comf
+    Fixed by: Bas van der Vlies
+
+  * email2trac crashed when ticket_update_by_subject was enabled. 
+    Fixed by: Bas van der Vlies
+
 2010-05-20
   * email2trac crashed if there are '/' and '\' characters in a filename.
     These characters are now being replace by '_', closes #196
