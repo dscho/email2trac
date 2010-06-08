@@ -2051,6 +2051,11 @@ if __name__ == '__main__':
 	#debug HvB
 	#print settings
 
+	# Quick hack for 0.12
+	#
+	if version in [ '0.12dev']:
+		version = '0.12'
+
 	try:
 		if version == '0.9':
 			from trac import attachment 
@@ -2082,12 +2087,28 @@ if __name__ == '__main__':
 			from trac import util
 			from trac.core import TracError
 
+			#
+			# return  util.text.to_unicode(str)
+			#
+			# see http://projects.edgewall.com/trac/changeset/2799
+			from trac.ticket.notification import TicketNotifyEmail
+
+		elif version == '0.12':
+			from trac import attachment 
+			from trac.env import Environment
+			from trac.ticket import Ticket
+			from trac.web.href import Href
+			from trac import config as trac_config
+			from trac import util
+			from trac.core import TracError
 
 			#
 			# return  util.text.to_unicode(str)
 			#
 			# see http://projects.edgewall.com/trac/changeset/2799
 			from trac.ticket.notification import TicketNotifyEmail
+
+
 		else:
 			print 'TRAC version %s is not supported' %version
 			sys.exit(1)
