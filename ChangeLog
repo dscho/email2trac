@@ -1,3 +1,8 @@
+2010-06-XX
+  * Support added for trac version 0.12, closes #201
+    Reported by: mark_kids add yahoo dot com 
+    Fixed by: Bas van der Vlies 
+    
 2010-05-25
   * delete_spam still used the trac_version in email2trac.comf
     Fixed by: Bas van der Vlies
