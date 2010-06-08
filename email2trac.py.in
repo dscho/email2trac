@@ -1923,7 +1923,7 @@ class TicketEmailParser(object):
 		try:
 			# create false {abs_}href properties, to trick Notify()
 			#
-			if not self.VERSION == 0.11:
+			if not (self.VERSION in [0.11, 0.12]):
 				self.env.abs_href = Href(self.get_config('project', 'url'))
 				self.env.href = Href(self.get_config('project', 'url'))
 
@@ -2053,8 +2053,10 @@ if __name__ == '__main__':
 
 	# Quick hack for 0.12
 	#
-	if version in [ '0.12dev']:
+	if version.startswith('0.12'):
 		version = '0.12'
+		if verbose:
+			print "Found trac version: %s" %(version)
 
 	try:
 		if version == '0.9':
