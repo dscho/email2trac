@@ -155,7 +155,7 @@ if __name__ == '__main__':
 		version = '0.12'
 
 	if VERBOSE:
-		print "Found trac version: %d" %version
+		print "Found trac version: %s" %version
 
 	## We only support versions 0.11 and 0.12
 	#
