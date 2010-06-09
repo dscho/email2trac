@@ -2043,20 +2043,17 @@ if __name__ == '__main__':
 
 
 	# Determine major trac version used to be in email2trac.conf
+	# Quick hack for 0.12
 	#
 	version = '0.%s' %(trac_version.split('.')[1])
+	if version.startswith('0.12'):
+		version = '0.12'
+
 	if verbose:
 		print "Found trac version: %s" %(version)
 	
 	#debug HvB
 	#print settings
-
-	# Quick hack for 0.12
-	#
-	if version.startswith('0.12'):
-		version = '0.12'
-		if verbose:
-			print "Found trac version: %s" %(version)
 
 	try:
 		if version == '0.9':

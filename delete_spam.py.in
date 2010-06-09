@@ -147,15 +147,21 @@ if __name__ == '__main__':
 		elif opt in ['-v', '--verbose']:
 			VERBOSE = True
 
-	## trac version is defined like this  X.version.X
+	# Determine major trac version used to be in email2trac.conf
+	# Quick hack for 0.12
 	#
-	version = int(trac_version.split('.')[1])
+	version = '0.%s' %(trac_version.split('.')[1])
+	if version.startswith('0.12'):
+		version = '0.12'
+
 	if VERBOSE:
 		print "Found trac version: %d" %version
 
-	if version < 10:
+	## We only support versions 0.11 and 0.12
+	#
+	if not version in ['0.11', '0.12']:
 		print 'Trac version %s is not suported' %(version)
-	
+
 	settings = ReadConfig(configfile, project_name)
 	if not settings.has_key('project'):
 		print __doc__
