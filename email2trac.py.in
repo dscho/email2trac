@@ -516,7 +516,11 @@ class TicketEmailParser(object):
 
 			n = n + 1
 			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
-			print 'TD: part%d: filename: %s' % (n, filename)
+			
+			try:
+				print 'TD: part%d: filename: %s' % (n, filename)
+			except UnicodeEncodeError, detail:
+				print 'Filename can not be printed due to non-ascii characters'
 
 			## Forbidden chars
 			#
@@ -525,7 +529,10 @@ class TicketEmailParser(object):
 	
 
 			part_file = os.path.join(self.TMPDIR, filename)
-			print 'TD: writing part%d (%s)' % (n,part_file)
+			try:
+				print 'TD: writing part%d (%s)' % (n,part_file)
+			except UnicodeEncodeError, detail:
+				print 'Filename can not be printed due to non-ascii characters'
 
 			if self.DRY_RUN:
 				print 'DRY_RUN: NOT saving attachments'
