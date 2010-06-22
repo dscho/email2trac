@@ -516,12 +516,10 @@ class TicketEmailParser(object):
 
 			n = n + 1
 			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
-			
-			try:
-				print 'TD: part%d: filename: %s' % (n, filename)
-			except UnicodeEncodeError, detail:
-				print 'TD: part%d: filename: %s' % (n, util.text.unicode_quote(filename))
-
+		
+			s = 'TD: part%d: filename: %s' %(n, filename)
+			self.print_unicode(s)
+	
 			## Forbidden chars
 			#
 			filename = filename.replace('\\', '_')
@@ -529,10 +527,8 @@ class TicketEmailParser(object):
 	
 
 			part_file = os.path.join(self.TMPDIR, filename)
-			try:
-				print 'TD: writing part%d (%s)' % (n,part_file)
-			except UnicodeEncodeError, detail:
-				print 'TD: writing part%d (%s)' % (n, util.text.unicode_quote(part_file))
+			s = 'TD: writing part%d (%s)' % (n,part_file)
+			self.print_unicode(s)
 
 			if self.DRY_RUN:
 				print 'DRY_RUN: NOT saving attachments'
@@ -594,8 +590,6 @@ class TicketEmailParser(object):
 		if self.VERBOSE:
 			print "VB: email_to_unicode"
 
-
-
 		results =  email.Header.decode_header(message_str)
 
 		s = None
@@ -651,6 +645,15 @@ class TicketEmailParser(object):
 				pass
 		return result
 
+	def print_unicode(self,s):
+		"""
+		This function prints unicode strings uif possible else it will quote it
+		"""
+		try:
+			print s
+		except UnicodeEncodeError, detail:
+			print util.text.unicode_quote(s)
+
 ########## TRAC ticket functions  ###########################################################
 
 	def update_ticket_fields(self, ticket, user_dict, use_default=None): 
@@ -684,10 +687,8 @@ class TicketEmailParser(object):
 		#
 		for field,value in user_dict.items():
 			if self.DEBUG >= 10: 
-				try:
-					print  'user_field\t %s = %s' %(field,value)
-				except UnicodeEncodeError, detail:
-					print  'user_field\t %s = %s' %(field, util.text.unicode_quote(value))
+				s = 'TD: user_field\t %s = %s' %(field,value) 
+				self.print_unicode(s)
 
 			## To prevent mail loop
 			#
@@ -726,10 +727,8 @@ class TicketEmailParser(object):
 					ticket[field] = value
 
 				if self.DEBUG >= 10: 
-					try:
-						print  'ticket_field\t %s = %s' %(field,  ticket[field])
-					except UnicodeEncodeError, detail:
-						print  'ticket_field\t %s = %s' %(field,  util.text.unicode_quote(ticket[field]))
+					s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
+					self.print_unicode(s)
 
 	def ticket_update(self, m, id, spam):
 		"""
@@ -890,10 +889,8 @@ class TicketEmailParser(object):
 					 value = options[int(value)]
 	
 			if self.DEBUG > 10:
-				try:
-					print 'TD: trac.ini name %s = %s' %(name, value)
-				except UnicodeEncodeError, detail:
-					print 'TD: trac.ini name %s = %s' %(name, util.text.unicode_quote(value))
+				s = 'TD: trac.ini name %s = %s' %(name, value)
+				self.print_unicode(s)
 
 			## email2trac.conf settings
 			#
@@ -901,19 +898,15 @@ class TicketEmailParser(object):
 			try:
 				value = self.parameters['%s_%s' %(prefix, name)]
 				if self.DEBUG > 10:
-					try:
-						print 'TD: email2trac.conf %s = %s ' %(name, value)
-					except UnicodeEncodeError, detail:
-						print 'TD: email2trac.conf %s = %s ' %(name, util.text.unicode_quote(value))
+					s = 'TD: email2trac.conf %s = %s ' %(name, value)
+					self.print_unicode(s)
 
 			except KeyError, detail:
 				pass
 		
 			if self.DEBUG:
-				try:
-					print 'user_dict[%s] = %s' %(name, value)
-				except UnicodeEncodeError, detail:
-					print 'user_dict[%s] = %s' %(name, util.text.unicode_quote(value))
+				s = 'TD: user_dict[%s] = %s' %(name, value)
+				self.print_unicode(s)
 
 			if value:
 				user_dict[name] = value
@@ -1784,10 +1777,8 @@ class TicketEmailParser(object):
 					message_parts.append('%s' %ubody_text)
 			else:
 				if self.DEBUG:
-					try:
-						print 'TD:               Filename: %s' % part.get_filename()
-					except UnicodeEncodeError, detail:
-						print 'TD:               Filename: %s' % util.text.unicode_quote(part.get_filename())
+					s = 'TD:               Filename: %s' % part.get_filename()
+					self.print_unicode(s)
 
 				##
 				#
@@ -1854,10 +1845,8 @@ class TicketEmailParser(object):
 				unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
 				
 			if self.DEBUG:
-				try:
-					print 'TD: Attachment with filename %s will be saved as %s' % (filename, unique_filename)
-				except UnicodeEncodeError, detail:
-					print 'Filename can not be printed due to non-ascii characters'
+				s = 'TD: Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+				self.print_unicode(s)
 
 			attachment_names.add(unique_filename)
 
@@ -1869,11 +1858,8 @@ class TicketEmailParser(object):
 	def attachment_exists(self, filename):
 
 		if self.DEBUG:
-			s = 'TD: attachment already exists: Id : '
-			try:
-				print "%s%s, Filename : %s" % (s, self.id, filename)
-			except UnicodeEncodeError, detail:
-				print "%s%s, Filename : Can not be printed due to non-ascii characters" %(s, self.id)
+			s = 'TD: attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
+			self.print_unicode(s)
 
 		# We have no valid ticket id
 		#
