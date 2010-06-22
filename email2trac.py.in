@@ -520,7 +520,7 @@ class TicketEmailParser(object):
 			try:
 				print 'TD: part%d: filename: %s' % (n, filename)
 			except UnicodeEncodeError, detail:
-				print 'Filename can not be printed due to non-ascii characters'
+				print 'TD: part%d: filename: %s' % (n, util.text.unicode_quote(filename))
 
 			## Forbidden chars
 			#
@@ -532,11 +532,13 @@ class TicketEmailParser(object):
 			try:
 				print 'TD: writing part%d (%s)' % (n,part_file)
 			except UnicodeEncodeError, detail:
-				print 'Filename can not be printed due to non-ascii characters'
+				print 'TD: writing part%d (%s)' % (n, util.text.unicode_quote(part_file))
 
 			if self.DRY_RUN:
 				print 'DRY_RUN: NOT saving attachments'
 				continue
+
+			part_file = util.text.unicode_quote(part_file)
 
 			fx = open(part_file, 'wb')
 			text = part.get_payload(decode=1)
@@ -591,6 +593,8 @@ class TicketEmailParser(object):
 		"""
 		if self.VERBOSE:
 			print "VB: email_to_unicode"
+
+
 
 		results =  email.Header.decode_header(message_str)
 
@@ -1095,9 +1099,10 @@ class TicketEmailParser(object):
 				
 			(original, filename, part) = item
 			#
-			# Must be tuneables HvB
+			# We have to determine the size so we use this temporary solution. we must escape it
+			# else we get UnicodeErrors. 
 			#
-			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, filename))
+			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, util.text.unicode_quote(filename)))
 			text = part.get_payload(decode=1)
 			if not text:
 				text = '(None)'
@@ -1767,11 +1772,11 @@ class TicketEmailParser(object):
 					try:
 						print 'TD:               Filename: %s' % part.get_filename()
 					except UnicodeEncodeError, detail:
-						print 'TD:               Filename: Can not be printed due to non-ascii characters'
+						print 'TD:               Filename: %s' % util.text.unicode_quote(part.get_filename())
 
-				## Convert 7-bit filename to 8 bits value
+				##
 				#
-				filename = self.email_to_unicode(part.get_filename())
+				filename = part.get_filename()
 				message_parts.append((filename, part))
 
 		return message_parts
