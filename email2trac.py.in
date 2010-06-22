@@ -684,7 +684,10 @@ class TicketEmailParser(object):
 		#
 		for field,value in user_dict.items():
 			if self.DEBUG >= 10: 
-				print  'user_field\t %s = %s' %(field,value)
+				try:
+					print  'user_field\t %s = %s' %(field,value)
+				except UnicodeEncodeError, detail:
+					print  'user_field\t %s = %s' %(field, util.text.unicode_quote(value))
 
 			## To prevent mail loop
 			#
@@ -723,7 +726,10 @@ class TicketEmailParser(object):
 					ticket[field] = value
 
 				if self.DEBUG >= 10: 
-					print  'ticket_field\t %s = %s' %(field,  ticket[field])
+					try:
+						print  'ticket_field\t %s = %s' %(field,  ticket[field])
+					except UnicodeEncodeError, detail:
+						print  'ticket_field\t %s = %s' %(field,  util.text.unicode_quote(ticket[field]))
 
 	def ticket_update(self, m, id, spam):
 		"""
@@ -884,7 +890,10 @@ class TicketEmailParser(object):
 					 value = options[int(value)]
 	
 			if self.DEBUG > 10:
-				print 'trac.ini name %s = %s' %(name, value)
+				try:
+					print 'TD: trac.ini name %s = %s' %(name, value)
+				except UnicodeEncodeError, detail:
+					print 'TD: trac.ini name %s = %s' %(name, util.text.unicode_quote(value))
 
 			## email2trac.conf settings
 			#
@@ -892,13 +901,19 @@ class TicketEmailParser(object):
 			try:
 				value = self.parameters['%s_%s' %(prefix, name)]
 				if self.DEBUG > 10:
-					print 'email2trac.conf %s = %s ' %(name, value)
+					try:
+						print 'TD: email2trac.conf %s = %s ' %(name, value)
+					except UnicodeEncodeError, detail:
+						print 'TD: email2trac.conf %s = %s ' %(name, util.text.unicode_quote(value))
 
 			except KeyError, detail:
 				pass
 		
 			if self.DEBUG:
-				print 'user_dict[%s] = %s' %(name, value)
+				try:
+					print 'user_dict[%s] = %s' %(name, value)
+				except UnicodeEncodeError, detail:
+					print 'user_dict[%s] = %s' %(name, util.text.unicode_quote(value))
 
 			if value:
 				user_dict[name] = value
