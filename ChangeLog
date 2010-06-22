@@ -1,3 +1,14 @@
+2010-XX-XX
+  * When debug is enabled email2trac chokes on non-ascii (utf8) 
+    characters in ticket fields, closes #205
+    Reported by: eirik dot schwenke add nsd dot uib dot no
+    Fixed by: Bas van der Vlies
+
+  * Email2trac crashes when attachment filename contains non-ascii       
+    characters, closes #206
+    Reported by: karsten dot rohrbach add wibas dot de
+    Fixed by: Bas van der Vlies
+
 2010-06-09
   * Support added for trac version 0.12, closes #201
     Reported by: mark_kids add yahoo dot com 
