@@ -1780,9 +1780,14 @@ class TicketEmailParser(object):
 					s = 'TD:               Filename: %s' % part.get_filename()
 					self.print_unicode(s)
 
-				##
-				#
-				filename = part.get_filename()
+				## 
+				#  First try to use email header function to convert filename.
+				#  If this fails the use the plan filename 
+				try:
+					filename = self.email_to_unicode(part.get_filename())
+				except UnicodeEncodeError, detail:
+					filename = part.get_filename()
+
 				message_parts.append((filename, part))
 
 		return message_parts
