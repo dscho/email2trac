@@ -1,3 +1,9 @@
+email2trac (1.4.6-1) stable; urgency=low
+
+  * A better fix for attachments with special characters, closes #206
+
+ -- Bas van der Vlies <basv@sara.nl>  Wed, 23 Jun 2010 11:52:19 +0200
+
 email2trac (1.4.5-1) stable; urgency=low
 
   * When debug is enabled email2trac chokes on non-ascii (utf8) 

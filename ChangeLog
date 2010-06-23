@@ -1,4 +1,9 @@
-2010-XX-XX
+2010-06-23
+  * A better fix for attachments with special characters, closes #206
+    Reported by: karsten dot rohrbach add wibas dot de
+    Fixed by: Bas van der Vlies
+
+2010-06-22
   * When debug is enabled email2trac chokes on non-ascii (utf8) 
     characters in ticket fields, closes #205
     Reported by: eirik dot schwenke add nsd dot uib dot no
