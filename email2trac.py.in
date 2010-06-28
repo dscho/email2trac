@@ -765,11 +765,11 @@ class TicketEmailParser(object):
 
 		# When is the change committed
 		# 
-		if self.VERSION == 0.11:
+		if self.VERSION < 0.11:
+			when = int(time.time())
+		else:
 			utc = UTC()
 			when = datetime.now(utc)
-		else:
-			when = int(time.time())
 
 		try:
 			tkt = Ticket(self.env, self.id, self.db)
