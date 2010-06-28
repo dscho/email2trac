@@ -853,11 +853,6 @@ class TicketEmailParser(object):
 				tkt.save_changes(self.author, body_text, when, None, str(cnum))
 			
 
-		#if self.VERSION  == 0.9:
-		#	error_with_attachments = self.attach_attachments(message_parts, True)
-		#else:
-		#	error_with_attachments = self.attach_attachments(message_parts)
-
 		if self.notification and not spam:
 			self.notify(tkt, False, when)
 
