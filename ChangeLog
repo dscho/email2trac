@@ -2,7 +2,10 @@
   * Ticket update for version 0.12 did not work, closes #209
     Author: mark underscore kids add yahoo dot com
     Applied by: Bas van der Vlies
-    
+
+  * enabled workflow and notification for trac version 0.12
+    Author: Bas van der Vlies
+
 2010-06-23
   * A better fix for attachments with special characters, closes #206
     Reported by: karsten dot rohrbach add wibas dot de

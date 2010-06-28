@@ -4,6 +4,9 @@ email2trac (1.4.7-1) stable; urgency=low
     Author: mark underscore kids add yahoo dot com
     Applied by: Bas van der Vlies
 
+  * enabled workflow and notification for trac version 0.12
+    Author: Bas van der Vlies
+
  -- Bas van der Vlies <basv@sara.nl>  Mon, 28 Jun 2010 07:56:18 +0200
 
 email2trac (1.4.6-1) stable; urgency=low

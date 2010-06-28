@@ -801,7 +801,7 @@ class TicketEmailParser(object):
 			#b = controller.get_ticket_changes(req, tkt, 'reopen')
 			#print 'get_ticket_changes :', b
 
-			if self.WORKFLOW and (self.VERSION in [0.11]) :
+			if self.WORKFLOW and (self.VERSION >= 0.11 ) :
 				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
 				from trac.test import Mock, MockPerm
 
@@ -1944,7 +1944,7 @@ class TicketEmailParser(object):
 
 			if self.notify_template:
 
-				if self.VERSION == 0.11:
+				if self.VERSION >= 0.11:
 
 					from trac.web.chrome import Chrome
 
@@ -2036,7 +2036,7 @@ if __name__ == '__main__':
 			project_name = value
 		elif opt in ['-t', '--ticket_prefix']:
 			ticket_prefix = value
-		elif opt in ['-v', '--version']:
+		elif opt in ['-v', '--verbose']:
 			verbose = True
 	
 	settings = ReadConfig(configfile, project_name)
