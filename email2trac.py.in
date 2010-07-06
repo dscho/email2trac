@@ -745,9 +745,6 @@ class TicketEmailParser(object):
 		try:
 			id, keywords = string.split(id, '?')
 
-			# Skip the last ':' character
-			#
-			keywords = keywords[:-1]
 			update_fields = self.str_to_dict(keywords)
 
 			# Strip '#' 
@@ -755,6 +752,7 @@ class TicketEmailParser(object):
 			self.id = int(id[1:])
 
 		except ValueError:
+
 			# Strip '#' 
 			#
 			self.id = int(id[1:])
@@ -773,8 +771,11 @@ class TicketEmailParser(object):
 
 		try:
 			tkt = Ticket(self.env, self.id, self.db)
+
 		except util.TracError, detail:
+
 			# Not a valid ticket
+
 			self.id = None
 			return False
 
@@ -1466,7 +1467,7 @@ class TicketEmailParser(object):
 		#
 		ticket_regex = r'''
 			(?P<new_fields>[#][?].*)
-			|(?P<reply>(?P<id>[#][\d]+)(?P<fields>\?.*?:)*)
+			|(?P<reply>(?P<id>[#][\d]+)(?P<fields>\?.*)?:)
 			'''
 		# Check if  FullBlogPlugin is installed
 		#
@@ -1496,12 +1497,17 @@ class TicketEmailParser(object):
 		# Find out if this is a ticket, a blog or a discussion
 		#
 		result =  SYSTEM_RE.search(subject)
+
 		if result:
 			# update ticket + fields
 			#
 			if result.group('reply') and self.TICKET_UPDATE:
 				self.system = 'ticket'
-				self.ticket_update(m, result.group('reply'), spam_msg)
+
+				# Skip the last ':' character
+				#
+				if not self.ticket_update(m, result.group('reply')[:-1], spam_msg):
+					self.new_ticket(m, subject, spam_msg)
 
 			# New ticket + fields
 			#
@@ -1540,7 +1546,8 @@ class TicketEmailParser(object):
 			self.system = 'ticket'
 			result = self.ticket_update_by_subject(subject)
 			if result:
-				self.ticket_update(m, result, spam_msg)
+				if not self.ticket_update(m, result, spam_msg):
+					self.new_ticket(m, subject, spam_msg)
 			else:
 				# No update by subject, so just create a new ticket
 				self.new_ticket(m, subject, spam_msg)
