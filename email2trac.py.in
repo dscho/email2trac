@@ -440,14 +440,12 @@ class TicketEmailParser(object):
 			#for n,e in to_addrs:
 			#	to_list.append(e)
 				
-			# Remove reporter email address if notification is 
-			# on
+			# Always Remove reporter email address from cc-list 
 			#
-			if self.notification:
-				try:
-					cc_addrs.remove((self.author, self.email_addr))
-				except ValueError, detail:
-					pass
+			try:
+				cc_addrs.remove((self.author, self.email_addr))
+			except ValueError, detail:
+				pass
 
 			for name,addr in cc_addrs:
 		
@@ -854,7 +852,7 @@ class TicketEmailParser(object):
 				tkt.save_changes(self.author, body_text, when, None, str(cnum))
 			
 
-		if self.notification and not spam:
+		if not spam:
 			self.notify(tkt, False, when)
 
 		return True
@@ -1074,7 +1072,7 @@ class TicketEmailParser(object):
 				tkt.save_changes(tkt['reporter'], comment)
 				#print tkt.get_changelog(self.db, when)
 
-		if self.notification and not spam:
+		if not spam:
 			self.notify(tkt, True)
 
 
@@ -1447,11 +1445,6 @@ class TicketEmailParser(object):
 			spam_msg = True
 		else:
 			spam_msg = False
-
-		if self.get_config('notification', 'smtp_enabled') in ['true']:
-			self.notification = 1
-		else:
-			self.notification = 0
 
 		if not m['Subject']:
 			subject  = 'No Subject'
@@ -1937,15 +1930,30 @@ class TicketEmailParser(object):
 		"""
 		A wrapper for the TRAC notify function. So we can use templates
 		"""
+		if self.VERBOSE:
+			print "VB: notify()"
+
 		if self.DRY_RUN:
 				print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
 				return
 		try:
+
+			#from trac.ticket.web_ui import TicketModule
+			#from trac.ticket.notification import TicketNotificationSystem
+			#ticket_sys = TicketNotificationSystem(self.env)
+			#a = TicketModule(self.env)
+			#print a.__dict__
+			#tn_sys = TicketNotificationSystem(self.env)
+			#print tn_sys
+			#print tn_sys.__dict__
+			#sys.exit(0)
+
 			# create false {abs_}href properties, to trick Notify()
 			#
 			if not (self.VERSION in [0.11, 0.12]):
 				self.env.abs_href = Href(self.get_config('project', 'url'))
 				self.env.href = Href(self.get_config('project', 'url'))
+
 
 			tn = TicketNotifyEmail(self.env)
 
