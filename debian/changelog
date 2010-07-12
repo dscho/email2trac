@@ -1,3 +1,14 @@
+email2trac (1.4.9-1) stable; urgency=low
+
+  * Do not check if notification is enabled, let Trac determine if a 
+    notfication is enabled and which interface/plugin is used, eg:
+    announcerplugin, closes #199
+
+    Reported by: Chris LoSacco chrisl add arc90 dot com
+    Fixed by: Bas van der Vlies
+
+ -- Bas van der Vlies <basv@sara.nl>  Mon, 12 Jul 2010 13:18:19 +0200
+
 email2trac (1.4.8-1) stable; urgency=low
 
   * Fixed several errors in ticket update: 
