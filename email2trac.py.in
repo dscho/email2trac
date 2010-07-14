@@ -192,6 +192,11 @@ class TicketEmailParser(object):
 		else:
 			self.REPLY_ALL = 0
 
+		if parameters.has_key('ticket_permission_system'):
+			self.TICKET_PERMISSION_SYSTEM = str(parameters['ticket_permission_system'])
+		else:
+			self.TICKET_PERMISSION_SYSTEM = None
+
 		if parameters.has_key('ticket_update'):
 			self.TICKET_UPDATE = int(parameters['ticket_update'])
 		else:
@@ -657,6 +662,30 @@ class TicketEmailParser(object):
 
 ########## TRAC ticket functions  ###########################################################
 
+	def check_permission(self, action):
+		"""
+		check if the reporter has the right permission for the action: 
+          - TICKET_CREATE
+          - TICKET_MODIFY
+
+		There are three models:
+  			- None      : no checking at all
+			- trac      : check the permission via trac permission model
+			- email2trac: ....
+		"""
+		if self.VERBOSE:
+			print "VB: check_permission"
+
+		if self.TICKET_PERMISSION_SYSTEM in ['trac']:
+			perm = PermissionSystem(self.env)
+			if perm.check_permission(action, self.author):
+				return True
+			else:
+				return False
+		else:
+				return True
+
+
 	def update_ticket_fields(self, ticket, user_dict, use_default=None): 
 		"""
 		This will update the ticket fields. It will check if the 
@@ -981,6 +1010,13 @@ class TicketEmailParser(object):
 		self.set_reply_fields(tkt, msg)
 
 		self.set_ticket_fields(tkt)
+
+		# Check the permission of the reporter
+		#
+		if self.TICKET_PERMISSION_SYSTEM:
+			if not self.check_permission('TICKET_CREATE'):
+				print 'Reporter: %s has no permission to create tickets' %self.author
+				return False
 
 		# Old style setting for component, will be removed
 		#
@@ -2116,6 +2152,7 @@ if __name__ == '__main__':
 			from trac import config as trac_config
 			from trac import util
 			from trac.core import TracError
+			from trac.perm import PermissionSystem
 
 			#
 			# return  util.text.to_unicode(str)
@@ -2131,6 +2168,7 @@ if __name__ == '__main__':
 			from trac import config as trac_config
 			from trac import util
 			from trac.core import TracError
+			from trac.perm import PermissionSystem
 
 			#
 			# return  util.text.to_unicode(str)
