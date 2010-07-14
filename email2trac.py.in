@@ -390,7 +390,10 @@ class TicketEmailParser(object):
 		#  and forbid the ticket email address as author field
 
 		if self.email_addr == self.trac_smtp_from:
-			self.author = "email2trac"
+			if self.email_name:
+				self.author = self.email_name
+			else:
+				self.author = "email2trac"
 		else:
 			self.author = self.email_addr
 
