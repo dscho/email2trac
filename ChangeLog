@@ -1,5 +1,5 @@
 2010-08-XX
-    * addde a new option 'ticket_permission_system'. Can be set to:
+    * added a new option 'ticket_permission_system'. Can be set to:
       - trac: Then it will check if the report has the right trac
         permission to create or modify a ticket. closes #202
 
