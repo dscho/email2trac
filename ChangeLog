@@ -1,3 +1,17 @@
+2010-08-XX
+    * addde a new option 'ticket_permission_system'. Can be set to:
+      - trac: Then it will check if the report has the right trac
+        permission to create or modify a ticket. closes #202
+
+      - update_restricted_to_participants: A ticket update is allowed only if:
+        1) the updater is the reporter,
+        2) the updater is in the CC
+        3) the updater has trac permission to update the ticket.
+        If the update is denied, a new ticket will be generated instead as to
+        not loose the issue . closes #203
+
+    Authors:  kris add tsampa dot org & Bas van der Vlies
+
 2010-08-12
   * Do not check if notification is enabled, let Trac determine if a
     notfication is enabled and which interface/plugin is used, eg:
