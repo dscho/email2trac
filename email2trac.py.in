@@ -662,7 +662,40 @@ class TicketEmailParser(object):
 
 ########## TRAC ticket functions  ###########################################################
 
-	def check_permission(self, action):
+	def check_permission_participants(self, tkt):
+		"""
+		Check if the mailer is allowed to update the ticket
+		"""
+
+		if tkt['reporter'].lower() in [self.author, self.email_addr]:
+			if self.DEBUG:
+				print 'ALLOW, %s is the ticket reporter' %(self.email_addr)
+			return True
+
+		perm = PermissionSystem(self.env)
+		if perm.check_permission('TICKET_MODIFY', self.author):
+			if self.DEBUG:
+				print 'ALLOW, %s has trac permission to update the ticket' %(self.author)
+			return True
+		else:
+			return False
+		
+
+		# Is the updater in the CC?
+		try:
+			cc_list = tkt['cc'].split(',')
+			for cc in cc_list:
+				if self.email_addr.lower() in cc.strip():
+
+					if self.DEBUG:
+						print 'ALLOW, %s is in the CC' %(self.email_addr)
+
+					return True
+
+		except KeyError:
+			return False
+
+	def check_permission(self, tkt, action):
 		"""
 		check if the reporter has the right permission for the action: 
           - TICKET_CREATE
@@ -677,11 +710,20 @@ class TicketEmailParser(object):
 			print "VB: check_permission"
 
 		if self.TICKET_PERMISSION_SYSTEM in ['trac']:
+
 			perm = PermissionSystem(self.env)
 			if perm.check_permission(action, self.author):
 				return True
 			else:
 				return False
+
+		elif self.TICKET_PERMISSION_SYSTEM in ['update_restricted_to_participants']:
+			if action in ['TICKET_MODIFY']:
+				return (self.check_permission_participants(tkt))	
+			else:
+				return True
+
+		# Default is to allow everybody ticket updates and ticket creation
 		else:
 				return True
 
@@ -808,6 +850,13 @@ class TicketEmailParser(object):
 
 			self.id = None
 			return False
+
+		# Check the permission of the reporter
+		#
+		if self.TICKET_PERMISSION_SYSTEM:
+			if not self.check_permission(tkt, 'TICKET_MODIFY'):
+				print 'Reporter: %s has no permission to modify tickets' %self.author
+				return False
 
 		# How many changes has this ticket
 		cnum = len(tkt.get_changelog())
@@ -1014,7 +1063,7 @@ class TicketEmailParser(object):
 		# Check the permission of the reporter
 		#
 		if self.TICKET_PERMISSION_SYSTEM:
-			if not self.check_permission('TICKET_CREATE'):
+			if not self.check_permission(tkt, 'TICKET_CREATE'):
 				print 'Reporter: %s has no permission to create tickets' %self.author
 				return False
 
