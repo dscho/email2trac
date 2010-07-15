@@ -918,10 +918,7 @@ class TicketEmailParser(object):
 
 		body_text = self.body_text(message_parts)
 
-		if self.VERSION  == 0.9:
-			error_with_attachments = self.attach_attachments(message_parts, True)
-		else:
-			error_with_attachments = self.attach_attachments(message_parts)
+		error_with_attachments = self.attach_attachments(message_parts)
 
 		if body_text.strip() or update_fields or self.properties: 
 			if self.DRY_RUN:
@@ -1449,7 +1446,7 @@ class TicketEmailParser(object):
 
 		# Attach attachments.
 		self.id = topic['id']
-		self.attach_attachments(context.content_parts, self.VERSION == 0.9)
+		self.attach_attachments(context.content_parts, True)
 
 		# Notify change listeners.
 		for listener in api.topic_change_listeners:
@@ -1475,7 +1472,7 @@ class TicketEmailParser(object):
 
 		# Attach attachments.
 		self.id = message['topic']
-		self.attach_attachments(context.content_parts, self.VERSION == 0.9)
+		self.attach_attachments(context.content_parts, True)
 
 		# Notify change listeners.
 		for listener in api.message_change_listeners:
@@ -2172,14 +2169,7 @@ if __name__ == '__main__':
 	#print settings
 
 	try:
-		if version == '0.9':
-			from trac import attachment 
-			from trac.env import Environment
-			from trac.ticket import Ticket
-			from trac.web.href import Href
-			from trac import util
-			from trac.Notify import TicketNotifyEmail
-		elif version == '0.10':
+		if version == '0.10':
 			from trac import attachment 
 			from trac.env import Environment
 			from trac.ticket import Ticket

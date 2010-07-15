@@ -13,6 +13,9 @@ email2trac (1.5.0-1) stable; urgency=low
 
     Authors:  kris add tsampa dot org & Bas van der Vlies
 
+  * removed suppport for version 0.9
+    Author: Bas van der Vlies
+
  -- Bas van der Vlies <basv@sara.nl>  Thu, 15 Jul 2010 14:17:24 +0200
 
 email2trac (1.4.9-1) stable; urgency=low
