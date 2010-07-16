@@ -74,6 +74,7 @@ import mimetypes
 import traceback
 import logging
 import logging.handlers
+import UserDict
 
 
 from trac import __version__ as trac_version
@@ -111,6 +112,51 @@ class UTC(tzinfo):
 	def dst(self, dt):
 		return self.ZERO
 
+class SaraDict(UserDict.UserDict):
+	def __init__(self, dictin = None):
+		UserDict.UserDict.__init__(self)
+		self.name = None 
+		
+		if dictin:
+			if dictin.has_key('name'):
+				self.name = dictin['name']
+				del dictin['name']
+			self.data = dictin 
+			
+	def get_value(self, key):
+		if self.has_key(key):
+			return self[key]
+		else:
+			return None 
+				
+	def __repr__(self):
+		return repr(self.data) 
+
+	def __str__(self):
+		return str(self.data) 
+			
+	def __getattr__(self, name):
+		"""
+		override the class attribute get method. Return the value
+		from the Userdict
+		"""
+		if self.data.has_key(name):
+			return self.data[name] 
+		else:
+			return None
+			
+	def __setattr__(self, name, value):
+		"""
+		override the class attribute set method only when the UserDict
+		has set its class attribute
+		"""
+		if self.__dict__.has_key('data'):
+			self.data[name] = value
+		else:
+			self.__dict__[name] = value
+
+	def __iter__(self):
+		return iter(self.data.keys())
 
 class TicketEmailParser(object):
 	env = None
@@ -139,16 +185,17 @@ class TicketEmailParser(object):
 
 		self.VERSION = version
 
+		self.get_config = self.env.config.get
+
 		self.setup_log()
 		self.setup_parameters()
 
 		self.DRY_RUN = parameters['dry_run']
 		self.VERBOSE = parameters['verbose']
 
-		self.get_config = self.env.config.get
 
 
-	def setup_log():
+	def setup_log(self):
 		"""
 		Setup loging
 
@@ -156,31 +203,31 @@ class TicketEmailParser(object):
         would be interpreted by the ConfigParser itself.
 
 		"""
-		if not parameters.log_type:
-			paramters.log_type = 'syslog'
+		if not self.parameters.log_type:
+			self.parameters.log_type = 'syslog'
 
-		if parameters.log_type = 'file'
+		if self.parameters.log_type == 'file':
 			if not os.path.isabs(parameters.log_file):
-				parameters.log_file = os.path.jpin(self.env.path. 'log')
+				self.parameters.log_file = os.path.join(self.env.path, 'log')
 			hdlr = logging.FileHandler()
 
-		elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
+		elif self.parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
 			# Requires win32 extensions
 			hdlr = logging.handlers.NTEventLogHandler(logid, logtype='Application')
 
-		elif parameters.log_type in ('syslog', 'unix'):
+		elif self.parameters.log_type in ('syslog', 'unix'):
 			hdlr = logging.handlers.SysLogHandler('/dev/log')
 
-		elif parameters.log_type in ('stderr'):
+		elif self.parameters.log_type in ('stderr'):
 			hdlr = logging.StreamHandler(sys.stderr)
 
 		else:
 			hdlr = logging.handlers.BufferingHandler(0)
 
-		if parameters.format:
-			parameters.format = parameters.format.replace('$(', '%(')
+		if self.parameters.log_format:
+			self.parameters['log_format'] = self.parameters.log_format.replace('$(', '%(')
 		else:
-			parameters.format = 'Email2trac: %(message)s'
+			self.parameters.log_format = 'Email2trac: %(message)s'
 
 
 		self.logger = logging.getLogger('email2trac')
@@ -188,7 +235,7 @@ class TicketEmailParser(object):
 		## Setup debug level
 		
 
-	def setup_parameters():
+	def setup_parameters(self):
 		if self.parameters.has_key('umask'):
 			os.umask(int(self.parameters['umask'], 8))
 
@@ -2136,14 +2183,18 @@ def ReadConfig(file, name):
 			print "Valid names: %s" %sections
 			sys.exit(1)
 
-		project =  dict()
+		project =  SaraDict()
 		for option, value in  config.options(name):
 			project[option] = value 
 
 	else:
 		# use some trac internals to get the defaults
 		#
-		project = config.parser.defaults()
+		tmp = config.parser.defaults()
+		project =  SaraDict()
+
+		for option,value in tmp.items():
+			project[option] = value 
 
 	return project
 
