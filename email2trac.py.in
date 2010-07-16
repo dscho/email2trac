@@ -72,6 +72,9 @@ import unicodedata
 from stat import *
 import mimetypes
 import traceback
+import logging
+import logging.handlers
+
 
 from trac import __version__ as trac_version
 
@@ -147,8 +150,43 @@ class TicketEmailParser(object):
 
 	def setup_log():
 		"""
-		Setup loging for config file
+		Setup loging
+
+		Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
+        would be interpreted by the ConfigParser itself.
+
 		"""
+		if not parameters.log_type:
+			paramters.log_type = 'syslog'
+
+		if parameters.log_type = 'file'
+			if not os.path.isabs(parameters.log_file):
+				parameters.log_file = os.path.jpin(self.env.path. 'log')
+			hdlr = logging.FileHandler()
+
+		elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
+			# Requires win32 extensions
+			hdlr = logging.handlers.NTEventLogHandler(logid, logtype='Application')
+
+		elif parameters.log_type in ('syslog', 'unix'):
+			hdlr = logging.handlers.SysLogHandler('/dev/log')
+
+		elif parameters.log_type in ('stderr'):
+			hdlr = logging.StreamHandler(sys.stderr)
+
+		else:
+			hdlr = logging.handlers.BufferingHandler(0)
+
+		if parameters.format:
+			parameters.format = parameters.format.replace('$(', '%(')
+		else:
+			parameters.format = 'Email2trac: %(message)s'
+
+
+		self.logger = logging.getLogger('email2trac')
+
+		## Setup debug level
+		
 
 	def setup_parameters():
 		if self.parameters.has_key('umask'):
