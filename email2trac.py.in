@@ -135,160 +135,171 @@ class TicketEmailParser(object):
 		self.STRIP_CONTENT_TYPES = list()
 
 		self.VERSION = version
+
+		self.setup_log()
+		self.setup_parameters()
+
 		self.DRY_RUN = parameters['dry_run']
 		self.VERBOSE = parameters['verbose']
 
 		self.get_config = self.env.config.get
 
-		if parameters.has_key('umask'):
-			os.umask(int(parameters['umask'], 8))
 
-		if parameters.has_key('debug'):
-			self.DEBUG = int(parameters['debug'])
+	def setup_log():
+		"""
+		Setup loging for config file
+		"""
+
+	def setup_parameters():
+		if self.parameters.has_key('umask'):
+			os.umask(int(self.parameters['umask'], 8))
+
+		if self.parameters.has_key('debug'):
+			self.DEBUG = int(self.parameters['debug'])
 		else:
 			self.DEBUG = 0
 
-		if parameters.has_key('mailto_link'):
-			self.MAILTO = int(parameters['mailto_link'])
-			if parameters.has_key('mailto_cc'):
-				self.MAILTO_CC = parameters['mailto_cc']
+		if self.parameters.has_key('mailto_link'):
+			self.MAILTO = int(self.parameters['mailto_link'])
+			if self.parameters.has_key('mailto_cc'):
+				self.MAILTO_CC = self.parameters['mailto_cc']
 			else:
 				self.MAILTO_CC = ''
 		else:
 			self.MAILTO = 0
 
-		if parameters.has_key('spam_level'):
-			self.SPAM_LEVEL = int(parameters['spam_level'])
+		if self.parameters.has_key('spam_level'):
+			self.SPAM_LEVEL = int(self.parameters['spam_level'])
 		else:
 			self.SPAM_LEVEL = 0
 
-		if parameters.has_key('spam_header'):
-			self.SPAM_HEADER = parameters['spam_header']
+		if self.parameters.has_key('spam_header'):
+			self.SPAM_HEADER = self.parameters['spam_header']
 		else:
 			self.SPAM_HEADER = 'X-Spam-Score'
 
-		if parameters.has_key('email_quote'):
-			self.EMAIL_QUOTE = str(parameters['email_quote'])
+		if self.parameters.has_key('email_quote'):
+			self.EMAIL_QUOTE = str(self.parameters['email_quote'])
 		else:	
 			self.EMAIL_QUOTE = '> '
 
-		if parameters.has_key('email_header'):
-			self.EMAIL_HEADER = int(parameters['email_header'])
+		if self.parameters.has_key('email_header'):
+			self.EMAIL_HEADER = int(self.parameters['email_header'])
 		else:
 			self.EMAIL_HEADER = 0
 
-		if parameters.has_key('alternate_notify_template'):
-			self.notify_template = str(parameters['alternate_notify_template'])
+		if self.parameters.has_key('alternate_notify_template'):
+			self.notify_template = str(self.parameters['alternate_notify_template'])
 		else:
 			self.notify_template = None
 
-		if parameters.has_key('alternate_notify_template_update'):
-			self.notify_template_update = str(parameters['alternate_notify_template_update'])
+		if self.parameters.has_key('alternate_notify_template_update'):
+			self.notify_template_update = str(self.parameters['alternate_notify_template_update'])
 		else:
 			self.notify_template_update = None
 
-		if parameters.has_key('reply_all'):
-			self.REPLY_ALL = int(parameters['reply_all'])
+		if self.parameters.has_key('reply_all'):
+			self.REPLY_ALL = int(self.parameters['reply_all'])
 		else:
 			self.REPLY_ALL = 0
 
-		if parameters.has_key('ticket_permission_system'):
-			self.TICKET_PERMISSION_SYSTEM = str(parameters['ticket_permission_system'])
+		if self.parameters.has_key('ticket_permission_system'):
+			self.TICKET_PERMISSION_SYSTEM = str(self.parameters['ticket_permission_system'])
 		else:
 			self.TICKET_PERMISSION_SYSTEM = None
 
-		if parameters.has_key('ticket_update'):
-			self.TICKET_UPDATE = int(parameters['ticket_update'])
+		if self.parameters.has_key('ticket_update'):
+			self.TICKET_UPDATE = int(self.parameters['ticket_update'])
 		else:
 			self.TICKET_UPDATE = 0
 
-		if parameters.has_key('ticket_update_by_subject'):
-			self.TICKET_UPDATE_BY_SUBJECT = int(parameters['ticket_update_by_subject'])
+		if self.parameters.has_key('ticket_update_by_subject'):
+			self.TICKET_UPDATE_BY_SUBJECT = int(self.parameters['ticket_update_by_subject'])
 		else:
 			self.TICKET_UPDATE_BY_SUBJECT = 0
 
-		if parameters.has_key('ticket_update_by_subject_lookback'):
-			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = int(parameters['ticket_update_by_subject_lookback'])
+		if self.parameters.has_key('ticket_update_by_subject_lookback'):
+			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = int(self.parameters['ticket_update_by_subject_lookback'])
 		else:
 			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = 30
 
-		if parameters.has_key('drop_spam'):
-			self.DROP_SPAM = int(parameters['drop_spam'])
+		if self.parameters.has_key('drop_spam'):
+			self.DROP_SPAM = int(self.parameters['drop_spam'])
 		else:
 			self.DROP_SPAM = 0
 
-		if parameters.has_key('verbatim_format'):
-			self.VERBATIM_FORMAT = int(parameters['verbatim_format'])
+		if self.parameters.has_key('verbatim_format'):
+			self.VERBATIM_FORMAT = int(self.parameters['verbatim_format'])
 		else:
 			self.VERBATIM_FORMAT = 1
 
-		if parameters.has_key('reflow'):
-			self.REFLOW = int(parameters['reflow'])
+		if self.parameters.has_key('reflow'):
+			self.REFLOW = int(self.parameters['reflow'])
 		else:
 			self.REFLOW = 1
 
-		if parameters.has_key('drop_alternative_html_version'):
-			self.DROP_ALTERNATIVE_HTML_VERSION = int(parameters['drop_alternative_html_version'])
+		if self.parameters.has_key('drop_alternative_html_version'):
+			self.DROP_ALTERNATIVE_HTML_VERSION = int(self.parameters['drop_alternative_html_version'])
 		else:
 			self.DROP_ALTERNATIVE_HTML_VERSION = 0
 
-		if parameters.has_key('strip_signature'):
-			self.STRIP_SIGNATURE = int(parameters['strip_signature'])
+		if self.parameters.has_key('strip_signature'):
+			self.STRIP_SIGNATURE = int(self.parameters['strip_signature'])
 		else:
 			self.STRIP_SIGNATURE = 0
 
-		if parameters.has_key('strip_quotes'):
-			self.STRIP_QUOTES = int(parameters['strip_quotes'])
+		if self.parameters.has_key('strip_quotes'):
+			self.STRIP_QUOTES = int(self.parameters['strip_quotes'])
 		else:
 			self.STRIP_QUOTES = 0
 
 		self.properties = dict()
-		if parameters.has_key('inline_properties'):
-			self.INLINE_PROPERTIES = int(parameters['inline_properties'])
+		if self.parameters.has_key('inline_properties'):
+			self.INLINE_PROPERTIES = int(self.parameters['inline_properties'])
 		else:
 			self.INLINE_PROPERTIES = 0
 
-		if parameters.has_key('use_textwrap'):
-			self.USE_TEXTWRAP = int(parameters['use_textwrap'])
+		if self.parameters.has_key('use_textwrap'):
+			self.USE_TEXTWRAP = int(self.parameters['use_textwrap'])
 		else:
 			self.USE_TEXTWRAP = 0
 
-		if parameters.has_key('binhex'):
+		if self.parameters.has_key('binhex'):
 			self.STRIP_CONTENT_TYPES.append('application/mac-binhex40')
 
-		if parameters.has_key('applesingle'):
+		if self.parameters.has_key('applesingle'):
 			self.STRIP_CONTENT_TYPES.append('application/applefile')
 
-		if parameters.has_key('appledouble'):
+		if self.parameters.has_key('appledouble'):
 			self.STRIP_CONTENT_TYPES.append('application/applefile')
 
-		if parameters.has_key('strip_content_types'):
-			items = parameters['strip_content_types'].split(',')
+		if self.parameters.has_key('strip_content_types'):
+			items = self.parameters['strip_content_types'].split(',')
 			for item in items:
 				self.STRIP_CONTENT_TYPES.append(item.strip())
 
 		self.WORKFLOW = None
-		if parameters.has_key('workflow'):
-			self.WORKFLOW = parameters['workflow']
+		if self.parameters.has_key('workflow'):
+			self.WORKFLOW = self.parameters['workflow']
 
 		# Use OS independend functions
 		#
 		self.TMPDIR = os.path.normcase('/tmp')
-		if parameters.has_key('tmpdir'):
-			self.TMPDIR = os.path.normcase(str(parameters['tmpdir']))
+		if self.parameters.has_key('tmpdir'):
+			self.TMPDIR = os.path.normcase(str(self.parameters['tmpdir']))
 
-		if parameters.has_key('ignore_trac_user_settings'):
-			self.IGNORE_TRAC_USER_SETTINGS = int(parameters['ignore_trac_user_settings'])
+		if self.parameters.has_key('ignore_trac_user_settings'):
+			self.IGNORE_TRAC_USER_SETTINGS = int(self.parameters['ignore_trac_user_settings'])
 		else:
 			self.IGNORE_TRAC_USER_SETTINGS = 0
 
-		if parameters.has_key('email_triggers_workflow'):
-			self.EMAIL_TRIGGERS_WORKFLOW = int(parameters['email_triggers_workflow'])
+		if self.parameters.has_key('email_triggers_workflow'):
+			self.EMAIL_TRIGGERS_WORKFLOW = int(self.parameters['email_triggers_workflow'])
 		else:
 			self.EMAIL_TRIGGERS_WORKFLOW = 1
 
-		if parameters.has_key('subject_field_separator'):
-			self.SUBJECT_FIELD_SEPARATOR = parameters['subject_field_separator'].strip()
+		if self.parameters.has_key('subject_field_separator'):
+			self.SUBJECT_FIELD_SEPARATOR = self.parameters['subject_field_separator'].strip()
 		else:
 			self.SUBJECT_FIELD_SEPARATOR = '&'
 
