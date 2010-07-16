@@ -193,8 +193,6 @@ class TicketEmailParser(object):
 		self.DRY_RUN = parameters['dry_run']
 		self.VERBOSE = parameters['verbose']
 
-
-
 	def setup_log(self):
 		"""
 		Setup loging
@@ -209,23 +207,23 @@ class TicketEmailParser(object):
 		if self.parameters.log_type == 'file':
 			if not os.path.isabs(parameters.log_file):
 				self.parameters.log_file = os.path.join(self.env.path, 'log')
-			hdlr = logging.FileHandler()
+			self.log_handler = logging.FileHandler()
 
 		elif self.parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
 			# Requires win32 extensions
-			hdlr = logging.handlers.NTEventLogHandler(logid, logtype='Application')
+			self.log_handler = logging.handlers.NTEventLogHandler(logid, logtype='Application')
 
 		elif self.parameters.log_type in ('syslog', 'unix'):
-			hdlr = logging.handlers.SysLogHandler('/dev/log')
+			self.log_handler = logging.handlers.SysLogHandler('/dev/log')
 
 		elif self.parameters.log_type in ('stderr'):
-			hdlr = logging.StreamHandler(sys.stderr)
+			self.log_handler = logging.StreamHandler(sys.stderr)
 
 		else:
-			hdlr = logging.handlers.BufferingHandler(0)
+			self.log_handler = logging.handlers.BufferingHandler(0)
 
 		if self.parameters.log_format:
-			self.parameters['log_format'] = self.parameters.log_format.replace('$(', '%(')
+			self.parameters.log_format = self.parameters.log_format.replace('$(', '%(')
 		else:
 			self.parameters.log_format = 'Email2trac: %(message)s'
 
@@ -233,8 +231,28 @@ class TicketEmailParser(object):
 		self.logger = logging.getLogger('email2trac')
 
 		## Setup debug level
-		
+		#
+		if not self.parameters.log_level:
+			self.parameters.log_level = 'CRITICAL'
+		else:
+			self.parameters.log_level = self.parameters.log_level.upper()
 
+		if self.parameters.loglevel in ['DEBUG', 'ALL']:
+			self.logger.setLevel(logging.DEBUG)
+		elif self.parameters.loglevel in ['INFO'] or self.parameters['verbose']:
+			self.logger.setLevel(logging.INFO)
+		elif self.parameters.loglevel in ['ERROR']:
+			self.logger.setLevel(logging.ERROR)
+		elif self.parameters.loglevel in ['CRITICAL']:
+			self.logger.setLevel(logging.CRITICAL)
+		else:
+			self.logger.setLevel(logging.WARNING)
+
+		self.log_formatter = logging.Formatter(self.parameters.log_format)
+		self.log_handler.setFormatter(self.log_formatter) 
+		self.logger.addHandler(self.log_handler)
+			
+		
 	def setup_parameters(self):
 		if self.parameters.has_key('umask'):
 			os.umask(int(self.parameters['umask'], 8))
@@ -1579,6 +1597,7 @@ class TicketEmailParser(object):
 	def parse(self, fp):
 		"""
 		"""
+		self.logger.info('Main function parse')
 		if self.VERBOSE:
 			print "VB: main function parse()"
 		global m
