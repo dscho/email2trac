@@ -190,7 +190,7 @@ class TicketEmailParser(object):
 		self.setup_log()
 		self.setup_parameters()
 
-		self.DRY_RUN = parameters['dry_run']
+		self.DRY_RUN = parameters.dry_run
 
 	def setup_log(self):
 		"""
@@ -242,6 +242,9 @@ class TicketEmailParser(object):
 		elif self.parameters.log_level in ['INFO'] or self.parameters.verbose:
 			self.logger.setLevel(logging.INFO)
 
+		elif self.parameters.log_level in ['WARNING']:
+			self.logger.setLevel(logging.WARNING)
+
 		elif self.parameters.log_level in ['ERROR']:
 			self.logger.setLevel(logging.ERROR)
 
@@ -249,7 +252,7 @@ class TicketEmailParser(object):
 			self.logger.setLevel(logging.CRITICAL)
 
 		else:
-			self.logger.setLevel(logging.WARNING)
+			self.logger.setLevel(logging.ERROR)
 
 		self.log_formatter = logging.Formatter(self.parameters.log_format)
 		self.log_handler.setFormatter(self.log_formatter) 
@@ -605,7 +608,7 @@ class TicketEmailParser(object):
 		else:
 			body_file = os.path.join(self.TMPDIR, 'body.txt')
 
-		if self.DRY_RUN:
+		if self.parameters.dry_run:
 			print 'DRY-RUN: not saving body to %s' %(body_file)
 			return
 
@@ -653,7 +656,7 @@ class TicketEmailParser(object):
 			s = 'TD: writing part%d (%s)' % (n,part_file)
 			self.print_unicode(s)
 
-			if self.DRY_RUN:
+			if self.parameters.dry_run:
 				print 'DRY_RUN: NOT saving attachments'
 				continue
 
@@ -682,7 +685,7 @@ class TicketEmailParser(object):
 			#msg_file = '/var/tmp/msg.txt' 
 			msg_file = os.path.join(self.TMPDIR, 'msg.txt')
 
-		if self.DRY_RUN:
+		if self.parameters.dry_run:
 			print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
 		else:
 			print 'TD: saving email to %s' %(msg_file)
@@ -1031,7 +1034,7 @@ class TicketEmailParser(object):
 		error_with_attachments = self.attach_attachments(message_parts)
 
 		if body_text.strip() or update_fields or self.properties: 
-			if self.DRY_RUN:
+			if self.parameters.dry_run:
 				print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
 			else:
 				if error_with_attachments:
@@ -1227,7 +1230,7 @@ class TicketEmailParser(object):
 		utc = UTC()
 		when = datetime.now(utc)
 
-		if not self.DRY_RUN:
+		if not self.parameters.dry_run:
 			self.id = tkt.insert()
 	
 		changed = False
@@ -1259,7 +1262,7 @@ class TicketEmailParser(object):
 			comment = '%s\n%s\n' %(comment, error_with_attachments)
 
 		if changed:
-			if self.DRY_RUN:
+			if self.parameters.dry_run
 				print 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
 			else:
 				tkt.save_changes(tkt['reporter'], comment)
@@ -1275,7 +1278,7 @@ class TicketEmailParser(object):
 		'''
 		self.logger.info('function attach_attachments()')
 
-		if self.DRY_RUN:
+		if self.parameters.dry_run:
 			print "DRY_RUN: no attachments attached to tickets"
 			return ''
 
@@ -2121,7 +2124,7 @@ class TicketEmailParser(object):
 		"""
 		self.logger.info('function notify()')
 
-		if self.DRY_RUN:
+		if self.parameters.dry_run:
 				print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
 				return
 		try:
