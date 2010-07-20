@@ -50,9 +50,9 @@ How to use
  * Commandline opions:
                 -h,--help
                 -f,--file  <configuration file>
-		-n,--dry-run
+                -n,--dry-run
                 -p, --project <project name>
-		-t, --ticket_prefix <name>
+	        -t, --ticket_prefix <name>
 
 SVN Info:
         $Id$
@@ -162,7 +162,7 @@ class TicketEmailParser(object):
 	env = None
 	comment = '> '
 
-	def __init__(self, env, parameters, version):
+	def __init__(self, env, parameters, logger, version):
 		self.env = env
 
 		# Database connection
@@ -172,6 +172,7 @@ class TicketEmailParser(object):
 		# Save parameters
 		#
 		self.parameters = parameters
+		self.logger = logger
 
 		# Some useful mail constants
 		#
@@ -187,86 +188,14 @@ class TicketEmailParser(object):
 
 		self.get_config = self.env.config.get
 
-		self.setup_log()
+		## init function ##
+		#
 		self.setup_parameters()
 
-
-	def setup_log(self):
-		"""
-		Setup loging
-
-		Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
-        would be interpreted by the ConfigParser itself.
-
-		"""
-		if not self.parameters.log_type:
-			self.parameters.log_type = 'syslog'
-
-		if self.parameters.log_type == 'file':
-			if not os.path.isabs(parameters.log_file):
-				self.parameters.log_file = os.path.join(self.env.path, 'log')
-			self.log_handler = logging.FileHandler()
-
-		elif self.parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
-			# Requires win32 extensions
-			self.log_handler = logging.handlers.NTEventLogHandler(logid, logtype='Application')
-
-		elif self.parameters.log_type in ('syslog', 'unix'):
-			self.log_handler = logging.handlers.SysLogHandler('/dev/log')
-
-		elif self.parameters.log_type in ('stderr'):
-			self.log_handler = logging.StreamHandler(sys.stderr)
-
-		else:
-			self.log_handler = logging.handlers.BufferingHandler(0)
-
-
-		if self.parameters.log_format:
-			self.parameters.log_format = self.parameters.log_format.replace('$(', '%(')
-		else:
-			self.parameters.log_format = 'Email2trac: %(message)s'
-
-		self.logger = logging.getLogger('email2trac')
-
-		## Setup debug level
-		#
-		if not self.parameters.log_level:
-			self.parameters.log_level = 'CRITICAL'
-		else:
-			self.parameters.log_level = self.parameters.log_level.upper()
-
-		if self.parameters.log_level in ['DEBUG', 'ALL'] and self.parameters.debug > 0:
-			self.logger.setLevel(logging.DEBUG)
-
-		elif self.parameters.log_level in ['INFO'] or self.parameters.verbose:
-			self.logger.setLevel(logging.INFO)
-
-		elif self.parameters.log_level in ['WARNING']:
-			self.logger.setLevel(logging.WARNING)
-
-		elif self.parameters.log_level in ['ERROR']:
-			self.logger.setLevel(logging.ERROR)
-
-		elif self.parameters.log_level in ['CRITICAL']:
-			self.logger.setLevel(logging.CRITICAL)
-
-		else:
-			self.logger.setLevel(logging.ERROR)
-
-		self.log_formatter = logging.Formatter(self.parameters.log_format)
-		self.log_handler.setFormatter(self.log_formatter) 
-
-		self.logger.addHandler(self.log_handler)
-			
-		
 	def setup_parameters(self):
 		if self.parameters.has_key('umask'):
 			os.umask(int(self.parameters['umask'], 8))
 
-		if self.parameters.debug:
-			self.parameters.debug = int(self.parameters.debug)
-		else:
-			self.parameters.debug = 0
 
 		if self.parameters.has_key('mailto_link'):
 			self.MAILTO = int(self.parameters['mailto_link'])
@@ -1062,6 +991,8 @@ class TicketEmailParser(object):
 			- /etc/email2trac.conf with <prefix>_<field>
 			- trac default values, trac.ini
 		"""
+		self.logger.debug('function set_ticket_fields')
+
 		user_dict = dict()
 
 		for field in ticket.fields:
@@ -2178,7 +2109,7 @@ class TicketEmailParser(object):
 			tn.notify(tkt, new, modtime) 
 
 		except Exception, e:
-			print 'TD: Failure sending notification on creation of ticket #%s: %s' %(self.id, e)
+			set.logger.error('Failure sending notification on creation of ticket #%s: %s' %(self.id, e))
 
 
 
@@ -2216,7 +2147,76 @@ def ReadConfig(file, name):
 		for option,value in tmp.items():
 			project[option] = value 
 
+	## Convert debug value to int
+	#
+	if project.debug:
+		project.debug = int(project.debug)
+	else:
+		project.debug = 0
+
 	return project
+
+########## Setup Logging ###############################################################
+
+def setup_log(parameters):
+	"""
+	Setup loging
+
+		Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
+        would be interpreted by the ConfigParser itself.
+
+	"""
+	logger = logging.getLogger('email2trac')
+
+	if not parameters.log_type:
+		parameters.log_type = 'syslog'
+
+	if parameters.log_type == 'file':
+		if not os.path.isabs(parameters.log_file):
+			parameters.log_file = os.path.join('log')
+		log_handler = logging.FileHandler()
+
+	elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
+		# Requires win32 extensions
+		log_handler = logging.handlers.NTEventLogHandler(logid, logtype='Application')
+
+	elif parameters.log_type in ('syslog', 'unix'):
+		log_handler = logging.handlers.SysLogHandler('/dev/log')
+
+	elif parameters.log_type in ('stderr'):
+		log_handler = logging.StreamHandler(sys.stderr)
+
+	else:
+		log_handler = logging.handlers.BufferingHandler(0)
+
+	if parameters.log_format:
+		parameters.log_format = parameters.log_format.replace('$(', '%(')
+	else:
+		parameters.log_format = 'Email2trac: %(message)s'
+
+	log_formatter = logging.Formatter(parameters.log_format)
+	log_handler.setFormatter(log_formatter) 
+	logger.addHandler(log_handler)
+
+	if (parameters.log_level in ['DEBUG', 'ALL']) or (parameters.debug > 0):
+		logger.setLevel(logging.DEBUG)
+
+	elif parameters.log_level in ['INFO'] or parameters.verbose:
+		logger.setLevel(logging.INFO)
+
+	elif parameters.log_level in ['WARNING']:
+		logger.setLevel(logging.WARNING)
+
+	elif parameters.log_level in ['ERROR']:
+		logger.setLevel(logging.ERROR)
+
+	elif parameters.log_level in ['CRITICAL']:
+		logger.setLevel(logging.CRITICAL)
+
+	else:
+		logger.setLevel(logging.INFO)
+
+	return logger
 
 
 if __name__ == '__main__':
@@ -2260,6 +2260,15 @@ if __name__ == '__main__':
 			verbose = True
 	
 	settings = ReadConfig(configfile, project_name)
+
+	# The default prefix for ticket values in email2trac.conf
+	#
+	settings['ticket_prefix'] = ticket_prefix
+	settings['dry_run'] = dry_run
+	settings['verbose'] = verbose
+
+	logger = setup_log(settings)
+
 	if not settings.has_key('project'):
 		print __doc__
 		print 'No Trac project is defined in the email2trac config file.'
@@ -2268,13 +2277,6 @@ if __name__ == '__main__':
 	if component:
 		settings['component'] = component
 
-	# The default prefix for ticket values in email2trac.conf
-	#
-	settings['ticket_prefix'] = ticket_prefix
-	settings['dry_run'] = dry_run
-	settings['verbose'] = verbose
-
-
 	# Determine major trac version used to be in email2trac.conf
 	# Quick hack for 0.12
 	#
@@ -2282,8 +2284,7 @@ if __name__ == '__main__':
 	if version.startswith('0.12'):
 		version = '0.12'
 
-	if verbose:
-		print "Found trac version: %s" %(version)
+	logger.debug("Found trac version: %s" %(version))
 	
 	#debug HvB
 	#print settings
@@ -2337,7 +2338,7 @@ if __name__ == '__main__':
 
 
 		else:
-			print 'TRAC version %s is not supported' %version
+			logger.error('TRAC version %s is not supported' %version)
 			sys.exit(1)
 			
 		if settings.has_key('enable_syslog'):
@@ -2352,12 +2353,12 @@ if __name__ == '__main__':
 			os.environ['PYTHON_EGG_CACHE'] = python_egg_cache
 
 	
-		if int(settings['debug']) > 0:
-			print 'Loading environment', settings['project']
+		if settings.debug > 0:
+			logger.debug('Loading environment %s', settings.project)
 
 		env = Environment(settings['project'], create=0)
 
-		tktparser = TicketEmailParser(env, settings, float(version))
+		tktparser = TicketEmailParser(env, settings, logger, float(version))
 		tktparser.parse(sys.stdin)
 
 	# Catch all errors ans log to SYSLOG if we have enabled this
@@ -2377,7 +2378,6 @@ if __name__ == '__main__':
 
 		if m:
 			tktparser.save_email_for_debug(m, True)
-
 
 		sys.exit(1)
 # EOB
