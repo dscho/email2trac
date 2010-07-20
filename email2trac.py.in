@@ -2149,7 +2149,7 @@ def ReadConfig(file, name):
 
 ########## Setup Logging ###############################################################
 
-def setup_log(parameters):
+def setup_log(parameters, interactive=None):
 	"""
 	Setup loging
 
@@ -2158,6 +2158,9 @@ def setup_log(parameters):
 
 	"""
 	logger = logging.getLogger('email2trac')
+
+	if interactive:
+		parameters.log_type = 'stderr'
 
 	if not parameters.log_type:
 		parameters.log_type = 'syslog'
@@ -2219,7 +2222,7 @@ if __name__ == '__main__':
 	ticket_prefix = 'default'
 	dry_run = None
 	verbose = None
-	debug = None
+	debug_interactive = None
 
 	SHORT_OPT = 'cdhf:np:t:v'
 	LONG_OPT  =  ['component=', 'debug', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=', 'verbose']
@@ -2239,7 +2242,7 @@ if __name__ == '__main__':
 		elif opt in ['-c', '--component']:
 			component = value
 		elif opt in ['-d', '--debug']:
-			debug = 1
+			debug_interactive = 1
 		elif opt in ['-f', '--file']:
 			configfile = value
 		elif opt in ['-n', '--dry-run']:
@@ -2259,10 +2262,10 @@ if __name__ == '__main__':
 	settings.dry_run = dry_run
 	settings.verbose = verbose
 
-	if not settings.debug and debug:
-		settings.debug = debug
+	if not settings.debug and debug_interactive:
+		settings.debug = debug_interactive
 
-	logger = setup_log(settings)
+	logger = setup_log(settings, debug_interactive)
 
 	if not settings.has_key('project'):
 		print __doc__
