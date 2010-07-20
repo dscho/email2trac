@@ -49,10 +49,11 @@ How to use
 
  * Commandline opions:
                 -h,--help
+				-d, --debug 
                 -f,--file  <configuration file>
                 -n,--dry-run
                 -p, --project <project name>
-	        -t, --ticket_prefix <name>
+                -t, --ticket_prefix <name>
 
 SVN Info:
         $Id$
@@ -2166,9 +2167,15 @@ def setup_log(parameters, interactive=None):
 		parameters.log_type = 'syslog'
 
 	if parameters.log_type == 'file':
+
+		if not parameters.log_file:
+			parameters.log_file = 'email2trac.log'
+
 		if not os.path.isabs(parameters.log_file):
-			parameters.log_file = os.path.join('log')
-		log_handler = logging.FileHandler()
+			import tempfile
+			parameters.log_file = os.path.join(tempfile.gettempdir(), parameters.log_file)
+
+		log_handler = logging.FileHandler(parameters.log_file)
 
 	elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
 		# Requires win32 extensions
