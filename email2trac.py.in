@@ -138,7 +138,7 @@ class SaraDict(UserDict.UserDict):
 	def __getattr__(self, name):
 		"""
 		override the class attribute get method. Return the value
-		from the Userdict
+		from the dictionary
 		"""
 		if self.data.has_key(name):
 			return self.data[name] 
@@ -461,6 +461,8 @@ class TicketEmailParser(object):
 		This function wil check if the email address is allowed or denied
 		to send mail to the ticket list
 	    """	
+		self.logger.debug('function email_header_acl: %s' %keyword)
+
 		try:
 			mail_addresses = self.parameters[keyword]
 
@@ -542,7 +544,7 @@ class TicketEmailParser(object):
 		"""
 		Set all the right fields for a new ticket
 		"""
-		self.logger.info('function set_reply_fields')
+		self.logger.debug('function set_reply_fields')
 
 		## Only use name or email adress
 		#ticket['reporter'] = self.email_from
@@ -628,7 +630,7 @@ class TicketEmailParser(object):
 	def debug_attachments(self, message_parts):
 		"""
 		"""
-		self.logger.info('function debug_attachments')
+		self.logger.debug('function debug_attachments')
 		
 		n = 0
 		for item in message_parts:
@@ -711,7 +713,7 @@ class TicketEmailParser(object):
 		that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
 		understands it.
 		"""
-		self.logger.info("function email_to_unicode")
+		self.logger.debug("function email_to_unicode")
 
 		results =  email.Header.decode_header(message_str)
 
@@ -745,7 +747,7 @@ class TicketEmailParser(object):
 		"""
 		Transfrom a string of the form [<key>=<value>]+ to dict[<key>] = <value>
 		""" 
-		self.logger.info("function str_to_dict")
+		self.logger.debug("function str_to_dict")
 
 		fields = string.split(s, self.SUBJECT_FIELD_SEPARATOR)
 
@@ -782,11 +784,11 @@ class TicketEmailParser(object):
 		"""
 		Check if the mailer is allowed to update the ticket
 		"""
-		self.logger.info('function check_permission_participants')
+		self.logger.debug('function check_permission_participants')
 
 		if tkt['reporter'].lower() in [self.author, self.email_addr]:
 			if self.parameters.debug:
-				self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
+				self.logger.info('ALLOW, %s is the ticket reporter' %(self.email_addr))
 
 			return True
 
@@ -826,7 +828,7 @@ class TicketEmailParser(object):
 			- trac      : check the permission via trac permission model
 			- email2trac: ....
 		"""
-		self.logger.info("function check_permission")
+		self.logger.debug("function check_permission")
 
 		if self.TICKET_PERMISSION_SYSTEM in ['trac']:
 
@@ -858,7 +860,7 @@ class TicketEmailParser(object):
 			   1) Skip the value (use_default=None)
 			   2) Set default value for field (use_default=1)
 		"""
-		self.logger.info("function update_ticket_fields")
+		self.logger.debug("function update_ticket_fields")
 
 		# Build a system dictionary from the ticket fields 
 		# with field as index and option as value
@@ -927,7 +929,7 @@ class TicketEmailParser(object):
 		will append the contents of this email to that ticket, instead of 
 		creating a new one.
 		"""
-		self.logger.info("function ticket_update")
+		self.logger.debug("function ticket_update")
 
 		# Must we update ticket fields
 		#
@@ -947,7 +949,7 @@ class TicketEmailParser(object):
 			#
 			self.id = int(id[1:])
 
-		self.logger.info("function ticket_update id %s" %id)
+		self.logger.debug("function ticket_update id %s" %id)
 
 		# When is the change committed
 		# 
@@ -971,7 +973,7 @@ class TicketEmailParser(object):
 		#
 		if self.TICKET_PERMISSION_SYSTEM:
 			if not self.check_permission(tkt, 'TICKET_MODIFY'):
-				print 'Reporter: %s has no permission to modify tickets' %self.author
+				self.logger.info('Reporter: %s has no permission to modify tickets' %self.author)
 				return False
 
 		# How many changes has this ticket
@@ -1117,7 +1119,7 @@ class TicketEmailParser(object):
 
 		So we must have the last column
 		"""
-		self.logger.info('function ticket_update_by_subject')
+		self.logger.debug('function ticket_update_by_subject')
 
 		matched_id = None
 		if self.TICKET_UPDATE and self.TICKET_UPDATE_BY_SUBJECT:
@@ -1169,7 +1171,7 @@ class TicketEmailParser(object):
 		"""
 		Create a new ticket
 		"""
-		self.logger.info('function new_ticket')
+		self.logger.debug('function new_ticket')
 
 		tkt = Ticket(self.env)
 
@@ -1181,7 +1183,7 @@ class TicketEmailParser(object):
 		#
 		if self.TICKET_PERMISSION_SYSTEM:
 			if not self.check_permission(tkt, 'TICKET_CREATE'):
-				self.logger.error('Reporter: %s has no permission to create tickets' %self.author)
+				self.logger.info('Reporter: %s has no permission to create tickets' %self.author)
 				return False
 
 		# Old style setting for component, will be removed
@@ -1280,7 +1282,7 @@ class TicketEmailParser(object):
 		'''
 		save any attachments as files in the ticket's directory
 		'''
-		self.logger.info('function attach_attachments()')
+		self.logger.debug('function attach_attachments()')
 
 		if self.parameters.dry_run:
 			print "DRY_RUN: no attachments attached to tickets"
@@ -1597,7 +1599,7 @@ class TicketEmailParser(object):
 	def parse(self, fp):
 		"""
 		"""
-		self.logger.info('Main function parse')
+		self.logger.debug('Main function parse')
 		global m
 
 		m = email.message_from_file(fp)
@@ -1815,8 +1817,7 @@ class TicketEmailParser(object):
 		"""
 		Parse text if we use inline keywords to set ticket fields
 		"""
-		if self.parameters.debug:
-			self.logger.info('function inline_properties')
+		self.logger.debug('function inline_properties')
 
 		properties = dict()
 		body = list()
@@ -1866,7 +1867,7 @@ class TicketEmailParser(object):
 	def inline_part(self, part):
 		"""
 		"""
-		self.logger.info('function inline_part()')
+		self.logger.debug('function inline_part()')
 
 		return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
 
@@ -1875,7 +1876,7 @@ class TicketEmailParser(object):
 		parses the email message and returns a list of body parts and attachments
 		body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
 		"""
-		self.logger.info('function get_message_parts()')
+		self.logger.debug('function get_message_parts()')
 
 		message_parts = list()
 	
@@ -2131,7 +2132,7 @@ class TicketEmailParser(object):
 		"""
 		A wrapper for the TRAC notify function. So we can use templates
 		"""
-		self.logger.info('function notify()')
+		self.logger.debug('function notify()')
 
 		if self.parameters.dry_run:
 				print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
