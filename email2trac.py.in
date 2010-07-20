@@ -708,7 +708,7 @@ class TicketEmailParser(object):
 
 		if tkt['reporter'].lower() in [self.author, self.email_addr]:
 			if self.parameters.debug:
-				self.logger.info('ALLOW, %s is the ticket reporter' %(self.email_addr))
+				self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
 
 			return True
 
@@ -2219,9 +2219,10 @@ if __name__ == '__main__':
 	ticket_prefix = 'default'
 	dry_run = None
 	verbose = None
+	debug = None
 
-	SHORT_OPT = 'chf:np:t:v'
-	LONG_OPT  =  ['component=', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=', 'verbose']
+	SHORT_OPT = 'cdhf:np:t:v'
+	LONG_OPT  =  ['component=', 'debug', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=', 'verbose']
 
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], SHORT_OPT, LONG_OPT)
@@ -2237,6 +2238,8 @@ if __name__ == '__main__':
 			sys.exit(0)
 		elif opt in ['-c', '--component']:
 			component = value
+		elif opt in ['-d', '--debug']:
+			debug = 1
 		elif opt in ['-f', '--file']:
 			configfile = value
 		elif opt in ['-n', '--dry-run']:
@@ -2252,9 +2255,12 @@ if __name__ == '__main__':
 
 	# The default prefix for ticket values in email2trac.conf
 	#
-	settings['ticket_prefix'] = ticket_prefix
-	settings['dry_run'] = dry_run
-	settings['verbose'] = verbose
+	settings.ticket_prefix = ticket_prefix
+	settings.dry_run = dry_run
+	settings.verbose = verbose
+
+	if not settings.debug and debug:
+		settings.debug = debug
 
 	logger = setup_log(settings)
 
