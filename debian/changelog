@@ -15,10 +15,12 @@ email2trac (1.5.0-4) stable; urgency=low
 
   * Switch for logging to the python logging module and add some new
     options to control the behaviour inspired by the trac logging module:
-     - log_type
-     - log_level
-     - log_format
-     - log_file
+     - log_type,, default syslog
+     - log_level, default info
+     - log_format, email2trac <project name>
+     - log_file, none
+
+    Can be set to the same values as trac logging
   
     Author: Bas van der Vlies
 
