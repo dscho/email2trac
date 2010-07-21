@@ -20,6 +20,8 @@
       - log_format, email2trac <project name>
       - log_file, none
 
+     Can be set to the same values as trac logging
+
      Author: Bas van der Vlies
 
    * removed trac 0.9 support
