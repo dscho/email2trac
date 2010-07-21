@@ -1,4 +1,4 @@
-email2trac (1.5.0-1) stable; urgency=low
+email2trac (1.5.0-2) stable; urgency=low
 
   * added a new option 'ticket_permission_system'. Can be set to:
       - trac: Then it will check if the report has the right trac
