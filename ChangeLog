@@ -1,4 +1,4 @@
-2010-08-XX
+2010-07-21
     * added a new option 'ticket_permission_system'. Can be set to:
       - trac: Then it will check if the report has the right trac
         permission to create or modify a ticket. closes #202
@@ -26,7 +26,7 @@
 
    * removed trac 0.9 support
      
-2010-08-12
+2010-07-12
   * Do not check if notification is enabled, let Trac determine if a
     notfication is enabled and which interface/plugin is used, eg:
     announcerplugin
