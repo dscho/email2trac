@@ -2115,7 +2115,7 @@ def ReadConfig(file, name):
 
 ########## Setup Logging ###############################################################
 
-def setup_log(parameters, interactive=None):
+def setup_log(parameters, project_name, interactive=None):
 	"""
 	Setup loging
 
@@ -2123,7 +2123,7 @@ def setup_log(parameters, interactive=None):
         would be interpreted by the ConfigParser itself.
 
 	"""
-	logger = logging.getLogger('email2trac')
+	logger = logging.getLogger('email2trac %s' %project_name)
 
 	if interactive:
 		parameters.log_type = 'stderr'
@@ -2158,7 +2158,7 @@ def setup_log(parameters, interactive=None):
 	if parameters.log_format:
 		parameters.log_format = parameters.log_format.replace('$(', '%(')
 	else:
-		parameters.log_format = 'Email2trac: %(message)s'
+		parameters.log_format = '%(name)s: %(message)s'
 
 	log_formatter = logging.Formatter(parameters.log_format)
 	log_handler.setFormatter(log_formatter) 
@@ -2237,12 +2237,13 @@ if __name__ == '__main__':
 	if not settings.debug and debug_interactive:
 		settings.debug = debug_interactive
 
-	logger = setup_log(settings, debug_interactive)
 
-	if not settings.has_key('project'):
+	if not settings.project:
 		print __doc__
 		print 'No Trac project is defined in the email2trac config file.'
 		sys.exit(1)
+
+	logger = setup_log(settings, os.path.basename(settings.project), debug_interactive)
 	
 	if component:
 		settings['component'] = component
