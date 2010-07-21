@@ -18,10 +18,12 @@
       - log_type
       - log_level
       - log_format
+      - log_file
 
-     Authors: Bas van der Vlies
+     Author: Bas van der Vlies
+
+   * removed trac 0.9 support
      
-
 2010-08-12
   * Do not check if notification is enabled, let Trac determine if a
     notfication is enabled and which interface/plugin is used, eg:

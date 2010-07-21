@@ -13,16 +13,16 @@ email2trac (1.5.0-1) stable; urgency=low
 
     Authors:  kris add tsampa dot org & Bas van der Vlies
 
-   * Switch for logging to the python logging module and add some new
-     options to control the behaviour inspired by the trac logging module:
-      - log_type
-      - log_level
-      - log_format
+  * Switch for logging to the python logging module and add some new
+    options to control the behaviour inspired by the trac logging module:
+     - log_type
+     - log_level
+     - log_format
+     - log_file
+  
+    Author: Bas van der Vlies
 
-     Authors: Bas van der Vlies
-
-
-  * removed suppport for version 0.9
+  * removed suppport for trac version 0.9
     Author: Bas van der Vlies
 
  -- Bas van der Vlies <basv@sara.nl>  Thu, 15 Jul 2010 14:17:24 +0200
