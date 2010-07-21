@@ -198,15 +198,13 @@ class TicketEmailParser(object):
 		else:
 			self.MAILTO = 0
 
-		if self.parameters.has_key('spam_level'):
-			self.SPAM_LEVEL = int(self.parameters['spam_level'])
+		if self.parameters.spam_level:
+			self.SPAM_LEVEL = int(self.parameters.spam_level)
 		else:
 			self.SPAM_LEVEL = 0
 
-		if self.parameters.has_key('spam_header'):
-			self.SPAM_HEADER = self.parameters['spam_header']
-		else:
-			self.SPAM_HEADER = 'X-Spam-Score'
+		if not self.parameters.spam_header:
+			self.parameters.spam_header = 'X-Spam-Score'
 
 		if self.parameters.has_key('email_quote'):
 			self.EMAIL_QUOTE = str(self.parameters['email_quote'])
@@ -345,8 +343,8 @@ class TicketEmailParser(object):
 		# Note if Spam_level then '*' are included
 		"""
 		spam = False
-		if message.has_key(self.SPAM_HEADER):
-			spam_l = string.split(message[self.SPAM_HEADER])
+		if message.has_key(self.parameters.spam_header):
+			spam_l = string.split(message[self.parameters.spam_header])
 
 			try:
 				number = spam_l[0].count('*')
@@ -1536,7 +1534,7 @@ class TicketEmailParser(object):
 			self.logger.info('Message rejected : %s not in recipient list' %(self.to_email_addr))
 			return False
 
-		# If drop the message
+		# If spam drop the message
 		#
 		if self.spam(m) == 'drop':
 			return False
