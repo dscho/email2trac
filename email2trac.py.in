@@ -2119,9 +2119,8 @@ def setup_log(parameters, project_name, interactive=None):
 	"""
 	Setup loging
 
-		Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
-        would be interpreted by the ConfigParser itself.
-
+	Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
+    would be interpreted by the ConfigParser itself.
 	"""
 	logger = logging.getLogger('email2trac %s' %project_name)
 
