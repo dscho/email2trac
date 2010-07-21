@@ -364,15 +364,13 @@ class TicketEmailParser(object):
 		# How to handle SPAM messages
 		#
 		if self.DROP_SPAM and spam:
-			if self.parameters.debug > 2 : 
-				set.logger.debug('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' % self.SPAM_LEVEL)
 
+			set.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' % self.SPAM_LEVEL)
 			return 'drop'	
 
 		elif spam:
 
 			return 'Spam'	
-
 		else:
 
 			return False
@@ -393,8 +391,7 @@ class TicketEmailParser(object):
 				return default 
 
 		except KeyError, detail:
-			if self.parameters.debug > 2 :
-				self.logger.debug('%s not defined, all messages are allowed.' %(keyword))
+			self.logger.debug('%s not defined, all messages are allowed.' %(keyword))
 
 			return default 
 
@@ -504,8 +501,7 @@ class TicketEmailParser(object):
 				#if addr in to_list:
 
 				if addr == self.trac_smtp_from:
-					if self.parameters.debug:
-						self.logger.debug("Skipping %s mail address for CC-field" %(addr))
+					self.logger.debug("Skipping %s mail address for CC-field" %(addr))
 					continue
 
 				if email_cc:
@@ -514,8 +510,7 @@ class TicketEmailParser(object):
 					email_cc = addr
 
 			if email_cc:
-				if self.parameters.debug:
-						self.logger.debug('set_reply_fields: %s' %email_cc)
+				self.logger.debug('set_reply_fields: %s' %email_cc)
 
 				ticket['cc'] = self.email_to_unicode(email_cc)
 
@@ -708,15 +703,13 @@ class TicketEmailParser(object):
 		self.logger.debug('function check_permission_participants')
 
 		if tkt['reporter'].lower() in [self.author, self.email_addr]:
-			if self.parameters.debug:
-				self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
+			self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
 
 			return True
 
 		perm = PermissionSystem(self.env)
 		if perm.check_permission('TICKET_MODIFY', self.author):
-			if self.parameters.debug:
-				self.logger.debug('ALLOW, %s has trac permission to update the ticket' %(self.author))
+			self.logger.debug('ALLOW, %s has trac permission to update the ticket' %(self.author))
 
 			return True
 
@@ -729,9 +722,7 @@ class TicketEmailParser(object):
 			cc_list = tkt['cc'].split(',')
 			for cc in cc_list:
 				if self.email_addr.lower() in cc.strip():
-
-					if self.parameters.debug:
-						self.logger.debug('ALLOW, %s is in the CC' %(self.email_addr))
+					self.logger.debug('ALLOW, %s is in the CC' %(self.email_addr))
 
 					return True
 
@@ -810,8 +801,7 @@ class TicketEmailParser(object):
 				cc_list = user_dict['cc'].split(',')
 
 				if self.trac_smtp_from in cc_list:
-					if self.parameters.debug:
-						self.logger.debug('TD: MAIL LOOP: %s is not allowed as CC address' %(self.trac_smtp_from))
+					self.logger.debug('TD: MAIL LOOP: %s is not allowed as CC address' %(self.trac_smtp_from))
 
 					cc_list.remove(self.trac_smtp_from)
 
@@ -929,13 +919,10 @@ class TicketEmailParser(object):
 				controller = ConfigurableTicketWorkflow(self.env)
 				fields = controller.get_ticket_changes(req, tkt, self.WORKFLOW)
 
-				if self.parameters.debug:
-					self.logger.debug('Workflow ticket update fields: ')
+				self.logger.debug('Workflow ticket update fields: ')
 
 				for key in fields.keys():
-					if self.parameters.debug:
-						self.logger.debug('\t %s : %s' %(key, fields[key]))
-
+					self.logger.debug('\t %s : %s' %(key, fields[key]))
 					tkt[key] = fields[key]
 
 			else:
@@ -1005,7 +992,7 @@ class TicketEmailParser(object):
 					 value = options[int(value)]
 	
 			if self.parameters.debug:
-				s = 'TD: trac.ini name %s = %s' %(name, value)
+				s = 'trac[%s] = %s' %(name, value)
 				self.print_unicode(s)
 
 			## email2trac.conf settings
@@ -1014,14 +1001,14 @@ class TicketEmailParser(object):
 			try:
 				value = self.parameters['%s_%s' %(prefix, name)]
 				if self.parameters.debug > 10:
-					s = 'TD: email2trac.conf %s = %s ' %(name, value)
+					s = 'email2trac[%s] = %s ' %(name, value)
 					self.print_unicode(s)
 
 			except KeyError, detail:
 				pass
 		
 			if self.parameters.debug:
-				s = 'TD: user_dict[%s] = %s' %(name, value)
+				s = 'used %s = %s' %(name, value)
 				self.print_unicode(s)
 
 			if value:
@@ -1054,8 +1041,7 @@ class TicketEmailParser(object):
 				# This is a reply
 				orig_subject = result.group(3)
 
-				if self.parameters.debug:
-					self.logger.debug('subject search string: %s' %(orig_subject))
+				self.logger.debug('subject search string: %s' %(orig_subject))
 
 				cursor = self.db.cursor()
 				summaries = [orig_subject, '%%: %s' % orig_subject]
@@ -1067,8 +1053,7 @@ class TicketEmailParser(object):
 
 
 				for summary in summaries:
-					if self.parameters.debug:
-						self.logger.debug('Looking for summary matching: "%s"' % summary)
+					self.logger.debug('Looking for summary matching: "%s"' % summary)
 
 					sql = """SELECT id FROM ticket
 						 	WHERE changetime >= %s AND summary LIKE %s
@@ -1078,8 +1063,7 @@ class TicketEmailParser(object):
 					for row in cursor:
 						(matched_id,) = row
 
-						if self.parameters.debug:
-							self.logger.debug('Found matching ticket id: %d' % matched_id)
+						self.logger.debug('Found matching ticket id: %d' % matched_id)
 
 						break
 
@@ -1334,8 +1318,7 @@ class TicketEmailParser(object):
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
-		if self.parameters.debug:
-			self.logger.debug('Creating a new topic in forum:', self.id)
+		self.logger.debug('Creating a new topic in forum:', self.id)
 
 		# Get dissussion API component.
 		api = self.env[DiscussionApi]
@@ -1344,8 +1327,8 @@ class TicketEmailParser(object):
 		# Get forum for new topic.
 		forum = api.get_forum(context, self.id)
 
-		if not forum and self.parameters.debug:
-			self.logger.debug("ERROR: Replied forum doesn't exist")
+		if not forum:
+			self.logger.error("ERROR: Replied forum doesn't exist")
 
 		# Prepare topic.
 		topic = {'forum' : forum['id'],
@@ -1365,8 +1348,7 @@ class TicketEmailParser(object):
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
-		if self.parameters.debug:
-			self.logger.debug('Replying to discussion topic', self.id)
+		self.logger.debug('Replying to discussion topic', self.id)
 
 		# Get dissussion API component.
 		api = self.env[DiscussionApi]
@@ -1375,8 +1357,8 @@ class TicketEmailParser(object):
 		# Get replied topic.
 		topic = api.get_topic(context, self.id)
 
-		if not topic and self.parameters.debug:
-			self.logger.debug("ERROR: Replied topic doesn't exist")
+		if not topic:
+			self.logger.error("ERROR: Replied topic doesn't exist")
 
 		# Prepare message.
 		message = {'forum' : topic['forum'],
@@ -1396,8 +1378,7 @@ class TicketEmailParser(object):
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
-		if self.parameters.debug:
-			self.loggger.debug('TD: Replying to discussion message', self.id)
+		self.loggger.debug('TD: Replying to discussion message', self.id)
 
 		# Get dissussion API component.
 		api = self.env[DiscussionApi]
@@ -1406,8 +1387,8 @@ class TicketEmailParser(object):
 		# Get replied message.
 		message = api.get_message(context, self.id)
 
-		if not message and self.parameters.debug:
-			self.logger.debug("ERROR: Replied message doesn't exist")
+		if not message:
+			self.logger.error("ERROR: Replied message doesn't exist")
 
 		# Prepare message.
 		message = {'forum' : message['forum'],
@@ -1528,9 +1509,7 @@ class TicketEmailParser(object):
 		m = email.message_from_file(fp)
 		
 		if not m:
-			if self.parameters.debug:
-				self.logger.debug('This is not a valid email message format')
-
+			self.logger.debug('This is not a valid email message format')
 			return
 			
 		# Work around lack of header folding in Python; see http://bugs.python.org/issue4696
@@ -1546,21 +1525,15 @@ class TicketEmailParser(object):
  		self.get_sender_info(m)
 
 		if not self.email_header_acl('white_list', self.email_addr, True):
-			if self.parameters.debug:
-				self.logger.debug('Message rejected : %s not in white list' %(self.email_addr))
-
+			self.logger.info('Message rejected : %s not in white list' %(self.email_addr))
 			return False
 
 		if self.email_header_acl('black_list', self.email_addr, False):
-			if self.parameters.debug:
-				self.logger.debug('Message rejected : %s in black list' %(self.email_addr))
-
+			self.logger.info('Message rejected : %s in black list' %(self.email_addr))
 			return False
 
 		if not self.email_header_acl('recipient_list', self.to_email_addr, True):
-			if self.parameters.debug:
-				self.logger.debug('Message rejected : %s not in recipient list' %(self.to_email_addr))
-
+			self.logger.info('Message rejected : %s not in recipient list' %(self.to_email_addr))
 			return False
 
 		# If drop the message
@@ -1578,8 +1551,7 @@ class TicketEmailParser(object):
 		else:
 			subject  = self.email_to_unicode(m['Subject'])
 
-		if self.parameters.debug:
-			self.logger.debug('subject: %s' %subject)
+		self.logger.debug('subject: %s' %subject)
 
 		#
 		# [hic] #1529: Re: LRZ
@@ -1753,8 +1725,8 @@ class TicketEmailParser(object):
 				keyword, value = match.groups()
 				self.properties[keyword] = value.strip()
 
-				if self.parameters.debug:
-					self.logger.debug('inline properties: %s : %s' %(keyword,value))
+				self.logger.debug('inline properties: %s : %s' %(keyword,value))
+
 			else:
 				body.append(line)
 				
@@ -1806,17 +1778,13 @@ class TicketEmailParser(object):
 		ALTERNATIVE_MULTIPART = False
 
 		for part in msg.walk():
-			if self.parameters.debug:
-				self.logger.debug('Message part: Main-Type: %s' % part.get_content_maintype())
-				self.logger.debug('Message part: Content-Type: %s' % part.get_content_type())
+			self.logger.debug('Message part: Main-Type: %s' % part.get_content_maintype())
+			self.logger.debug('Message part: Content-Type: %s' % part.get_content_type())
 
 			## Check content type
 			# 
 			if part.get_content_type() in self.STRIP_CONTENT_TYPES:
-
-				if self.parameters.debug:
-					self.logger.debug("A %s attachment named '%s' was skipped" %(part.get_content_type(), part.get_filename()))
-
+				self.logger.debug("A %s attachment named '%s' was skipped" %(part.get_content_type(), part.get_filename()))
 				continue
 
 			## Catch some mulitpart execptions
@@ -1828,8 +1796,8 @@ class TicketEmailParser(object):
 			## Skip multipart containers
 			#
 			if part.get_content_maintype() == 'multipart':
-				if self.parameters.debug:
-					self.logger.debug("Skipping multipart container")
+				self.logger.debug("Skipping multipart container")
+
 				continue
 			
 			## Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
@@ -1840,17 +1808,14 @@ class TicketEmailParser(object):
 			#
 			if ALTERNATIVE_MULTIPART and self.DROP_ALTERNATIVE_HTML_VERSION:
 				if part.get_content_type() == 'text/html':
-					if self.parameters.debug:
-						self.logger.debug('Skipping alternative HTML message')
-
-			        	ALTERNATIVE_MULTIPART = False
+					self.logger.debug('Skipping alternative HTML message')
+					ALTERNATIVE_MULTIPART = False
 					continue
 
 			## Inline text parts are where the body is
 			#
 			if part.get_content_type() == 'text/plain' and inline:
-				if self.parameters.debug:
-					self.logger.debug('               Inline body part')
+				self.logger.debug('               Inline body part')
 
 				# Try to decode, if fails then do not decode
 				#
