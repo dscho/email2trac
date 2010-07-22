@@ -182,11 +182,6 @@ class TicketEmailParser(object):
 		if not self.parameters.email_quote:
 			self.parameters.email_quote = '> '
 
-		if self.parameters.has_key('ticket_permission_system'):
-			self.TICKET_PERMISSION_SYSTEM = str(self.parameters['ticket_permission_system'])
-		else:
-			self.TICKET_PERMISSION_SYSTEM = None
-
 		if self.parameters.has_key('ticket_update'):
 			self.TICKET_UPDATE = int(self.parameters['ticket_update'])
 		else:
@@ -686,7 +681,7 @@ class TicketEmailParser(object):
 		"""
 		self.logger.debug("function check_permission")
 
-		if self.TICKET_PERMISSION_SYSTEM in ['trac']:
+		if self.parameters.ticket_permission_system in ['trac']:
 
 			perm = PermissionSystem(self.env)
 			if perm.check_permission(action, self.author):
@@ -694,7 +689,7 @@ class TicketEmailParser(object):
 			else:
 				return False
 
-		elif self.TICKET_PERMISSION_SYSTEM in ['update_restricted_to_participants']:
+		elif self.parameters.ticket_permission_system in ['update_restricted_to_participants']:
 			if action in ['TICKET_MODIFY']:
 				return (self.check_permission_participants(tkt))	
 			else:
@@ -825,7 +820,7 @@ class TicketEmailParser(object):
 
 		# Check the permission of the reporter
 		#
-		if self.TICKET_PERMISSION_SYSTEM:
+		if self.parameters.ticket_permission_system:
 			if not self.check_permission(tkt, 'TICKET_MODIFY'):
 				self.logger.info('Reporter: %s has no permission to modify tickets' %self.author)
 				return False
@@ -1031,7 +1026,7 @@ class TicketEmailParser(object):
 
 		# Check the permission of the reporter
 		#
-		if self.TICKET_PERMISSION_SYSTEM:
+		if self.parameters.ticket_permission_system:
 			if not self.check_permission(tkt, 'TICKET_CREATE'):
 				self.logger.info('Reporter: %s has no permission to create tickets' %self.author)
 				return False
