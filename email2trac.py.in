@@ -62,7 +62,6 @@ import os
 import sys
 import string
 import getopt
-import stat
 import time
 import email
 import email.Iterators
@@ -70,13 +69,14 @@ import email.Header
 import re
 import urllib
 import unicodedata
-from stat import *
 import mimetypes
 import traceback
 import logging
 import logging.handlers
 import UserDict
+
 from datetime import tzinfo, timedelta, datetime
+from stat import *
 
 
 from trac import __version__ as trac_version
@@ -509,7 +509,7 @@ class TicketEmailParser(object):
 			print 'DRY-RUN: not saving body to %s' %(body_file)
 			return
 
-		print 'TD: writing body to %s' %(body_file)
+		print 'writing body to %s' %(body_file)
 		fx = open(body_file, 'wb') 
 		if not message_body:
 				message_body = '(None)'
@@ -538,9 +538,9 @@ class TicketEmailParser(object):
 			(original, filename, part) = item
 
 			n = n + 1
-			print 'TD: part%d: Content-Type: %s' % (n, part.get_content_type())
+			print 'part%d: Content-Type: %s' % (n, part.get_content_type())
 		
-			s = 'TD: part%d: filename: %s' %(n, filename)
+			s = 'part%d: filename: %s' %(n, filename)
 			self.print_unicode(s)
 	
 			## Forbidden chars
@@ -550,7 +550,7 @@ class TicketEmailParser(object):
 	
 
 			part_file = os.path.join(self.TMPDIR, filename)
-			s = 'TD: writing part%d (%s)' % (n,part_file)
+			s = 'writing part%d (%s)' % (n,part_file)
 			self.print_unicode(s)
 
 			if self.parameters.dry_run:
@@ -585,7 +585,7 @@ class TicketEmailParser(object):
 		if self.parameters.dry_run:
 			print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
 		else:
-			print 'TD: saving email to %s' %(msg_file)
+			print 'saving email to %s' %(msg_file)
 
 			fx = open(msg_file, 'wb')
 			fx.write('%s' % message)
@@ -772,7 +772,7 @@ class TicketEmailParser(object):
 		#
 		for field,value in user_dict.items():
 			if self.parameters.debug:
-				s = 'TD: user_field\t %s = %s' %(field,value) 
+				s = 'user_field\t %s = %s' %(field,value) 
 				self.print_unicode(s)
 
 			## To prevent mail loop
@@ -782,7 +782,7 @@ class TicketEmailParser(object):
 				cc_list = user_dict['cc'].split(',')
 
 				if self.trac_smtp_from in cc_list:
-					self.logger.debug('TD: MAIL LOOP: %s is not allowed as CC address' %(self.trac_smtp_from))
+					self.logger.debug('MAIL LOOP: %s is not allowed as CC address' %(self.trac_smtp_from))
 
 					cc_list.remove(self.trac_smtp_from)
 
@@ -1204,7 +1204,7 @@ class TicketEmailParser(object):
 			# get the file_size
 			#
 			stats = os.lstat(path) 
-			file_size = stats[stat.ST_SIZE]
+			file_size = stats[ST_SIZE]
 
 			# Check if the attachment size is allowed
 			#
@@ -1363,7 +1363,7 @@ class TicketEmailParser(object):
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
-		self.loggger.debug('TD: Replying to discussion message', self.id)
+		self.loggger.debug('Replying to discussion message', self.id)
 
 		# Get dissussion API component.
 		api = self.env[DiscussionApi]
@@ -1847,7 +1847,7 @@ class TicketEmailParser(object):
 					message_parts.append('%s' %ubody_text)
 			else:
 				if self.parameters.debug:
-					s = 'TD:               Filename: %s' % part.get_filename()
+					s = '              Filename: %s' % part.get_filename()
 					self.print_unicode(s)
 
 				## 
@@ -1920,7 +1920,7 @@ class TicketEmailParser(object):
 				unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
 				
 			if self.parameters.debug:
-				s = 'TD: Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+				s = 'Attachment with filename %s will be saved as %s' % (filename, unique_filename)
 				self.print_unicode(s)
 
 			attachment_names.add(unique_filename)
@@ -1933,7 +1933,7 @@ class TicketEmailParser(object):
 	def attachment_exists(self, filename):
 
 		if self.parameters.debug:
-			s = 'TD: attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
+			s = 'attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
 			self.print_unicode(s)
 
 		# We have no valid ticket id
