@@ -202,11 +202,6 @@ class TicketEmailParser(object):
 		else:
 			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = 30
 
-		if self.parameters.has_key('drop_spam'):
-			self.DROP_SPAM = int(self.parameters['drop_spam'])
-		else:
-			self.DROP_SPAM = 0
-
 		if self.parameters.has_key('verbatim_format'):
 			self.VERBATIM_FORMAT = int(self.parameters['verbatim_format'])
 		else:
@@ -312,7 +307,7 @@ class TicketEmailParser(object):
 
 		# How to handle SPAM messages
 		#
-		if self.DROP_SPAM and spam:
+		if self.parameters.drop_spam and spam:
 
 			self.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' %self.parameters.spam_level)
 			return 'drop'	
