@@ -182,11 +182,6 @@ class TicketEmailParser(object):
 		if not self.parameters.email_quote:
 			self.parameters.email_quote = '> '
 
-		if self.parameters.has_key('reply_all'):
-			self.REPLY_ALL = int(self.parameters['reply_all'])
-		else:
-			self.REPLY_ALL = 0
-
 		if self.parameters.has_key('ticket_permission_system'):
 			self.TICKET_PERMISSION_SYSTEM = str(self.parameters['ticket_permission_system'])
 		else:
@@ -425,7 +420,7 @@ class TicketEmailParser(object):
 
 		# Put all CC-addresses in ticket CC field
 		#
-		if self.REPLY_ALL:
+		if self.parameters.reply_all:
 
 			email_cc = ''
 
