@@ -182,11 +182,6 @@ class TicketEmailParser(object):
 		if not self.parameters.email_quote):
 			self.parameters.email_quote = '> '
 
-		if self.parameters.has_key('email_header'):
-			self.EMAIL_HEADER = int(self.parameters['email_header'])
-		else:
-			self.EMAIL_HEADER = 0
-
 		if self.parameters.has_key('alternate_notify_template'):
 			self.notify_template = str(self.parameters['alternate_notify_template'])
 		else:
@@ -910,7 +905,7 @@ class TicketEmailParser(object):
 		if self.properties:
 				self.update_ticket_fields(tkt, self.properties)
 
-		if self.EMAIL_HEADER:
+		if self.parameters.email_header:
 			message_parts.insert(0, self.email_header_txt(m))
 
 		body_text = self.body_text(message_parts)
@@ -1082,11 +1077,6 @@ class TicketEmailParser(object):
 				update_fields = self.str_to_dict(keywords)
 				self.update_ticket_fields(tkt, update_fields)
 
-		# produce e-mail like header
-		#
-		head = ''
-		if self.EMAIL_HEADER > 0:
-			head = self.email_header_txt(msg)
 
 		message_parts = self.get_message_parts(msg)
 
@@ -1097,8 +1087,12 @@ class TicketEmailParser(object):
 
 		message_parts = self.unique_attachment_names(message_parts)
 		
-		if self.EMAIL_HEADER > 0:
-			message_parts.insert(0, self.email_header_txt(msg))
+		# produce e-mail like header
+		#
+		head = ''
+		if self.parameters.email_header:
+			head = self.email_header_txt(msg)
+			message_parts.insert(0, head)
 			
 		body_text = self.body_text(message_parts)
 
