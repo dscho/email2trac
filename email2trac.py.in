@@ -363,7 +363,7 @@ class TicketEmailParser(object):
 		#
 		if self.DROP_SPAM and spam:
 
-			set.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' % self.SPAM_LEVEL)
+			self.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' % self.SPAM_LEVEL)
 			return 'drop'	
 
 		elif spam:
