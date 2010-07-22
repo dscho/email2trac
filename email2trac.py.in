@@ -182,10 +182,10 @@ class TicketEmailParser(object):
 		if not self.parameters.email_quote:
 			self.parameters.email_quote = '> '
 
-		if self.parameters.has_key('ticket_update_by_subject_lookback'):
-			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = int(self.parameters['ticket_update_by_subject_lookback'])
+		if self.parameters.ticket_update_by_subject_lookback:
+			self.parameters.ticket_update_by_subject_lookback = int(self.parameters.ticket_update_by_subject_lookback)
 		else:
-			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = 30
+			self.parameters.ticket_update_by_subject_lookback = 30
 
 		if self.parameters.has_key('verbatim_format'):
 			self.VERBATIM_FORMAT = int(self.parameters['verbatim_format'])
@@ -977,7 +977,7 @@ class TicketEmailParser(object):
 				##
 				# Convert days to seconds
 				lookback = int(time.mktime(time.gmtime())) - \
-						self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK * 24 * 3600
+						self.parameters.ticket_update_by_subject_lookback * 24 * 3600
 
 
 				for summary in summaries:
