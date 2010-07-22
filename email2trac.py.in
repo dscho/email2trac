@@ -182,11 +182,6 @@ class TicketEmailParser(object):
 		if not self.parameters.email_quote:
 			self.parameters.email_quote = '> '
 
-		if self.parameters.has_key('ticket_update_by_subject'):
-			self.TICKET_UPDATE_BY_SUBJECT = int(self.parameters['ticket_update_by_subject'])
-		else:
-			self.TICKET_UPDATE_BY_SUBJECT = 0
-
 		if self.parameters.has_key('ticket_update_by_subject_lookback'):
 			self.TICKET_UPDATE_BY_SUBJECT_LOOKBACK = int(self.parameters['ticket_update_by_subject_lookback'])
 		else:
@@ -965,7 +960,7 @@ class TicketEmailParser(object):
 		self.logger.debug('function ticket_update_by_subject')
 
 		matched_id = None
-		if self.parameters.ticket_update and self.TICKET_UPDATE_BY_SUBJECT:
+		if self.parameters.ticket_update and self.parameters.ticket_update_by_subject:
 				
 			SUBJECT_RE = re.compile(r'^(RE|AW|VS|SV):(.*:)*\s*(.*)', re.IGNORECASE)
 			result = SUBJECT_RE.search(subject)
