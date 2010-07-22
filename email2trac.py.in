@@ -172,17 +172,15 @@ class TicketEmailParser(object):
 			os.umask(int(self.parameters.umask, 8))
 
 		if self.parameters.spam_level:
-			self.SPAM_LEVEL = int(self.parameters.spam_level)
+			self.parameters.spam_level = int(self.parameters.spam_level)
 		else:
-			self.SPAM_LEVEL = 0
+			self.parameters.spam_level = 0
 
 		if not self.parameters.spam_header:
 			self.parameters.spam_header = 'X-Spam-Score'
 
-		if self.parameters.has_key('email_quote'):
-			self.EMAIL_QUOTE = str(self.parameters['email_quote'])
-		else:	
-			self.EMAIL_QUOTE = '> '
+		if not self.parameters.email_quote):
+			self.parameters.email_quote = '> '
 
 		if self.parameters.has_key('email_header'):
 			self.EMAIL_HEADER = int(self.parameters['email_header'])
@@ -324,7 +322,7 @@ class TicketEmailParser(object):
 			except IndexError, detail:
 				number = 0
 				
-			if number >= self.SPAM_LEVEL:
+			if number >= self.parameters.spam_level:
 				spam = True
 				
 		# treat virus mails as spam
@@ -336,7 +334,7 @@ class TicketEmailParser(object):
 		#
 		if self.DROP_SPAM and spam:
 
-			self.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' % self.SPAM_LEVEL)
+			self.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' %self.parameters.spam_level)
 			return 'drop'	
 
 		elif spam:
@@ -1677,7 +1675,7 @@ class TicketEmailParser(object):
 		"""
 		body = [] 
 		for line in text.splitlines():
-			if line.startswith(self.EMAIL_QUOTE): 
+			if line.startswith(self.parameters.email_quote): 
 				continue
 			body.append(line)
 
