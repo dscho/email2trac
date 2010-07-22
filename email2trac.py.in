@@ -179,7 +179,7 @@ class TicketEmailParser(object):
 		if not self.parameters.spam_header:
 			self.parameters.spam_header = 'X-Spam-Score'
 
-		if not self.parameters.email_quote):
+		if not self.parameters.email_quote:
 			self.parameters.email_quote = '> '
 
 		if self.parameters.has_key('alternate_notify_template'):
