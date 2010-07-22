@@ -182,16 +182,6 @@ class TicketEmailParser(object):
 		if not self.parameters.email_quote:
 			self.parameters.email_quote = '> '
 
-		if self.parameters.has_key('alternate_notify_template'):
-			self.notify_template = str(self.parameters['alternate_notify_template'])
-		else:
-			self.notify_template = None
-
-		if self.parameters.has_key('alternate_notify_template_update'):
-			self.notify_template_update = str(self.parameters['alternate_notify_template_update'])
-		else:
-			self.notify_template_update = None
-
 		if self.parameters.has_key('reply_all'):
 			self.REPLY_ALL = int(self.parameters['reply_all'])
 		else:
@@ -1116,7 +1106,7 @@ class TicketEmailParser(object):
 		# some routines in trac are dependend on ticket id	
 		# like alternate notify template
 		#
-		if self.notify_template:
+		if self.parameters.alternate_notify_template:
 			tkt['id'] = self.id
 			changed = True
 
@@ -2016,22 +2006,22 @@ class TicketEmailParser(object):
 
 			tn = TicketNotifyEmail(self.env)
 
-			if self.notify_template:
+			if self.parameters.alternate_notify_template:
 
 				if self.VERSION >= 0.11:
 
 					from trac.web.chrome import Chrome
 
-					if self.notify_template_update and not new:
-						tn.template_name = self.notify_template_update
+					if  self.parameters.alternate_notify_template_update and not new:
+						tn.template_name = self.parameters.alternate_notify_template_update
 					else:
-						tn.template_name = self.notify_template
+						tn.template_name = self.parameters.alternate_notify_template
 
 					tn.template = Chrome(tn.env).load_template(tn.template_name, method='text')
 						
 				else:
 
-					tn.template_name = self.notify_template;
+					tn.template_name = self.parameters.alternate_notify_template
 
 			tn.notify(tkt, new, modtime) 
 
