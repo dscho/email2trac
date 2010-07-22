@@ -87,23 +87,6 @@ from trac import config as trac_config
 trac_default_version = '0.11'
 m = None 
 
-# A UTC class needed for trac version 0.11, added by
-# tbaschak at ktc dot mb dot ca
-#
-class UTC(tzinfo):
-	"""UTC"""
-	ZERO = timedelta(0)
-	HOUR = timedelta(hours=1) 
-	
-	def utcoffset(self, dt):
-		return self.ZERO 
-		
-	def tzname(self, dt):
-		return "UTC" 
-		
-	def dst(self, dt):
-		return self.ZERO
-
 class SaraDict(UserDict.UserDict):
 	def __init__(self, dictin = None):
 		UserDict.UserDict.__init__(self)
@@ -865,8 +848,7 @@ class TicketEmailParser(object):
 		if self.VERSION < 0.11:
 			when = int(time.time())
 		else:
-			utc = UTC()
-			when = datetime.now(utc)
+			when = datetime.now(util.datefmt.utc)
 
 		try:
 			tkt = Ticket(self.env, self.id, self.db)
@@ -953,7 +935,7 @@ class TicketEmailParser(object):
 			else:
 				if error_with_attachments:
 					body_text = '%s\\%s' %(error_with_attachments, body_text)
-				
+				self.logger.debug('tkt.save_changes(%s, %d)' %(self.author, cnum))
 				tkt.save_changes(self.author, body_text, when, None, str(cnum))
 			
 
@@ -1134,10 +1116,12 @@ class TicketEmailParser(object):
 
 		tkt['description'] = body_text
 
-		#when = int(time.time())
-		#
-		utc = UTC()
-		when = datetime.now(utc)
+		# When is the change committed
+		# 
+		if self.VERSION < 0.11:
+			when = int(time.time())
+		else:
+			when = datetime.now(util.datefmt.utc)
 
 		if self.parameters.dry_run:
 			print 'DRY_RUN: tkt.insert()'
@@ -1240,6 +1224,7 @@ class TicketEmailParser(object):
 				att = attachment.Attachment(self.env, 'discussion', 'topic/%s'
 				  % (self.id,))
 			else:
+				self.logger.debug('Attach %s to ticket %d' %(util.text.unicode_quote(filename), self.id))
 				att = attachment.Attachment(self.env, 'ticket', self.id)
   
 			# This will break the ticket_update system, the body_text is vaporized
@@ -1250,8 +1235,10 @@ class TicketEmailParser(object):
 				att.description = self.email_to_unicode('Added by email2trac')
 
 			try:
+				self.logger.debug('Insert atachment')
 				att.insert(filename, fd, file_size)
 			except OSError, detail:
+				self.logger.info('%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail))
 				status = '%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail)
 
 			# Remove the created temporary filename
@@ -2064,7 +2051,7 @@ class TicketEmailParser(object):
 			tn.notify(tkt, new, modtime) 
 
 		except Exception, e:
-			set.logger.error('Failure sending notification on creation of ticket #%s: %s' %(self.id, e))
+			self.logger.error('Failure sending notification on creation of ticket #%s: %s' %(self.id, e))
 
 
 
