@@ -168,18 +168,8 @@ class TicketEmailParser(object):
 		self.setup_parameters()
 
 	def setup_parameters(self):
-		if self.parameters.has_key('umask'):
-			os.umask(int(self.parameters['umask'], 8))
-
-
-		if self.parameters.has_key('mailto_link'):
-			self.MAILTO = int(self.parameters['mailto_link'])
-			if self.parameters.has_key('mailto_cc'):
-				self.MAILTO_CC = self.parameters['mailto_cc']
-			else:
-				self.MAILTO_CC = ''
-		else:
-			self.MAILTO = 0
+		if self.parameters.umask:
+			os.umask(int(self.parameters.umask, 8))
 
 		if self.parameters.spam_level:
 			self.SPAM_LEVEL = int(self.parameters.spam_level)
@@ -1140,7 +1130,7 @@ class TicketEmailParser(object):
 
 		## Rewrite the description if we have mailto enabled
 		#
-		if self.MAILTO:
+		if self.parameters.mailto_link:
 			changed = True
 			comment = u'\nadded mailto line\n'
 			mailto = self.html_mailto_link( m['Subject'])
@@ -1988,12 +1978,15 @@ class TicketEmailParser(object):
 		else:	
 			author = self.author
 
+		if not self.parameters.mailto_cc:
+			self.parameters.mailto_cc = ''
+
 		# use urllib to escape the chars
 		#
 		s = 'mailto:%s?Subject=%s&Cc=%s' %( 
 		       urllib.quote(self.email_addr), 
 			   urllib.quote('Re: #%s: %s' %(self.id, subject)),
-			   urllib.quote(self.MAILTO_CC)
+			   urllib.quote(self.parameters.mailto_cc)
 			   )
 
 		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
