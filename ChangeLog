@@ -2,6 +2,11 @@
     * logging of spam message was wrong. Fixed it, 
        - set.logger.info must be self.logger.info
     Author: Bas van der Vlies
+
+    * logging of notification error was wrong. Fixed it, closes #212
+       - set.logger.error must be self.logger.error
+    Reported by:  adam dot lucke at srd-berlin dot de
+    Author: Bas van der Vlies
   
 2010-07-21
     * added a new option 'ticket_permission_system'. Can be set to:
