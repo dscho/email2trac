@@ -204,14 +204,11 @@ class TicketEmailParser(object):
 			self.parameters.strip_quotes = int(self.parameters.strip_quotes)
 
 		self.properties = dict()
-		if self.parameters.has_key('inline_properties'):
-			self.INLINE_PROPERTIES = int(self.parameters['inline_properties'])
-		else:
-			self.INLINE_PROPERTIES = 0
+		if self.parameters.inline_properties:
+			self.parameters.inline_properties = int(self.parameters.inline_properties)
 
-		if self.parameters.has_key('use_textwrap'):
-			self.USE_TEXTWRAP = int(self.parameters['use_textwrap'])
-		else:
+		if self.parameters.use_textwrap:
+			self.parameters.use_textwrap = int(self.parameters.use_textwrap)
 			self.USE_TEXTWRAP = 0
 
 		if self.parameters.has_key('binhex'):
@@ -1667,7 +1664,7 @@ class TicketEmailParser(object):
 		reformat = ''
 
 		for s in text.split(LINESEPARATOR):
-			tmp = textwrap.fill(s,self.USE_TEXTWRAP)
+			tmp = textwrap.fill(s, self.parameters.use_textwrap)
 			if tmp:
 				reformat = '%s\n%s' %(reformat,tmp)
 			else:
@@ -1758,10 +1755,10 @@ class TicketEmailParser(object):
 				if self.parameters.strip_quotes: 
 					body_text = self.strip_quotes(body_text)
 
-				if self.INLINE_PROPERTIES: 
+				if self.parameters.inline_properties: 
 					body_text = self.inline_properties(body_text)
 
-				if self.USE_TEXTWRAP:
+				if self.parameters.use_textwrap:
 					body_text = self.wrap_text(body_text)
 
 				## Get contents charset (iso-8859-15 if not defined in mail headers)
