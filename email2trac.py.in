@@ -2147,9 +2147,6 @@ if __name__ == '__main__':
 
 	logger.debug("Found trac version: %s" %(version))
 	
-	#debug HvB
-	#print settings
-
 	try:
 		if version == '0.10':
 			from trac import attachment 
