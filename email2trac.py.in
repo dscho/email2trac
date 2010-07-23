@@ -187,10 +187,10 @@ class TicketEmailParser(object):
 		else:
 			self.parameters.ticket_update_by_subject_lookback = 30
 
-		if self.parameters.has_key('verbatim_format'):
-			self.VERBATIM_FORMAT = int(self.parameters['verbatim_format'])
+		if not self.parameters.verbatim_format:
+			self.parameters.verbatim_format = 1
 		else:
-			self.VERBATIM_FORMAT = 1
+			self.parameters.verbatim_format = 0
 
 		if self.parameters.has_key('reflow'):
 			self.REFLOW = int(self.parameters['reflow'])
@@ -1758,7 +1758,7 @@ class TicketEmailParser(object):
 				format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
 				delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
 
-				if self.REFLOW and not self.VERBATIM_FORMAT and format == 'flowed':
+				if self.REFLOW and not self.parameters.verbatim_format and format == 'flowed':
 					body_text = self.reflow(body_text, delsp == 'yes')
 	
 				if self.STRIP_SIGNATURE:
@@ -1788,7 +1788,7 @@ class TicketEmailParser(object):
 				except LookupError, detail:
 					ubody_text = 'ERROR: Could not find charset: %s, please install' %(charset)
 
-				if self.VERBATIM_FORMAT:
+				if self.parameters.verbatim_format:
 					message_parts.append('{{{\r\n%s\r\n}}}' %ubody_text)
 				else:
 					message_parts.append('%s' %ubody_text)
