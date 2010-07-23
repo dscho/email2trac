@@ -8,6 +8,10 @@
     Reported by:  adam dot lucke at srd-berlin dot de
     Author: Bas van der Vlies
 
+    * Mail was lost when 'ticket_update' was disabled and a ticket
+      reply was detected.
+    Author: Bas van der Vlies
+
     * Removed a lot of obsolete code due to using UserDict
     Author: Bas van der Vlies
   

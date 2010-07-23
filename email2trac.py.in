@@ -729,6 +729,10 @@ class TicketEmailParser(object):
 		"""
 		self.logger.debug("function ticket_update")
 
+		if not self.parameters.ticket_update:
+			self.logger.debug("ticket_update disabled")
+			return False
+
 		# Must we update ticket fields
 		#
 		update_fields = dict()
@@ -747,7 +751,7 @@ class TicketEmailParser(object):
 			#
 			self.id = int(id[1:])
 
-		self.logger.debug("function ticket_update id %s" %id)
+		self.logger.debug("ticket_update id %s" %id)
 
 		# When is the change committed
 		# 
@@ -1483,7 +1487,8 @@ class TicketEmailParser(object):
 		if result:
 			# update ticket + fields
 			#
-			if result.group('reply') and self.parameters.ticket_update:
+			#if result.group('reply') and self.parameters.ticket_update:
+			if result.group('reply'):
 				self.system = 'ticket'
 
 				# Skip the last ':' character
