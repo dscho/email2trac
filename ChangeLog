@@ -1,4 +1,4 @@
-2010-07-22
+2010-07-23
     * logging of spam message was wrong. Fixed it, 
        - set.logger.info must be self.logger.info
     Author: Bas van der Vlies
