@@ -2003,13 +2003,6 @@ def ReadConfig(file, name):
 			except ValueError:
 				project[option] = value 
 
-	## Convert debug value to int
-	#
-	if project.debug:
-		project.debug = int(project.debug)
-	else:
-		project.debug = 0
-
 	return project
 
 ########## Setup Logging ###############################################################
@@ -2134,7 +2127,6 @@ if __name__ == '__main__':
 
 	if not settings.debug and debug_interactive:
 		settings.debug = debug_interactive
-
 
 	if not settings.project:
 		print __doc__
