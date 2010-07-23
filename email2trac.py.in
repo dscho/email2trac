@@ -187,25 +187,21 @@ class TicketEmailParser(object):
 		else:
 			self.parameters.ticket_update_by_subject_lookback = 30
 
-		if not self.parameters.verbatim_format:
+		if self.parameters.verbatim_format == None:
 			self.parameters.verbatim_format = 1
 		else:
 			self.parameters.verbatim_format = int(self.parameters.verbatim_format)
 
-		if not self.parameters.reflow:
+		if self.parameters.reflow == None:
 			self.parameters.reflow = 1
 		else:
 			self.parameters.reflow = int(self.parameters.reflow)
 
-		if self.parameters.has_key('strip_signature'):
-			self.STRIP_SIGNATURE = int(self.parameters['strip_signature'])
-		else:
-			self.STRIP_SIGNATURE = 0
+		if self.parameters.strip_signature:
+			self.parameters.strip_signature = int(self.parameters.strip_signature)
 
-		if self.parameters.has_key('strip_quotes'):
-			self.STRIP_QUOTES = int(self.parameters['strip_quotes'])
-		else:
-			self.STRIP_QUOTES = 0
+		if self.parameters.strip_quotes:
+			self.parameters.strip_quotes = int(self.parameters.strip_quotes)
 
 		self.properties = dict()
 		if self.parameters.has_key('inline_properties'):
@@ -1756,10 +1752,10 @@ class TicketEmailParser(object):
 				if self.parameters.reflow and not self.parameters.verbatim_format and format == 'flowed':
 					body_text = self.reflow(body_text, delsp == 'yes')
 	
-				if self.STRIP_SIGNATURE:
+				if self.parameters.strip_signature:
 					body_text = self.strip_signature(body_text)
 
-				if self.STRIP_QUOTES: 
+				if self.parameters.strip_quotes: 
 					body_text = self.strip_quotes(body_text)
 
 				if self.INLINE_PROPERTIES: 
