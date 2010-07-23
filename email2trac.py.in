@@ -98,9 +98,9 @@ class SaraDict(UserDict.UserDict):
 				del dictin['name']
 			self.data = dictin 
 			
-	def get_value(self, key):
-		if self.has_key(key):
-			return self[key]
+	def get_value(self, name):
+		if self.has_key(name):
+			return self[name]
 		else:
 			return None 
 				
@@ -159,6 +159,10 @@ class TicketEmailParser(object):
 		
 		self.STRIP_CONTENT_TYPES = list()
 
+		## fields properties via body_text
+		#
+		self.properties = dict()
+
 		self.VERSION = version
 
 		self.get_config = self.env.config.get
@@ -169,11 +173,9 @@ class TicketEmailParser(object):
 
 	def setup_parameters(self):
 		if self.parameters.umask:
-			os.umask(int(self.parameters.umask, 8))
+			os.umask(self.parameters.umask)
 
-		if self.parameters.spam_level:
-			self.parameters.spam_level = int(self.parameters.spam_level)
-		else:
+		if not self.parameters.spam_level:
 			self.parameters.spam_level = 0
 
 		if not self.parameters.spam_header:
@@ -182,34 +184,14 @@ class TicketEmailParser(object):
 		if not self.parameters.email_quote:
 			self.parameters.email_quote = '> '
 
-		if self.parameters.ticket_update_by_subject_lookback:
-			self.parameters.ticket_update_by_subject_lookback = int(self.parameters.ticket_update_by_subject_lookback)
-		else:
+		if not self.parameters.ticket_update_by_subject_lookback:
 			self.parameters.ticket_update_by_subject_lookback = 30
 
 		if self.parameters.verbatim_format == None:
 			self.parameters.verbatim_format = 1
-		else:
-			self.parameters.verbatim_format = int(self.parameters.verbatim_format)
 
 		if self.parameters.reflow == None:
 			self.parameters.reflow = 1
-		else:
-			self.parameters.reflow = int(self.parameters.reflow)
-
-		if self.parameters.strip_signature:
-			self.parameters.strip_signature = int(self.parameters.strip_signature)
-
-		if self.parameters.strip_quotes:
-			self.parameters.strip_quotes = int(self.parameters.strip_quotes)
-
-		self.properties = dict()
-		if self.parameters.inline_properties:
-			self.parameters.inline_properties = int(self.parameters.inline_properties)
-
-		if self.parameters.use_textwrap:
-			self.parameters.use_textwrap = int(self.parameters.use_textwrap)
-			self.USE_TEXTWRAP = 0
 
 		if self.parameters.binhex:
 			self.STRIP_CONTENT_TYPES.append('application/mac-binhex40')
@@ -230,13 +212,8 @@ class TicketEmailParser(object):
 		else:
 			self.parameters.tmpdir = os.path.normcase('/tmp')
 
-		if self.parameters.ignore_trac_user_settings:
-			self.parameters.ignore_trac_user_settings = int(self.parameters.ignore_trac_user_settings)
-
 		if self.parameters.email_triggers_workflow == None:
 			self.parameters.email_triggers_workflow = 1
-		else:
-			self.parameters.email_triggers_workflow = int(self.parameters.email_triggers_workflow)
 
 		if not self.parameters.subject_field_separator:
 			self.parameters.subject_field_separator = '&'
@@ -2009,7 +1986,10 @@ def ReadConfig(file, name):
 
 		project =  SaraDict()
 		for option, value in  config.options(name):
-			project[option] = value 
+			try:
+				project[option] = int(value)
+			except ValueError:
+				project[option] = value 
 
 	else:
 		# use some trac internals to get the defaults
@@ -2017,8 +1997,11 @@ def ReadConfig(file, name):
 		tmp = config.parser.defaults()
 		project =  SaraDict()
 
-		for option,value in tmp.items():
-			project[option] = value 
+		for option, value in tmp.items():
+			try:
+				project[option] = int(value)
+			except ValueError:
+				project[option] = value 
 
 	## Convert debug value to int
 	#
