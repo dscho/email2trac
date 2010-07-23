@@ -1,3 +1,9 @@
+email2trac (1.5.2-3) stable; urgency=low
+
+  * See Changelog
+
+ -- Bas van der Vlies <basv@sara.nl>  Fri, 23 Jul 2010 11:52:39 +0200
+
 email2trac (1.5.2-1) stable; urgency=low
 
     * logging of notification error was wrong. Fixed it, closes #212
