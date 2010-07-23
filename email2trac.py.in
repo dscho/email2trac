@@ -190,17 +190,12 @@ class TicketEmailParser(object):
 		if not self.parameters.verbatim_format:
 			self.parameters.verbatim_format = 1
 		else:
-			self.parameters.verbatim_format = 0
+			self.parameters.verbatim_format = int(self.parameters.verbatim_format)
 
-		if self.parameters.has_key('reflow'):
-			self.REFLOW = int(self.parameters['reflow'])
+		if not self.parameters.reflow:
+			self.parameters.reflow = 1
 		else:
-			self.REFLOW = 1
-
-		if self.parameters.has_key('drop_alternative_html_version'):
-			self.DROP_ALTERNATIVE_HTML_VERSION = int(self.parameters['drop_alternative_html_version'])
-		else:
-			self.DROP_ALTERNATIVE_HTML_VERSION = 0
+			self.parameters.reflow = int(self.parameters.reflow)
 
 		if self.parameters.has_key('strip_signature'):
 			self.STRIP_SIGNATURE = int(self.parameters['strip_signature'])
@@ -1738,7 +1733,7 @@ class TicketEmailParser(object):
 
 			## Drop HTML message
 			#
-			if ALTERNATIVE_MULTIPART and self.DROP_ALTERNATIVE_HTML_VERSION:
+			if ALTERNATIVE_MULTIPART and self.parameters.drop_alternative_html_version:
 				if part.get_content_type() == 'text/html':
 					self.logger.debug('Skipping alternative HTML message')
 					ALTERNATIVE_MULTIPART = False
@@ -1758,7 +1753,7 @@ class TicketEmailParser(object):
 				format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
 				delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
 
-				if self.REFLOW and not self.parameters.verbatim_format and format == 'flowed':
+				if self.parameters.reflow and not self.parameters.verbatim_format and format == 'flowed':
 					body_text = self.reflow(body_text, delsp == 'yes')
 	
 				if self.STRIP_SIGNATURE:
