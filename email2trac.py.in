@@ -211,39 +211,32 @@ class TicketEmailParser(object):
 			self.parameters.use_textwrap = int(self.parameters.use_textwrap)
 			self.USE_TEXTWRAP = 0
 
-		if self.parameters.has_key('binhex'):
+		if self.parameters.binhex:
 			self.STRIP_CONTENT_TYPES.append('application/mac-binhex40')
 
-		if self.parameters.has_key('applesingle'):
+		if self.parameters.applesingle:
 			self.STRIP_CONTENT_TYPES.append('application/applefile')
 
-		if self.parameters.has_key('appledouble'):
+		if self.parameters.appledouble:
 			self.STRIP_CONTENT_TYPES.append('application/applefile')
 
-		if self.parameters.has_key('strip_content_types'):
-			items = self.parameters['strip_content_types'].split(',')
+		if self.parameters.strip_content_types:
+			items = self.parameters.strip_content_types.split(',')
 			for item in items:
 				self.STRIP_CONTENT_TYPES.append(item.strip())
 
-		self.WORKFLOW = None
-		if self.parameters.has_key('workflow'):
-			self.WORKFLOW = self.parameters['workflow']
-
-		# Use OS independend functions
-		#
-		self.TMPDIR = os.path.normcase('/tmp')
-		if self.parameters.has_key('tmpdir'):
-			self.TMPDIR = os.path.normcase(str(self.parameters['tmpdir']))
-
-		if self.parameters.has_key('ignore_trac_user_settings'):
-			self.IGNORE_TRAC_USER_SETTINGS = int(self.parameters['ignore_trac_user_settings'])
+		if self.parameters.tmpdir:
+			self.parameters.tmpdir = os.path.normcase(str(self.parameters['tmpdir']))
 		else:
-			self.IGNORE_TRAC_USER_SETTINGS = 0
+			self.parameters.tmpdir = os.path.normcase('/tmp')
 
-		if self.parameters.has_key('email_triggers_workflow'):
-			self.EMAIL_TRIGGERS_WORKFLOW = int(self.parameters['email_triggers_workflow'])
+		if self.parameters.ignore_trac_user_settings:
+			self.parameters.ignore_trac_user_settings = int(self.parameters.ignore_trac_user_settings)
+
+		if self.parameters.email_triggers_workflow == None:
+			self.parameters.email_triggers_workflow = 1
 		else:
-			self.EMAIL_TRIGGERS_WORKFLOW = 1
+			self.parameters.email_triggers_workflow = int(self.parameters.email_triggers_workflow)
 
 		if self.parameters.has_key('subject_field_separator'):
 			self.SUBJECT_FIELD_SEPARATOR = self.parameters['subject_field_separator'].strip()
@@ -359,7 +352,7 @@ class TicketEmailParser(object):
 		else:
 			self.author = self.email_addr
 
-		if self.IGNORE_TRAC_USER_SETTINGS:
+		if self.parameters.ignore_trac_user_settings:
 			return
 
 		# Is this a registered user, use email address as search key:
@@ -439,7 +432,7 @@ class TicketEmailParser(object):
 			import tempfile
 			body_file = tempfile.mktemp('.email2trac')
 		else:
-			body_file = os.path.join(self.TMPDIR, 'body.txt')
+			body_file = os.path.join(self.parameters.tmpdir, 'body.txt')
 
 		if self.parameters.dry_run:
 			print 'DRY-RUN: not saving body to %s' %(body_file)
@@ -485,7 +478,7 @@ class TicketEmailParser(object):
 			filename = filename.replace('/', '_') 
 	
 
-			part_file = os.path.join(self.TMPDIR, filename)
+			part_file = os.path.join(self.parameters.tmpdir, filename)
 			s = 'writing part%d (%s)' % (n,part_file)
 			self.print_unicode(s)
 
@@ -516,7 +509,7 @@ class TicketEmailParser(object):
 			msg_file = tempfile.mktemp('.email2trac')
 		else:
 			#msg_file = '/var/tmp/msg.txt' 
-			msg_file = os.path.join(self.TMPDIR, 'msg.txt')
+			msg_file = os.path.join(self.parameters.tmpdir, 'msg.txt')
 
 		if self.parameters.dry_run:
 			print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
@@ -810,7 +803,7 @@ class TicketEmailParser(object):
 		# reopen the ticket if it is was closed
 		# We must use the ticket workflow framework
 		#
-		if tkt['status'] in ['closed'] and self.EMAIL_TRIGGERS_WORKFLOW:
+		if tkt['status'] in ['closed'] and self.parameters.email_triggers_workflow:
 
 			#print controller.actions['reopen']
 			#
@@ -826,14 +819,14 @@ class TicketEmailParser(object):
 			#b = controller.get_ticket_changes(req, tkt, 'reopen')
 			#print 'get_ticket_changes :', b
 
-			if self.WORKFLOW and (self.VERSION >= 0.11 ) :
+			if self.parameters.has_key.workflow and (self.VERSION >= 0.11 ) :
 				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
 				from trac.test import Mock, MockPerm
 
 				req = Mock(authname='anonymous', perm=MockPerm(), args={})
 
 				controller = ConfigurableTicketWorkflow(self.env)
-				fields = controller.get_ticket_changes(req, tkt, self.WORKFLOW)
+				fields = controller.get_ticket_changes(req, tkt, self.parameters.has_key.workflow)
 
 				self.logger.debug('Workflow ticket update fields: ')
 
@@ -1129,7 +1122,7 @@ class TicketEmailParser(object):
 			# We have to determine the size so we use this temporary solution. we must escape it
 			# else we get UnicodeErrors. 
 			#
-			path, fd =  util.create_unique_file(os.path.join(self.TMPDIR, util.text.unicode_quote(filename)))
+			path, fd =  util.create_unique_file(os.path.join(self.parameters.tmpdir, util.text.unicode_quote(filename)))
 			text = part.get_payload(decode=1)
 			if not text:
 				text = '(None)'
