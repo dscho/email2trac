@@ -796,14 +796,14 @@ class TicketEmailParser(object):
 			#b = controller.get_ticket_changes(req, tkt, 'reopen')
 			#print 'get_ticket_changes :', b
 
-			if self.parameters.has_key.workflow and (self.VERSION >= 0.11 ) :
+			if self.parameters.workflow and (self.VERSION >= 0.11 ) :
 				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
 				from trac.test import Mock, MockPerm
 
 				req = Mock(authname='anonymous', perm=MockPerm(), args={})
 
 				controller = ConfigurableTicketWorkflow(self.env)
-				fields = controller.get_ticket_changes(req, tkt, self.parameters.has_key.workflow)
+				fields = controller.get_ticket_changes(req, tkt, self.parameters.workflow)
 
 				self.logger.debug('Workflow ticket update fields: ')
 
