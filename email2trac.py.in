@@ -238,10 +238,10 @@ class TicketEmailParser(object):
 		else:
 			self.parameters.email_triggers_workflow = int(self.parameters.email_triggers_workflow)
 
-		if self.parameters.has_key('subject_field_separator'):
-			self.SUBJECT_FIELD_SEPARATOR = self.parameters['subject_field_separator'].strip()
+		if not self.parameters.subject_field_separator:
+			self.parameters.subject_field_separator = '&'
 		else:
-			self.SUBJECT_FIELD_SEPARATOR = '&'
+			self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
 
 		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
 
@@ -575,7 +575,7 @@ class TicketEmailParser(object):
 		""" 
 		self.logger.debug("function str_to_dict")
 
-		fields = string.split(s, self.SUBJECT_FIELD_SEPARATOR)
+		fields = string.split(s, self.parameters.subject_field_separator)
 
 		result = dict()
 		for field in fields:
