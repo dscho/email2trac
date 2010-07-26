@@ -1546,6 +1546,8 @@ class TicketEmailParser(object):
 		"""
 		Strip signature from message, inspired by Mailman software
 		"""
+		self.logger.debug('function strip_signature')
+
 		body = []
 		for line in text.splitlines():
 			if line == '-- ':
@@ -1595,10 +1597,21 @@ class TicketEmailParser(object):
 		"""
 		Strip quotes from message by Nicolas Mendoza
 		"""
+		self.logger.debug('function strip_quotes')
+
 		body = [] 
 		for line in text.splitlines():
-			if line.startswith(self.parameters.email_quote): 
-				continue
+			try:
+
+				if line.startswith(self.parameters.email_quote): 
+					continue
+
+			except UnicodeDecodeError:
+
+				tmp_line = self.email_to_unicode(line) 
+				if tmp_line.startswith(self.parameters.email_quote): 
+					continue
+				
 			body.append(line)
 
 		return ('\n'.join(body))

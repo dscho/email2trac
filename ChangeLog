@@ -1,3 +1,7 @@
+2010-07-26
+    * Fixed an Unicode error in strip_quotes
+    Author: Bas van der Vlies
+    
 2010-07-23
     * logging of spam message was wrong. Fixed it, 
        - set.logger.info must be self.logger.info
