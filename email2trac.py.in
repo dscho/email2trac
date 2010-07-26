@@ -2230,8 +2230,7 @@ if __name__ == '__main__':
 		tktparser = TicketEmailParser(env, settings, logger, float(version))
 		tktparser.parse(sys.stdin)
 
-	# Catch all errors ans log to SYSLOG if we have enabled this
-	# else stdout
+	## Catch all errors and use the logging module
 	#
 	except Exception, error:
 
