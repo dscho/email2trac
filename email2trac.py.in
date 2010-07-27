@@ -1821,6 +1821,11 @@ class TicketEmailParser(object):
 			filename = filename.replace('\\', '_')
 			filename = filename.replace('/', '_') 
 
+			## remove linefeed char
+			#
+			for forbidden_char in ['\r', '\n']:
+				filename = filename.replace(forbidden_char,'')
+
 			#
 			# We try to normalize the filename to utf-8 NFC if we can.
 			# Files uploaded from OS X might be in NFD.

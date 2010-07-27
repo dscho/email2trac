@@ -1,6 +1,11 @@
 2010-07-26
     * Fixed an Unicode error in strip_quotes
     Author: Bas van der Vlies
+
+    * The attachment filename may not contain '\n' and '\r'
+      characters.
+    Reported by: Jean-Paul Duyx <jean-paul dot duyx at vancis dot nl>
+    Fixed by; Bas van der Vlies
     
 2010-07-23
     * logging of spam message was wrong. Fixed it, 
