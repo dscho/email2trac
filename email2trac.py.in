@@ -478,9 +478,9 @@ class TicketEmailParser(object):
 			except OSError:
 				pass
 
-	def save_email_for_debug(self, message, tempfile=False):
+	def save_email_for_debug(self, message, create_tempfile=False):
 
-		if tempfile:
+		if create_tempfile:
 			import tempfile
 			msg_file = tempfile.mktemp('.email2trac')
 		else:
