@@ -889,7 +889,7 @@ class TicketEmailParser(object):
 			prefix = self.parameters['ticket_prefix']
 			try:
 				value = self.parameters['%s_%s' %(prefix, name)]
-				if self.parameters.debug > 10:
+				if self.parameters.debug:
 					s = 'email2trac[%s] = %s ' %(name, value)
 					self.print_unicode(s)
 
