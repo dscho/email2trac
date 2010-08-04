@@ -776,14 +776,14 @@ class TicketEmailParser(object):
 				self.logger.info('Reporter: %s has no permission to modify tickets' %self.author)
 				return False
 
-		# How many changes has this ticket
+		## How many changes has this ticket
+		#
 		cnum = len(tkt.get_changelog())
 
-
-		# reopen the ticket if it is was closed
-		# We must use the ticket workflow framework
+		## reopen the ticket if it is was closed
+		#  We must use the ticket workflow framework
 		#
-		if tkt['status'] in ['closed'] and self.parameters.email_triggers_workflow:
+		if self.parameters.email_triggers_workflow :
 
 			#print controller.actions['reopen']
 			#
@@ -799,14 +799,27 @@ class TicketEmailParser(object):
 			#b = controller.get_ticket_changes(req, tkt, 'reopen')
 			#print 'get_ticket_changes :', b
 
-			if self.parameters.workflow and (self.VERSION >= 0.11 ) :
+			workflow = None
+			if self.VERSION >= 0.11:
+
+				workflow = self.parameters['workflow_%s' %tkt['status']]
+
+				## fallback for compability (Will be deprecated)
+				#
+				if not workflow:
+					if tkt['status'] in ['closed'] and self.parameters.workflow:
+						workflow = self.parameters.workflow
+
+			if workflow:
+				## Execute workflow
+				#
 				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
 				from trac.test import Mock, MockPerm
 
 				req = Mock(authname='anonymous', perm=MockPerm(), args={})
 
 				controller = ConfigurableTicketWorkflow(self.env)
-				fields = controller.get_ticket_changes(req, tkt, self.parameters.workflow)
+				fields = controller.get_ticket_changes(req, tkt, workflow)
 
 				self.logger.debug('Workflow ticket update fields: ')
 
@@ -814,7 +827,9 @@ class TicketEmailParser(object):
 					self.logger.debug('\t %s : %s' %(key, fields[key]))
 					tkt[key] = fields[key]
 
-			else:
+			elif tkt['status'] in ['closed']:
+				## default when no workflow defined or wrong version of trac
+				#
 				tkt['status'] = 'reopened'
 				tkt['resolution'] = ''
 
