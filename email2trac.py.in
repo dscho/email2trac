@@ -828,7 +828,9 @@ class TicketEmailParser(object):
 		## Old pre 0.11 situation
 		# 
 		elif self.parameters.email_triggers_workflow:
+
 			self.logger.debug('email triggers workflow pre trac 0.11')
+
 			if tkt['status'] in ['closed']:
 				tkt['status'] = 'reopened'
 				tkt['resolution'] = ''
