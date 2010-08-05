@@ -1,4 +1,4 @@
-2010-07-26
+2010-XX-XX
     * Fixed an Unicode error in strip_quotes
     Author: Bas van der Vlies
 
@@ -6,7 +6,27 @@
       characters.
     Reported by: Jean-Paul Duyx <jean-paul dot duyx at vancis dot nl>
     Fixed by; Bas van der Vlies
-    
+
+   * Applied a patch to support workflow for all transitions. It will
+     also honour the permission model if set, closes #198
+     an example how to use it:
+	email2trac.conf:
+        	[project]
+		workflow_closed: reopen
+		workflow_infoneeded: provideinfo
+
+	trac.ini:
+		[ticket-workflow]
+		reopen = closed -> reopened 
+		reopen.permissions = TICKET_CREATE 
+		reopen.operations = del_resolution 
+		
+		provideinfo = infoneeded -> moreinfo
+		provideinfo.permissions = TICKET_CREATE
+		provideinfo.name = info provided
+
+     Authors: kroseneg add schmidham dot net and Bas van der Vlies
+
 2010-07-23
     * logging of spam message was wrong. Fixed it, 
        - set.logger.info must be self.logger.info
