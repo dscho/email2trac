@@ -783,57 +783,60 @@ class TicketEmailParser(object):
 		## reopen the ticket if it is was closed
 		#  We must use the ticket workflow framework
 		#
-		if self.parameters.email_triggers_workflow :
+		if self.parameters.email_triggers_workflow and (self.VERSION >= 0.11):
 
-			#print controller.actions['reopen']
-			#
-			# As reference	
-			# req = Mock(href=Href('/'), abs_href=Href('http://www.example.com/'), authname='anonymous', perm=MockPerm(), args={})
-			#
-			#a = controller.render_ticket_action_control(req, tkt, 'reopen')
-			#print 'controller : ', a
-			#
-			#b = controller.get_all_status()
-			#print 'get all status: ', b
-			#
-			#b = controller.get_ticket_changes(req, tkt, 'reopen')
-			#print 'get_ticket_changes :', b
+			self.logger.debug('Workflow ticket update fields: ')
 
-			workflow = None
-			if self.VERSION >= 0.11:
+			from trac.ticket.default_workflow import ConfigurableTicketWorkflow
+			from trac.test import Mock, MockPerm
 
+			req = Mock(authname=self.author, perm=MockPerm(), args={})
+			try:
 				workflow = self.parameters['workflow_%s' %tkt['status']]
-
+			except KeyError: 
 				## fallback for compability (Will be deprecated)
 				#
-				if not workflow:
-					if tkt['status'] in ['closed'] and self.parameters.workflow:
-						workflow = self.parameters.workflow
+				if tkt['status'] in ['closed']:
+					workflow = self.parameters.workflow
+				else:	
+ 					workflow = None
+
+			controller = ConfigurableTicketWorkflow(self.env)
+			#print controller.actions
+			#print controller.actions.keys()
+			#print controller.get_ticket_actions(req, tkt)
+			#print controller.actions[workflow]
+			#print controller.actions[workflow]['permissions'] is a list
 
 			if workflow:
-				## Execute workflow
-				#
-				from trac.ticket.default_workflow import ConfigurableTicketWorkflow
-				from trac.test import Mock, MockPerm
 
-				req = Mock(authname='anonymous', perm=MockPerm(), args={})
+				if self.parameters.ticket_permission_system:
 
-				controller = ConfigurableTicketWorkflow(self.env)
-				fields = controller.get_ticket_changes(req, tkt, workflow)
+					if self.check_permission(tkt, controller.actions[workflow]['permissions'][0]):
+						fields = controller.get_ticket_changes(req, tkt, workflow)
+					else:
+						fields = dict()
+						self.logger.info('Reporter: %s has no permission to trigger workflow' %self.author)
 
-				self.logger.debug('Workflow ticket update fields: ')
+				else:
+					fields = controller.get_ticket_changes(req, tkt, workflow)
 
 				for key in fields.keys():
 					self.logger.debug('\t %s : %s' %(key, fields[key]))
 					tkt[key] = fields[key]
 
-			elif tkt['status'] in ['closed']:
-				## default when no workflow defined or wrong version of trac
-				#
+		## Old pre 0.11 situation
+		# 
+		elif self.parameters.email_triggers_workflow:
+			self.logger.debug('email triggers workflow pre trac 0.11')
+			if tkt['status'] in ['closed']:
 				tkt['status'] = 'reopened'
 				tkt['resolution'] = ''
 
-		# Must we update some ticket fields properties via subjectline
+		else:
+			self.logger.debug('email triggers workflow disabled')
+
+		## Must we update some ticket fields properties via subjectline
 		#
 		if update_fields:
 			self.update_ticket_fields(tkt, update_fields)
