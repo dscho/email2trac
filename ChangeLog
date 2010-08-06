@@ -1,11 +1,10 @@
 2010-XX-XX
-    * Fixed an Unicode error in strip_quotes
-    Author: Bas van der Vlies
+   * Fixed an Unicode error in strip_quotes
+     Author: Bas van der Vlies
 
-    * The attachment filename may not contain '\n' and '\r'
-      characters.
-    Reported by: Jean-Paul Duyx <jean-paul dot duyx at vancis dot nl>
-    Fixed by; Bas van der Vlies
+   * The attachment filename may not contain '\n' and '\r' characters.
+     Reported by: Jean-Paul Duyx <jean-paul dot duyx at vancis dot nl>
+     Fixed by; Bas van der Vlies
 
    * Applied a patch to support workflow for all transitions. It will
      also honour the permission model if set, closes #198
@@ -27,6 +26,13 @@
 
      Authors: kroseneg add schmidham dot net and Bas van der Vlies
 
+   * The trac default value for resolution is fixed. The trac.ini value
+     for this is skipped and this resolution settings is only allowed in
+     email2trac.conf, closes #84
+
+     Reported by: hju add jochenkuhl dot de
+     Fixed by: Bas van der Vlies
+     
 2010-07-23
     * logging of spam message was wrong. Fixed it, 
        - set.logger.info must be self.logger.info
