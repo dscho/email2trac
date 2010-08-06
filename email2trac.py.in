@@ -891,6 +891,8 @@ class TicketEmailParser(object):
 			#
 			if not field.get('custom'):
 				value = self.get_config('ticket', 'default_%s' %(name) )
+				if (name in ['resolution']) and (value in ['fixed']):
+					value = None 
 			else:
 				##  Else we get the default value for reporter
 				#
@@ -906,7 +908,7 @@ class TicketEmailParser(object):
 
 			## email2trac.conf settings
 			#
-			prefix = self.parameters['ticket_prefix']
+			prefix = self.parameters.ticket_prefix
 			try:
 				value = self.parameters['%s_%s' %(prefix, name)]
 				if self.parameters.debug:
@@ -916,12 +918,11 @@ class TicketEmailParser(object):
 			except KeyError, detail:
 				pass
 		
-			if self.parameters.debug:
-				s = 'used %s = %s' %(name, value)
-				self.print_unicode(s)
-
 			if value:
 				user_dict[name] = value
+				if self.parameters.debug:
+					s = 'used %s = %s' %(name, value)
+					self.print_unicode(s)
 
 		self.update_ticket_fields(ticket, user_dict, use_default=1)
 
