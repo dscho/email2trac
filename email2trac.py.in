@@ -644,7 +644,7 @@ class TicketEmailParser(object):
 				return True
 
 
-	def update_ticket_fields(self, ticket, user_dict, new_ticket=None): 
+	def update_ticket_fields(self, ticket, user_dict, new=None): 
 		"""
 		This will update the ticket fields. It will check if the 
 		given fields are known and if the right values are specified
@@ -659,7 +659,7 @@ class TicketEmailParser(object):
 
 		## Check only permission model on ticket updates
 		#
-		if not new_ticket:
+		if not new:
 			if self.parameters.ticket_permission_system:
 				if not self.check_permission(ticket, 'TICKET_CHGPROP'):
 					self.logger.info('Reporter: %s has no permission to change ticket properties' %self.author)
@@ -710,7 +710,7 @@ class TicketEmailParser(object):
 					else:
 						# Must we set a default if value is not allowed
 						#
-						if new_ticket:
+						if new:
 							value = self.get_config('ticket', 'default_%s' %(field) )
 
 				except TypeError:
@@ -929,7 +929,7 @@ class TicketEmailParser(object):
 					s = 'used %s = %s' %(name, value)
 					self.print_unicode(s)
 
-		self.update_ticket_fields(ticket, user_dict, new_ticket=1)
+		self.update_ticket_fields(ticket, user_dict, new=1)
 
 		if 'status' not in user_dict.keys():
 			ticket['status'] = 'new'
