@@ -582,7 +582,7 @@ class TicketEmailParser(object):
 
 ########## TRAC ticket functions  ###########################################################
 
-	def check_permission_participants(self, tkt):
+	def check_permission_participants(self, tkt, action):
 		"""
 		Check if the mailer is allowed to update the ticket
 		"""
@@ -594,15 +594,11 @@ class TicketEmailParser(object):
 			return True
 
 		perm = PermissionSystem(self.env)
-		if perm.check_permission('TICKET_MODIFY', self.author):
+		if perm.check_permission(action, self.author):
 			self.logger.debug('ALLOW, %s has trac permission to update the ticket' %(self.author))
 
 			return True
-
-		else:
-			return False
 		
-
 		# Is the updater in the CC?
 		try:
 			cc_list = tkt['cc'].split(',')
@@ -613,13 +609,17 @@ class TicketEmailParser(object):
 					return True
 
 		except KeyError:
-			return False
+			pass
+
+		return False
 
 	def check_permission(self, tkt, action):
 		"""
 		check if the reporter has the right permission for the action: 
           - TICKET_CREATE
           - TICKET_MODIFY
+          - TICKET_APPEND
+          - TICKET_CHGPROP
 
 		There are three models:
   			- None      : no checking at all
@@ -637,17 +637,14 @@ class TicketEmailParser(object):
 				return False
 
 		elif self.parameters.ticket_permission_system in ['update_restricted_to_participants']:
-			if action in ['TICKET_MODIFY']:
-				return (self.check_permission_participants(tkt))	
-			else:
-				return True
+			return (self.check_permission_participants(tkt, action))	
 
 		# Default is to allow everybody ticket updates and ticket creation
 		else:
 				return True
 
 
-	def update_ticket_fields(self, ticket, user_dict, use_default=None): 
+	def update_ticket_fields(self, ticket, user_dict, new_ticket=None): 
 		"""
 		This will update the ticket fields. It will check if the 
 		given fields are known and if the right values are specified
@@ -655,10 +652,18 @@ class TicketEmailParser(object):
 			- If the field is known
 			- If the value supplied is valid for the ticket field.
 			  If not then there are two options:
-			   1) Skip the value (use_default=None)
-			   2) Set default value for field (use_default=1)
+			   1) Skip the value (new_ticket=None)
+			   2) Set default value for field (new_ticket=1)
 		"""
 		self.logger.debug("function update_ticket_fields")
+
+		## Check only permission model on ticket updates
+		#
+		if not new_ticket:
+			if self.parameters.ticket_permission_system:
+				if not self.check_permission(ticket, 'TICKET_CHGPROP'):
+					self.logger.info('Reporter: %s has no permission to change ticket properties' %self.author)
+					return False
 
 		# Build a system dictionary from the ticket fields 
 		# with field as index and option as value
@@ -705,7 +710,7 @@ class TicketEmailParser(object):
 					else:
 						# Must we set a default if value is not allowed
 						#
-						if use_default:
+						if new_ticket:
 							value = self.get_config('ticket', 'default_%s' %(field) )
 
 				except TypeError:
@@ -772,8 +777,8 @@ class TicketEmailParser(object):
 		# Check the permission of the reporter
 		#
 		if self.parameters.ticket_permission_system:
-			if not self.check_permission(tkt, 'TICKET_MODIFY'):
-				self.logger.info('Reporter: %s has no permission to modify tickets' %self.author)
+			if not self.check_permission(tkt, 'TICKET_APPEND'):
+				self.logger.info('Reporter: %s has no permission to add comments or attachments to tickets' %self.author)
 				return False
 
 		## How many changes has this ticket
@@ -924,7 +929,7 @@ class TicketEmailParser(object):
 					s = 'used %s = %s' %(name, value)
 					self.print_unicode(s)
 
-		self.update_ticket_fields(ticket, user_dict, use_default=1)
+		self.update_ticket_fields(ticket, user_dict, new_ticket=1)
 
 		if 'status' not in user_dict.keys():
 			ticket['status'] = 'new'
