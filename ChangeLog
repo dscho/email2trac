@@ -32,7 +32,14 @@
 
      Reported by: hju add jochenkuhl dot de
      Fixed by: Bas van der Vlies
-     
+
+   * Honor the trac permission model if set, Use
+    TICKET_APPEND and TICKET_CHGPROP instead of TICKET_MODIFY.
+    closes #214
+
+    Reported by: Konstantin Ryabitsev <icon add mricon dot com>
+    Fixed by: Bas van der Vlies
+    
 2010-07-23
     * logging of spam message was wrong. Fixed it, 
        - set.logger.info must be self.logger.info
