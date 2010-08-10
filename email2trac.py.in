@@ -318,8 +318,7 @@ class TicketEmailParser(object):
 		self.email_name, self.email_addr  = email.Utils.parseaddr(self.email_from)
 
 		## Trac can not handle author's name that contains spaces
-		#  and forbid the ticket email address as author field
-
+		#
 		if self.email_addr == self.trac_smtp_from:
 			if self.email_name:
 				self.author = self.email_name
@@ -639,7 +638,8 @@ class TicketEmailParser(object):
 		elif self.parameters.ticket_permission_system in ['update_restricted_to_participants']:
 			return (self.check_permission_participants(tkt, action))	
 
-		# Default is to allow everybody ticket updates and ticket creation
+		## Default is to allow everybody ticket updates and ticket creation
+		#
 		else:
 				return True
 
@@ -665,8 +665,8 @@ class TicketEmailParser(object):
 					self.logger.info('Reporter: %s has no permission to change ticket properties' %self.author)
 					return False
 
-		# Build a system dictionary from the ticket fields 
-		# with field as index and option as value
+		## Build a system dictionary from the ticket fields 
+		#  with field as index and option as value
 		#
 		sys_dict = dict()
 		for field in ticket.fields:
@@ -678,7 +678,7 @@ class TicketEmailParser(object):
 				pass
 
 		## Check user supplied fields an compare them with the
-		# system one's
+		#  system one's
 		#
 		for field,value in user_dict.items():
 			if self.parameters.debug:
@@ -701,14 +701,14 @@ class TicketEmailParser(object):
 
 			if sys_dict.has_key(field):
 
-				# Check if value is an allowed system option, if TypeError then
-				# every value is allowed
+				## Check if value is an allowed system option, if TypeError then
+				#  every value is allowed
 				#
 				try:
 					if value in sys_dict[field]:
 						ticket[field] = value
 					else:
-						# Must we set a default if value is not allowed
+						## Must we set a default if value is not allowed
 						#
 						if new:
 							value = self.get_config('ticket', 'default_%s' %(field) )
@@ -737,7 +737,7 @@ class TicketEmailParser(object):
 			self.logger.debug("ticket_update disabled")
 			return False
 
-		# Must we update ticket fields
+		## Must we update ticket fields
 		#
 		update_fields = dict()
 		try:
@@ -745,19 +745,19 @@ class TicketEmailParser(object):
 
 			update_fields = self.str_to_dict(keywords)
 
-			# Strip '#' 
+			## Strip '#' 
 			#
 			self.id = int(id[1:])
 
 		except ValueError:
 
-			# Strip '#' 
+			## Strip '#' 
 			#
 			self.id = int(id[1:])
 
 		self.logger.debug("ticket_update id %s" %id)
 
-		# When is the change committed
+		## When is the change committed
 		# 
 		if self.VERSION < 0.11:
 			when = int(time.time())
@@ -769,12 +769,12 @@ class TicketEmailParser(object):
 
 		except util.TracError, detail:
 
-			# Not a valid ticket
-
+			## Not a valid ticket
+			#
 			self.id = None
 			return False
 
-		# Check the permission of the reporter
+		## Check the permission of the reporter
 		#
 		if self.parameters.ticket_permission_system:
 			if not self.check_permission(tkt, 'TICKET_APPEND'):
@@ -851,7 +851,7 @@ class TicketEmailParser(object):
 		message_parts = self.get_message_parts(m)
 		message_parts = self.unique_attachment_names(message_parts)
 
-		# Must we update some ticket fields properties via body_text
+		## Must we update some ticket fields properties via body_text
 		#
 		if self.properties:
 				self.update_ticket_fields(tkt, self.properties)
@@ -953,7 +953,8 @@ class TicketEmailParser(object):
 			result = SUBJECT_RE.search(subject)
 
 			if result:
-				# This is a reply
+				## This is a reply
+				#
 				orig_subject = result.group(3)
 
 				self.logger.debug('subject search string: %s' %(orig_subject))
@@ -961,8 +962,8 @@ class TicketEmailParser(object):
 				cursor = self.db.cursor()
 				summaries = [orig_subject, '%%: %s' % orig_subject]
 
-				##
-				# Convert days to seconds
+				## Convert days to seconds
+				#
 				lookback = int(time.mktime(time.gmtime())) - \
 						self.parameters.ticket_update_by_subject_lookback * 24 * 3600
 
@@ -1001,14 +1002,14 @@ class TicketEmailParser(object):
 
 		self.set_ticket_fields(tkt)
 
-		# Check the permission of the reporter
+		## Check the permission of the reporter
 		#
 		if self.parameters.ticket_permission_system:
 			if not self.check_permission(tkt, 'TICKET_CREATE'):
 				self.logger.info('Reporter: %s has no permission to create tickets' %self.author)
 				return False
 
-		# Old style setting for component, will be removed
+		## Old style setting for component, will be removed
 		#
 		if spam:
 			tkt['component'] = 'Spam'
@@ -1032,14 +1033,14 @@ class TicketEmailParser(object):
 
 		message_parts = self.get_message_parts(msg)
 
-		# Must we update some ticket fields properties via body_text
+		## Must we update some ticket fields properties via body_text
 		#
 		if self.properties:
 				self.update_ticket_fields(tkt, self.properties)
 
 		message_parts = self.unique_attachment_names(message_parts)
 		
-		# produce e-mail like header
+		## produce e-mail like header
 		#
 		head = ''
 		if self.parameters.email_header:
@@ -1050,7 +1051,7 @@ class TicketEmailParser(object):
 
 		tkt['description'] = body_text
 
-		# When is the change committed
+		## When is the change committed
 		# 
 		if self.VERSION < 0.11:
 			when = int(time.time())
@@ -1065,8 +1066,8 @@ class TicketEmailParser(object):
 		changed = False
 		comment = ''
 
-		# some routines in trac are dependend on ticket id	
-		# like alternate notify template
+		## some routines in trac are dependend on ticket id	
+		#  like alternate notify template
 		#
 		if self.parameters.alternate_notify_template:
 			tkt['id'] = self.id
@@ -1113,20 +1114,21 @@ class TicketEmailParser(object):
 
 		count = 0
 
-		# Get Maxium attachment size
+		## Get Maxium attachment size
 		#
 		max_size = int(self.get_config('attachment', 'max_size'))
 		status   = None
 		
 		for item in message_parts:
-			# Skip body parts
+			## Skip body parts
+			#
 			if not isinstance(item, tuple):
 				continue
 				
 			(original, filename, part) = item
-			#
-			# We have to determine the size so we use this temporary solution. we must escape it
-			# else we get UnicodeErrors. 
+
+			## We have to determine the size so we use this temporary solution. we must escape it
+			#  else we get UnicodeErrors. 
 			#
 			path, fd =  util.create_unique_file(os.path.join(self.parameters.tmpdir, util.text.unicode_quote(filename)))
 			text = part.get_payload(decode=1)
@@ -1135,12 +1137,12 @@ class TicketEmailParser(object):
 			fd.write(text)
 			fd.close()
 
-			# get the file_size
+			## get the file_size
 			#
 			stats = os.lstat(path) 
 			file_size = stats[ST_SIZE]
 
-			# Check if the attachment size is allowed
+			## Check if the attachment size is allowed
 			#
 			if (max_size != -1) and (file_size > max_size):
 				status = '%s\nFile %s is larger then allowed attachment size (%d > %d)\n\n' \
@@ -1151,7 +1153,7 @@ class TicketEmailParser(object):
 			else:
 				count = count + 1
 					
-			# Insert the attachment
+			## Insert the attachment
 			# 
 			fd = open(path, 'rb')
 			if self.system == 'discussion':
@@ -1161,8 +1163,8 @@ class TicketEmailParser(object):
 				self.logger.debug('Attach %s to ticket %d' %(util.text.unicode_quote(filename), self.id))
 				att = attachment.Attachment(self.env, 'ticket', self.id)
   
-			# This will break the ticket_update system, the body_text is vaporized
-			# ;-(
+			## This will break the ticket_update system, the body_text is vaporized
+			#  ;-(
 			#
 			if not update:
 				att.author = self.author
@@ -1175,7 +1177,7 @@ class TicketEmailParser(object):
 				self.logger.info('%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail))
 				status = '%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail)
 
-			# Remove the created temporary filename
+			## Remove the created temporary filename
 			#
 			fd.close()
 			os.unlink(path)
@@ -1190,19 +1192,20 @@ class TicketEmailParser(object):
 		"""
 		The blog create/update function
 		"""
-		# import the modules
+		## import the modules
 		#
 		from tracfullblog.core import FullBlogCore
 		from tracfullblog.model import BlogPost, BlogComment
 		from trac.test import Mock, MockPerm
 
-		# instantiate blog core
+		## instantiate blog core
+		#
 		blog = FullBlogCore(self.env)
 		req = Mock(authname='anonymous', perm=MockPerm(), args={})
 
 		if id: 
 
-			# update blog
+			## update blog
 			#
 			comment = BlogComment(self.env, id)
 			comment.author = self.author
@@ -1213,7 +1216,7 @@ class TicketEmailParser(object):
 			blog.create_comment(req, comment)
 
 		else:
-			# create blog
+			## create blog
 			#
 			import time
 			post = BlogPost(self.env, 'blog_'+time.strftime("%Y%m%d%H%M%S", time.gmtime()))
@@ -1233,23 +1236,27 @@ class TicketEmailParser(object):
 
 	def discussion_topic(self, content, subject):
 
-		# Import modules.
+		## Import modules.
+		#
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
 		self.logger.debug('Creating a new topic in forum:', self.id)
 
-		# Get dissussion API component.
+		## Get dissussion API component.
+		#
 		api = self.env[DiscussionApi]
 		context = self._create_context(content, subject)
 
-		# Get forum for new topic.
+		## Get forum for new topic.
+		#
 		forum = api.get_forum(context, self.id)
 
 		if not forum:
 			self.logger.error("ERROR: Replied forum doesn't exist")
 
-		# Prepare topic.
+		## Prepare topic.
+		#
 		topic = {'forum' : forum['id'],
 				 'subject' : context.subject,
 				 'time': to_timestamp(datetime.now(utc)),
@@ -1257,29 +1264,34 @@ class TicketEmailParser(object):
 				 'subscribers' : [self.email_addr],
 				 'body' : self.body_text(context.content_parts)}
 
-		# Add topic to DB and commit it.
+		## Add topic to DB and commit it.
+		#
 		self._add_topic(api, context, topic)
 		self.db.commit()
 
 	def discussion_topic_reply(self, content, subject):
 
-		# Import modules.
+		## Import modules.
+		#
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
 		self.logger.debug('Replying to discussion topic', self.id)
 
-		# Get dissussion API component.
+		## Get dissussion API component.
+		#
 		api = self.env[DiscussionApi]
 		context = self._create_context(content, subject)
 
-		# Get replied topic.
+		## Get replied topic.
+		#
 		topic = api.get_topic(context, self.id)
 
 		if not topic:
 			self.logger.error("ERROR: Replied topic doesn't exist")
 
-		# Prepare message.
+		## Prepare message.
+		#
 		message = {'forum' : topic['forum'],
 				   'topic' : topic['id'],
 				   'replyto' : -1,
@@ -1287,29 +1299,34 @@ class TicketEmailParser(object):
 				   'author' : self.author,
 				   'body' : self.body_text(context.content_parts)}
 
-		# Add message to DB and commit it.
+		## Add message to DB and commit it.
+		#
 		self._add_message(api, context, message)
 		self.db.commit()
 
 	def discussion_message_reply(self, content, subject):
 
-		# Import modules.
+		## Import modules.
+		#
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
 		self.loggger.debug('Replying to discussion message', self.id)
 
-		# Get dissussion API component.
+		## Get dissussion API component.
+		#
 		api = self.env[DiscussionApi]
 		context = self._create_context(content, subject)
 
-		# Get replied message.
+		## Get replied message.
+		#
 		message = api.get_message(context, self.id)
 
 		if not message:
 			self.logger.error("ERROR: Replied message doesn't exist")
 
-		# Prepare message.
+		## Prepare message.
+		#
 		message = {'forum' : message['forum'],
 				   'topic' : message['topic'],
 				   'replyto' : message['id'],
@@ -1317,19 +1334,21 @@ class TicketEmailParser(object):
 				   'author' : self.author,
 				   'body' : self.body_text(context.content_parts)}
 
-		# Add message to DB and commit it.
+		## Add message to DB and commit it.
+		#
 		self._add_message(api, context, message)
 		self.db.commit()
 
 	def _create_context(self, content, subject):
 
-		# Import modules.
+		## Import modules.
+		#
 		from trac.mimeview import Context
 		from trac.web.api import Request
 		from trac.perm import PermissionCache
 
-		# TODO: Read server base URL from config.
-		# Create request object to mockup context creation.
+		## TODO: Read server base URL from config.
+		#  Create request object to mockup context creation.
 		#
 		environ = {'SERVER_PORT' : 80,
 				   'SERVER_NAME' : 'test',
@@ -1351,14 +1370,16 @@ class TicketEmailParser(object):
 		req.authname = self.author
 		req.perm = PermissionCache(self.env, self.author)
 
-		# Create and return context.
+		## Create and return context.
+		#
 		context = Context.from_request(req)
 		context.realm = 'discussion-email2trac'
 		context.cursor = self.db.cursor()
 		context.content = content
 		context.subject = subject
 
-		# Read content parts from content.
+		## Read content parts from content.
+		#
 		context.content_parts = self.get_message_parts(content)
 		context.content_parts = self.unique_attachment_names(
 		  context.content_parts)
@@ -1368,7 +1389,8 @@ class TicketEmailParser(object):
 	def _add_topic(self, api, context, topic):
 		context.req.perm.assert_permission('DISCUSSION_APPEND')
 
-		# Filter topic.
+		## Filter topic.
+		#
 		for discussion_filter in api.discussion_filters:
 			accept, topic_or_error = discussion_filter.filter_topic(
 			  context, topic)
@@ -1377,24 +1399,29 @@ class TicketEmailParser(object):
 			else:
 				raise TracError(topic_or_error)
 
-		# Add a new topic.
+		## Add a new topic.
+		#
 		api.add_topic(context, topic)
 
-		# Get inserted topic with new ID.
+		## Get inserted topic with new ID.
+		#
 		topic = api.get_topic_by_time(context, topic['time'])
 
-		# Attach attachments.
+		## Attach attachments.
+		#
 		self.id = topic['id']
 		self.attach_attachments(context.content_parts, True)
 
-		# Notify change listeners.
+		## Notify change listeners.
+		#
 		for listener in api.topic_change_listeners:
 			listener.topic_created(context, topic)
 
 	def _add_message(self, api, context, message):
 		context.req.perm.assert_permission('DISCUSSION_APPEND')
 
-		# Filter message.
+		## Filter message.
+		#
 		for discussion_filter in api.discussion_filters:
 			accept, message_or_error = discussion_filter.filter_message(
 			  context, message)
@@ -1403,17 +1430,21 @@ class TicketEmailParser(object):
 			else:
 				raise TracError(message_or_error)
 
-		# Add message.
+		## Add message.
+		#
 		api.add_message(context, message)
 
-		# Get inserted message with new ID.
+		## Get inserted message with new ID.
+		#
 		message = api.get_message_by_time(context, message['time'])
 
-		# Attach attachments.
+		## Attach attachments.
+		#
 		self.id = message['topic']
 		self.attach_attachments(context.content_parts, True)
 
-		# Notify change listeners.
+		## Notify change listeners.
+		#
 		for listener in api.message_change_listeners:
 			listener.message_created(context, message)
 
@@ -1431,7 +1462,8 @@ class TicketEmailParser(object):
 			self.logger.debug('This is not a valid email message format')
 			return
 			
-		# Work around lack of header folding in Python; see http://bugs.python.org/issue4696
+		## Work around lack of header folding in Python; see http://bugs.python.org/issue4696
+		#
 		try:
 			m.replace_header('Subject', m['Subject'].replace('\r', '').replace('\n', ''))
 		except AttributeError, detail:
@@ -1455,7 +1487,7 @@ class TicketEmailParser(object):
 			self.logger.info('Message rejected : %s not in recipient list' %(self.to_email_addr))
 			return False
 
-		# If spam drop the message
+		## If spam drop the message
 		#
 		if self.spam(m) == 'drop':
 			return False
@@ -1472,15 +1504,14 @@ class TicketEmailParser(object):
 
 		self.logger.debug('subject: %s' %subject)
 
-		#
-		# [hic] #1529: Re: LRZ
-		# [hic] #1529?owner=bas,priority=medium: Re: LRZ
+		## [hic] #1529: Re: LRZ
+		#  [hic] #1529?owner=bas,priority=medium: Re: LRZ
 		#
 		ticket_regex = r'''
 			(?P<new_fields>[#][?].*)
 			|(?P<reply>(?P<id>[#][\d]+)(?P<fields>\?.*)?:)
 			'''
-		# Check if  FullBlogPlugin is installed
+		## Check if  FullBlogPlugin is installed
 		#
 		blog_enabled = None
 		blog_regex = ''
@@ -1489,7 +1520,7 @@ class TicketEmailParser(object):
 		        blog_regex = '''|(?P<blog>blog:(?P<blog_id>\w*))'''
 
 
-		# Check if DiscussionPlugin is installed
+		## Check if DiscussionPlugin is installed
 		#
 		discussion_enabled = None
 		discussion_regex = ''
@@ -1505,23 +1536,22 @@ class TicketEmailParser(object):
 		regex_str = ticket_regex + blog_regex + discussion_regex
 		SYSTEM_RE = re.compile(regex_str, re.VERBOSE)
 
-		# Find out if this is a ticket, a blog or a discussion
+		## Find out if this is a ticket, a blog or a discussion
 		#
 		result =  SYSTEM_RE.search(subject)
 
 		if result:
-			# update ticket + fields
+			## update ticket + fields
 			#
-			#if result.group('reply') and self.parameters.ticket_update:
 			if result.group('reply'):
 				self.system = 'ticket'
 
-				# Skip the last ':' character
+				## Skip the last ':' character
 				#
 				if not self.ticket_update(m, result.group('reply')[:-1], spam_msg):
 					self.new_ticket(m, subject, spam_msg)
 
-			# New ticket + fields
+			## New ticket + fields
 			#
 			elif result.group('new_fields'):
 				self.system = 'ticket'
@@ -1533,21 +1563,21 @@ class TicketEmailParser(object):
 					self.blog(result.group('blog_id'))
 
 			if discussion_enabled:
-				# New topic.
+				## New topic.
 				#
 				if result.group('forum'):
 					self.system = 'discussion'
 					self.id = int(result.group('forum_id'))
 					self.discussion_topic(m, subject[result.end('forum'):])
 
-				# Reply to topic.
+				## Reply to topic.
 				#
 				elif result.group('topic'): 
 					self.system = 'discussion'
 					self.id = int(result.group('topic_id'))
 					self.discussion_topic_reply(m, subject[result.end('topic'):])
 
-				# Reply to topic message.
+				## Reply to topic message.
 				#
 				elif result.group('message'):
 					self.system = 'discussion'
@@ -1561,7 +1591,8 @@ class TicketEmailParser(object):
 				if not self.ticket_update(m, result, spam_msg):
 					self.new_ticket(m, subject, spam_msg)
 			else:
-				# No update by subject, so just create a new ticket
+				## No update by subject, so just create a new ticket
+				#
 				self.new_ticket(m, subject, spam_msg)
 
 
@@ -1592,12 +1623,14 @@ class TicketEmailParser(object):
 		for line in text.splitlines():
 			from re import match
 			
-			# Figure out the quote level and the content of the current line
+			## Figure out the quote level and the content of the current line
+			#
 			m = match('(>*)( ?)(.*)', line)
 			linequotelevel = len(m.group(1))
 			line = m.group(3)
 
-			# Determine whether this line is flowed
+			## Determine whether this line is flowed
+			#
 			if line and line != '-- ' and line[-1] == ' ':
 				flowed = 1
 			else:
@@ -1606,10 +1639,13 @@ class TicketEmailParser(object):
 			if flowed and delsp and line and line[-1] == ' ':
 				line = line[:-1]
 
-			# If the previous line is flowed, append this line to it
+			## If the previous line is flowed, append this line to it
+			#
 			if prevflowed and line != '-- ' and linequotelevel == quotelevel:
 				flowedlines[-1] += line
-			# Otherwise, start a new line
+
+			## Otherwise, start a new line
+			#
 			else:
 				flowedlines.append('>' * linequotelevel + line)
 
@@ -1750,7 +1786,7 @@ class TicketEmailParser(object):
 			if part.get_content_type() == 'text/plain' and inline:
 				self.logger.debug('               Inline body part')
 
-				# Try to decode, if fails then do not decode
+				## Try to decode, if fails then do not decode
 				#
 				body_text = part.get_payload(decode=1)
 				if not body_text:			
@@ -1798,9 +1834,9 @@ class TicketEmailParser(object):
 					s = '              Filename: %s' % part.get_filename()
 					self.print_unicode(s)
 
-				## 
-				#  First try to use email header function to convert filename.
+				## First try to use email header function to convert filename.
 				#  If this fails the use the plan filename 
+				#
 				try:
 					filename = self.email_to_unicode(part.get_filename())
 				except UnicodeEncodeError, detail:
@@ -1831,9 +1867,9 @@ class TicketEmailParser(object):
 			if not filename:
 				filename = 'untitled-part'
 
-				# Guess the extension from the content type, use non strict mode
-				# some additional non-standard but commonly used MIME types 
-				# are also recognized
+				## Guess the extension from the content type, use non strict mode
+				#  some additional non-standard but commonly used MIME types 
+				#  are also recognized
 				#
 				ext = mimetypes.guess_extension(part.get_content_type(), False)
 				if not ext:
@@ -1852,10 +1888,9 @@ class TicketEmailParser(object):
 			for forbidden_char in ['\r', '\n']:
 				filename = filename.replace(forbidden_char,'')
 
-			#
-			# We try to normalize the filename to utf-8 NFC if we can.
-			# Files uploaded from OS X might be in NFD.
-			# Check python version and then try it
+			## We try to normalize the filename to utf-8 NFC if we can.
+			#  Files uploaded from OS X might be in NFD.
+			#  Check python version and then try it
 			#
 			#if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
 			#	try:
@@ -1863,7 +1898,8 @@ class TicketEmailParser(object):
 			#	except TypeError:
 			#		pass
 
-			# Make the filename unique for this ticket
+			## Make the filename unique for this ticket
+			#
 			num = 0
 			unique_filename = filename
 			dummy_filename, ext = os.path.splitext(filename)
@@ -1889,7 +1925,7 @@ class TicketEmailParser(object):
 			s = 'attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
 			self.print_unicode(s)
 
-		# We have no valid ticket id
+		## We have no valid ticket id
 		#
 		if not self.id:
 			return False
@@ -1911,7 +1947,9 @@ class TicketEmailParser(object):
 		body_text = []
 		
 		for part in message_parts:
-			# Plain text part, append it
+
+			## Plain text part, append it
+			#
 			if not isinstance(part, tuple):
 				body_text.extend(part.strip().splitlines())
 				body_text.append("")
@@ -1944,7 +1982,7 @@ class TicketEmailParser(object):
 		if not self.parameters.mailto_cc:
 			self.parameters.mailto_cc = ''
 
-		# use urllib to escape the chars
+		## use urllib to escape the chars
 		#
 		s = 'mailto:%s?Subject=%s&Cc=%s' %( 
 		       urllib.quote(self.email_addr), 
@@ -1978,7 +2016,7 @@ class TicketEmailParser(object):
 			#print tn_sys.__dict__
 			#sys.exit(0)
 
-			# create false {abs_}href properties, to trick Notify()
+			## create false {abs_}href properties, to trick Notify()
 			#
 			if not (self.VERSION in [0.11, 0.12]):
 				self.env.abs_href = Href(self.get_config('project', 'url'))
@@ -2023,7 +2061,7 @@ def ReadConfig(file, name):
 
 	config = trac_config.Configuration(file)
 
-  	# Use given project name else use defaults
+  	## Use given project name else use defaults
   	#
 	if name:
 		sections = config.sections()
@@ -2040,7 +2078,7 @@ def ReadConfig(file, name):
 				project[option] = value 
 
 	else:
-		# use some trac internals to get the defaults
+		## use some trac internals to get the defaults
 		#
 		tmp = config.parser.defaults()
 		project =  SaraDict()
@@ -2082,7 +2120,8 @@ def setup_log(parameters, project_name, interactive=None):
 		log_handler = logging.FileHandler(parameters.log_file)
 
 	elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
-		# Requires win32 extensions
+		## Requires win32 extensions
+		#
 		log_handler = logging.handlers.NTEventLogHandler(logid, logtype='Application')
 
 	elif parameters.log_type in ('syslog', 'unix'):
@@ -2125,7 +2164,7 @@ def setup_log(parameters, project_name, interactive=None):
 
 
 if __name__ == '__main__':
-	# Default config file
+	## Default config file
 	#
 	configfile = '@email2trac_conf@'
 	project = ''
@@ -2167,7 +2206,7 @@ if __name__ == '__main__':
 	
 	settings = ReadConfig(configfile, project_name)
 
-	# The default prefix for ticket values in email2trac.conf
+	## The default prefix for ticket values in email2trac.conf
 	#
 	settings.ticket_prefix = ticket_prefix
 	settings.dry_run = dry_run
@@ -2186,7 +2225,7 @@ if __name__ == '__main__':
 	if component:
 		settings['component'] = component
 
-	# Determine major trac version used to be in email2trac.conf
+	## Determine major trac version used to be in email2trac.conf
 	# Quick hack for 0.12
 	#
 	version = '0.%s' %(trac_version.split('.')[1])
@@ -2247,7 +2286,7 @@ if __name__ == '__main__':
 			logger.error('TRAC version %s is not supported' %version)
 			sys.exit(1)
 
-		# Must be set before environment is created
+		## Must be set before environment is created
 		#
 		if settings.has_key('python_egg_cache'):
 			python_egg_cache = str(settings['python_egg_cache'])
