@@ -1,4 +1,4 @@
-2010-XX-XX
+1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies
 
