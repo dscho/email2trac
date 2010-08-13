@@ -339,7 +339,7 @@ class TicketEmailParser(object):
 		users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
 			if e and (e.lower() == self.email_addr.lower()) ]
 
-		if len(users) == 1:
+		if len(users) => 1:
 			self.email_from = users[0][0]
 			self.author = users[0][0]
 
