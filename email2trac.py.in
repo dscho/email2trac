@@ -220,6 +220,8 @@ class TicketEmailParser(object):
 			self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
 
 		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
+		self.smtp_default_domain = self.get_config('notification', 'smtp_default_domain')
+
 
 		self.system = None
 
@@ -337,7 +339,11 @@ class TicketEmailParser(object):
 		#   e : email address that the user has set in the settings tab 
 		#
 		users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
-			if e and (e.lower() == self.email_addr.lower()) ]
+			if ( 
+				(e and (e.lower() == self.email_addr.lower())) or
+			    (u + '@' + self.smtp_default_domain.lower() == self.email_addr.lower())
+			)
+			]
 
 		if len(users) >= 1:
 			self.email_from = users[0][0]

@@ -1,7 +1,12 @@
 1.X.X (2010-XX-XX)
    * An email adress can match multiple trac accounts, closes #218
      Author: Konstantin Ryabitsev <icon add mricon dot com>
- 
+
+   * Added check to detect valid users when smtp_default_domain in 
+     trac.ini is set, closes #219
+     Author: sto add iti dot upv dot es
+     Applied by: Bas van der Vlies with some minor changes
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies
