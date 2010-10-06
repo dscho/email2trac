@@ -7,6 +7,19 @@
      Author: sto add iti dot upv dot es
      Applied by: Bas van der Vlies with some minor changes
 
+   * Support for parentdir. Can be used to avoid sections for each project
+     or if all projects have a common parent directory, you can leave out
+     the project drectory setting for each project. 
+
+     If an section defines a project directory then this can NOT be overriden 
+     by the parendir declatation. 
+
+     This closes #217
+
+     Author: sto add iti dot upv dot es
+     Applied by: Bas van der Vlies with some minor changes
+
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies

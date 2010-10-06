@@ -2065,35 +2065,46 @@ def ReadConfig(file, name):
 		print 'File %s does not exist' %file
 		sys.exit(1)
 
-	config = trac_config.Configuration(file)
+	config = trac_config.Configuration(file) 
+	
+	parentdir = config.get('DEFAULT', 'parentdir')
+	sections = config.sections()
 
-  	## Use given project name else use defaults
-  	#
+	## use some trac internals to get the defaults
+	#
+	tmp = config.parser.defaults()
+	project =  SaraDict()
+
+	for option, value in tmp.items():
+		try:
+			project[option] = int(value)
+		except ValueError:
+			project[option] = value 
+
 	if name:
-		sections = config.sections()
-		if not name in sections:
-			print "Not a valid project name: %s" %name
-			print "Valid names: %s" %sections
+		if name in sections: 
+			project =  SaraDict()
+			for option, value in  config.options(name):
+				try:
+					project[option] = int(value)
+				except ValueError: 
+					project[option] = value 
+
+		elif not parentdir:
+			print "Not a valid project name: %s, valid names are: %s" %(name, sections)
+			print "or set parentdir in the [DEFAULT] section"
 			sys.exit(1)
 
-		project =  SaraDict()
-		for option, value in  config.options(name):
-			try:
-				project[option] = int(value)
-			except ValueError:
-				project[option] = value 
-
-	else:
-		## use some trac internals to get the defaults
-		#
-		tmp = config.parser.defaults()
-		project =  SaraDict()
-
-		for option, value in tmp.items():
-			try:
-				project[option] = int(value)
-			except ValueError:
-				project[option] = value 
+	## If parentdir the set project dir to parentdir + name
+	#
+	if not project.has_key('project'):
+		if not parentdir: 
+			print "You must set project or parentdir in your configuration file"
+			sys.exit(1)
+		elif not name:
+			print "You must set project in your configuration file"
+		else:
+			project['project'] = os.path.join(parentdir, name)
 
 	return project
 
@@ -2301,7 +2312,11 @@ if __name__ == '__main__':
 		if settings.debug > 0:
 			logger.debug('Loading environment %s', settings.project)
 
-		env = Environment(settings['project'], create=0)
+		try:
+			env = Environment(settings['project'], create=0)
+		except IOError, detail:
+			print "Trac project does not exists: %s" %(settings['project'])
+			sys.exit(1)
 
 		tktparser = TicketEmailParser(env, settings, logger, float(version))
 		tktparser.parse(sys.stdin)
