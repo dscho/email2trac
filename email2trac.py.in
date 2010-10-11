@@ -958,13 +958,13 @@ class TicketEmailParser(object):
 		matched_id = None
 		if self.parameters.ticket_update and self.parameters.ticket_update_by_subject:
 				
-			SUBJECT_RE = re.compile(r'^(RE|AW|VS|SV):(.*:)*\s*(.*)', re.IGNORECASE)
+			SUBJECT_RE = re.compile(r'^(?:(?:RE|AW|VS|SV|FW|FWD):\s*)+(.*)', re.IGNORECASE)
 			result = SUBJECT_RE.search(subject)
 
 			if result:
 				## This is a reply
 				#
-				orig_subject = result.group(3)
+				orig_subject = result.group(1)
 
 				self.logger.debug('subject search string: %s' %(orig_subject))
 
@@ -994,9 +994,11 @@ class TicketEmailParser(object):
 
 					if matched_id:
 						matched_id = '#%d' % matched_id
-						return matched_id
+						return (matched_id, orig_subject)
+					
+					subject = orig_subject
 
-		return matched_id
+		return (matched_id, subject)
 
 
 	def new_ticket(self, msg, subject, spam, set_fields = None):
@@ -1595,9 +1597,9 @@ class TicketEmailParser(object):
 
 		else:
 			self.system = 'ticket'
-			result = self.ticket_update_by_subject(subject)
-			if result:
-				if not self.ticket_update(m, result, spam_msg):
+			(matched_id, subject) = self.ticket_update_by_subject(subject)
+			if matched_id:
+				if not self.ticket_update(m, matched_id, spam_msg):
 					self.new_ticket(m, subject, spam_msg)
 			else:
 				## No update by subject, so just create a new ticket

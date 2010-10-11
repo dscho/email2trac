@@ -24,6 +24,12 @@
      Author: stas dot agarkov add gmail dot com
      Applied by: Bas van der Vlies
 
+   * email2trac: An enhancement to "update-by-subject", closes #188 Features: 
+      - Does a better job parsing out all the permutations of "Re: FW: Re: AW: Subject" 
+      - Modifies the subject to drop the prefixes 
+     Author: Konstantin Ryabitsev <icon add mricon dot com>
+     Applied by: Bas van der Vlies
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies
