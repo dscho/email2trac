@@ -19,6 +19,10 @@
      Author: sto add iti dot upv dot es
      Applied by: Bas van der Vlies with some minor changes
 
+   * email2trac: Used the wrong code to check number of ticket changes, 
+     closes #223.
+     Author: stas dot agarkov add gmail dot com
+     Applied by: Bas van der Vlies
 
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes

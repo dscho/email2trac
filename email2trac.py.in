@@ -789,7 +789,10 @@ class TicketEmailParser(object):
 
 		## How many changes has this ticket
 		#
-		cnum = len(tkt.get_changelog())
+		# cnum = len(tkt.get_changelog())
+		grouped = TicketModule(self.env).grouped_changelog_entries(tkt, self.db)
+		cnum = sum(1 for e in grouped) + 1
+
 
 		## reopen the ticket if it is was closed
 		#  We must use the ticket workflow framework
@@ -2258,6 +2261,8 @@ if __name__ == '__main__':
 			from trac.ticket import Ticket
 			from trac.web.href import Href
 			from trac import util
+			from trac.ticket.web_ui import TicketModule
+
 			#
 			# return  util.text.to_unicode(str)
 			#
@@ -2275,6 +2280,7 @@ if __name__ == '__main__':
 			from trac import util
 			from trac.core import TracError
 			from trac.perm import PermissionSystem
+			from trac.ticket.web_ui import TicketModule
 
 			#
 			# return  util.text.to_unicode(str)
@@ -2291,6 +2297,7 @@ if __name__ == '__main__':
 			from trac import util
 			from trac.core import TracError
 			from trac.perm import PermissionSystem
+			from trac.ticket.web_ui import TicketModule
 
 			#
 			# return  util.text.to_unicode(str)
