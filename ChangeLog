@@ -30,6 +30,11 @@
      Author: Konstantin Ryabitsev <icon add mricon dot com>
      Applied by: Bas van der Vlies
 
+   * When platform is Windows and log_type is not set, use 'eventlog' as default log_type 
+     instead of 'syslog', closes #225
+     Reported by: jkreider add clarkinc dot biz
+     Author: Bas van der Vlies
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies

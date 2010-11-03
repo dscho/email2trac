@@ -2128,7 +2128,10 @@ def setup_log(parameters, project_name, interactive=None):
 		parameters.log_type = 'stderr'
 
 	if not parameters.log_type:
-		parameters.log_type = 'syslog'
+		if sys.platform in ['win32', 'cygwin']:
+			paramters.log_type = 'eventlog'
+		else:
+			parameters.log_type = 'syslog'
 
 	if parameters.log_type == 'file':
 
