@@ -508,7 +508,7 @@ class TicketEmailParser(object):
 
 		message_parts = self.get_message_parts(message)
 		message_parts = self.unique_attachment_names(message_parts)
-		body_text = self.body_text(message_parts)
+		body_text = self.get_body_text(message_parts)
 		self.debug_body(body_text, True)
 		self.debug_attachments(message_parts)
 
@@ -868,7 +868,7 @@ class TicketEmailParser(object):
 		if self.parameters.email_header:
 			message_parts.insert(0, self.email_header_txt(m))
 
-		body_text = self.body_text(message_parts)
+		body_text = self.get_body_text(message_parts)
 
 		error_with_attachments = self.attach_attachments(message_parts)
 
@@ -1058,7 +1058,7 @@ class TicketEmailParser(object):
 			head = self.email_header_txt(msg)
 			message_parts.insert(0, head)
 			
-		body_text = self.body_text(message_parts)
+		body_text = self.get_body_text(message_parts)
 
 		tkt['description'] = body_text
 
@@ -1222,7 +1222,7 @@ class TicketEmailParser(object):
 			comment.author = self.author
 
 			message_parts = self.get_message_parts(m)
-			comment.comment = self.body_text(message_parts)
+			comment.comment = self.get_body_text(message_parts)
 
 			blog.create_comment(req, comment)
 
@@ -1238,7 +1238,7 @@ class TicketEmailParser(object):
 			post.title = self.email_to_unicode(m['Subject'])
 
 			message_parts = self.get_message_parts(m)
-			post.body = self.body_text(message_parts)
+			post.body = self.get_body_text(message_parts)
 			
 			blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
@@ -1273,7 +1273,7 @@ class TicketEmailParser(object):
 				 'time': to_timestamp(datetime.now(utc)),
 				 'author' : self.author,
 				 'subscribers' : [self.email_addr],
-				 'body' : self.body_text(context.content_parts)}
+				 'body' : self.get_body_text(context.content_parts)}
 
 		## Add topic to DB and commit it.
 		#
@@ -1308,7 +1308,7 @@ class TicketEmailParser(object):
 				   'replyto' : -1,
 				   'time' : to_timestamp(datetime.now(utc)),
 				   'author' : self.author,
-				   'body' : self.body_text(context.content_parts)}
+				   'body' : self.get_body_text(context.content_parts)}
 
 		## Add message to DB and commit it.
 		#
@@ -1343,7 +1343,7 @@ class TicketEmailParser(object):
 				   'replyto' : message['id'],
 				   'time' : to_timestamp(datetime.now(utc)),
 				   'author' : self.author,
-				   'body' : self.body_text(context.content_parts)}
+				   'body' : self.get_body_text(context.content_parts)}
 
 		## Add message to DB and commit it.
 		#
@@ -1954,7 +1954,7 @@ class TicketEmailParser(object):
 
 ########## TRAC Ticket Text ###########################################################
 			
-	def body_text(self, message_parts):
+	def get_body_text(self, message_parts):
 		body_text = []
 		
 		for part in message_parts:
@@ -1965,7 +1965,7 @@ class TicketEmailParser(object):
 				body_text.extend(part.strip().splitlines())
 				body_text.append("")
 				continue
-				
+
 			(original, filename, part) = part
 			inline = self.inline_part(part)
 			
@@ -1977,7 +1977,7 @@ class TicketEmailParser(object):
 				if self.system != 'discussion':
 					body_text.append('[attachment:"%s"]' % filename)
 				body_text.append("")
-				
+
 		body_text = '\r\n'.join(body_text)
 		return body_text
 
