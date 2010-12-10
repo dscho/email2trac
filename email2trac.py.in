@@ -1697,7 +1697,7 @@ class TicketEmailParser(object):
 		properties = dict()
 		body = list()
 
-		INLINE_EXP = re.compile('\s*[@]\s*([a-zA-Z]+)\s*:(.*)$')
+		INLINE_EXP = re.compile('\s*[@]\s*(\w+)\s*:(.*)$') 
 
 		for line in text.splitlines():
 			match = INLINE_EXP.match(line)

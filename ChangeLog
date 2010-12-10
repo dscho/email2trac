@@ -35,6 +35,12 @@
      Reported by: jkreider add clarkinc dot biz
      Author: Bas van der Vlies
 
+   * Applied a patch so we allow more ticket fields to be used for inline properties, eg:
+       * @custom_reports: vu
+     closes #227
+     Author: thomas dot moschny add gmx dot de 
+     Applied by: Bas van der Vlies
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies
