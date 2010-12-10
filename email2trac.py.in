@@ -1958,7 +1958,7 @@ class TicketEmailParser(object):
 		body_text = []
 		
 		for part in message_parts:
-
+		
 			## Plain text part, append it
 			#
 			if not isinstance(part, tuple):
@@ -1968,6 +1968,20 @@ class TicketEmailParser(object):
 
 			(original, filename, part) = part
 			inline = self.inline_part(part)
+
+#			if part.get_content_type() == 'text/html':
+#		
+#				body_text.append('{{{\n')
+#				body_text.append('#!html\n')
+#
+#				## Try to decode, if fails then do not decode
+#				#
+#				tmp  = part.get_payload(decode=1)
+#				if not tmp:			
+#					tmp = part.get_payload(decode=0)
+#				
+#				body_text.append(tmp)
+#				body_text.append('}}}\n')
 			
 			if part.get_content_maintype() == 'image' and inline:
 				if self.system != 'discussion':
