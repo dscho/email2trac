@@ -705,7 +705,7 @@ class TicketEmailParser(object):
 				value = ','.join(cc_list)
 				
 
-			## Check if every value is allowed for this filed
+			## Check if every value is allowed for this field
 			# 
 			if sys_dict.has_key(field): 
 
