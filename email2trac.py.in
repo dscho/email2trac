@@ -658,8 +658,8 @@ class TicketEmailParser(object):
 			- If the field is known
 			- If the value supplied is valid for the ticket field.
 			  If not then there are two options:
-			   1) Skip the value (new_ticket=None)
-			   2) Set default value for field (new_ticket=1)
+			   1) Skip the value (new=None)
+			   2) Set default value for field (new=1)
 		"""
 		self.logger.debug("function update_ticket_fields")
 
@@ -680,7 +680,7 @@ class TicketEmailParser(object):
 				sys_dict[field['name']] = field['options']
 
 			except KeyError:
-				sys_dict[field['name']] = None
+				#sys_dict[field['name']] = None
 				pass
 
 		## Check user supplied fields an compare them with the
@@ -705,31 +705,28 @@ class TicketEmailParser(object):
 				value = ','.join(cc_list)
 				
 
-			if sys_dict.has_key(field):
+			## Check if every value is allowed for this filed
+			# 
+			if sys_dict.has_key(field): 
 
-				## Check if value is an allowed system option, if TypeError then
-				#  every value is allowed
-				#
-				try:
-					if value in sys_dict[field]:
-						ticket[field] = value
-					else:
-						## Must we set a default if value is not allowed
-						#
-						if new:
-							value = self.get_config('ticket', 'default_%s' %(field) )
+				if value in sys_dict[field]: 
+					ticket[field] = value
+				else:
+					## Must we set a default if value is not allowed
+					#
+					if new:
+						value = self.get_config('ticket', 'default_%s' %(field) )
 
-				except TypeError:
-					pass
-
+			else:
 				## Only set if we have a value
 				#
-				if value:
-					ticket[field] = value
+				#if value:
+				#	ticket[field] = value
+				ticket[field] = value
 
-				if self.parameters.debug:
-					s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
-					self.print_unicode(s)
+			if self.parameters.debug:
+				s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
+				self.print_unicode(s)
 
 	def ticket_update(self, m, id, spam):
 		"""
@@ -852,7 +849,7 @@ class TicketEmailParser(object):
 		else:
 			self.logger.debug('email triggers workflow disabled')
 
-		## Must we update some ticket fields properties via subjectline
+		## Must we update some ticket fields properties via subject line
 		#
 		if update_fields:
 			self.update_ticket_fields(tkt, update_fields)
@@ -908,7 +905,7 @@ class TicketEmailParser(object):
 				if (name in ['resolution']) and (value in ['fixed']):
 					value = None 
 			else:
-				##  Else we get the default value for reporter
+				##  Else get the default value for reporter
 				#
 				value = field.get('value')
 				options = field.get('options')

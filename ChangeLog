@@ -41,6 +41,13 @@
      Author: thomas dot moschny add gmx dot de 
      Applied by: Bas van der Vlies
 
+   * Fixed some bugs in function update_ticket_fields:
+       - Can not clear values, repoterd by thomas dot moschny add gmx dot de
+	     closes #228
+       - Values were updated regardless if there are not allowed for the ticket
+	     field.
+     Author: Bas van der Vlies
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies
