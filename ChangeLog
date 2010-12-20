@@ -36,7 +36,7 @@
      Author: Bas van der Vlies
 
    * Applied a patch so we allow more ticket fields to be used for inline properties, eg:
-       * @custom_reports: vu
+       - @custom_reports: vu
      closes #227
      Author: thomas dot moschny add gmx dot de 
      Applied by: Bas van der Vlies
@@ -46,6 +46,11 @@
 	     closes #228
        - Values were updated regardless if there are not allowed for the ticket
 	     field.
+     Author: Bas van der Vlies
+
+   * Attachments without a name where named 'None' instead of 'untitled-part', 
+     closes #230
+     Reported by: hju add jochenkuhl dot de
      Author: Bas van der Vlies
 
 1.6.0 (2010-8-10)

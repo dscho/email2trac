@@ -1856,7 +1856,11 @@ class TicketEmailParser(object):
 		
 	def unique_attachment_names(self, message_parts):
 		"""
+	    Make sure we have unique names attachments:
+		  - check if it contains illegal characters
+		  - Rename "None" filenames to "untitled-part"
 		"""
+		self.logger.debug('function unique_attachment_names()')
 		renamed_parts = []
 		attachment_names = set()
 
@@ -1870,10 +1874,11 @@ class TicketEmailParser(object):
 				
 			(filename, part) = item
 
-			## If no filename, use a default one
+			## If filename = None, use a default one
 			#
-			if not filename:
+			if filename in [ 'None']:
 				filename = 'untitled-part'
+				self.logger.info('Rename filename "None" to: %s' %filename)
 
 				## Guess the extension from the content type, use non strict mode
 				#  some additional non-standard but commonly used MIME types 
