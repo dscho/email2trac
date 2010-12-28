@@ -74,6 +74,7 @@ import traceback
 import logging
 import logging.handlers
 import UserDict
+import tempfile
 
 from datetime import tzinfo, timedelta, datetime
 from stat import *
@@ -408,9 +409,8 @@ class TicketEmailParser(object):
 
 ########## DEBUG functions  ###########################################################
 
-	def debug_body(self, message_body, tempfile=False):
-		if tempfile:
-			import tempfile
+	def debug_body(self, message_body, temporary_file=False):
+		if temporary_file:
 			body_file = tempfile.mktemp('.email2trac')
 		else:
 			body_file = os.path.join(self.parameters.tmpdir, 'body.txt')
@@ -486,7 +486,6 @@ class TicketEmailParser(object):
 	def save_email_for_debug(self, message, create_tempfile=False):
 
 		if create_tempfile:
-			import tempfile
 			msg_file = tempfile.mktemp('.email2trac')
 		else:
 			#msg_file = '/var/tmp/msg.txt' 
@@ -1758,26 +1757,28 @@ class TicketEmailParser(object):
 		ALTERNATIVE_MULTIPART = False
 
 		for part in msg.walk():
-			self.logger.debug('Message part: Main-Type: %s' % part.get_content_maintype())
-			self.logger.debug('Message part: Content-Type: %s' % part.get_content_type())
+			content_maintype = part.get_content_maintype()
+			content_type =  part.get_content_type()
+
+			self.logger.debug('Message part: Main-Type: %s' % content_maintype)
+			self.logger.debug('Message part: Content-Type: %s' % content_type)
 
 			## Check content type
 			# 
-			if part.get_content_type() in self.STRIP_CONTENT_TYPES:
-				self.logger.debug("A %s attachment named '%s' was skipped" %(part.get_content_type(), part.get_filename()))
+			if content_type in self.STRIP_CONTENT_TYPES:
+				self.logger.debug("A %s attachment named '%s' was skipped" %(content_type, part.get_filename()))
 				continue
 
 			## Catch some mulitpart execptions
 			#
-			if part.get_content_type() == 'multipart/alternative':
+			if content_type == 'multipart/alternative':
 				ALTERNATIVE_MULTIPART = True
 				continue
 
 			## Skip multipart containers
 			#
-			if part.get_content_maintype() == 'multipart':
+			if content_maintype == 'multipart':
 				self.logger.debug("Skipping multipart container")
-
 				continue
 			
 			## Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
@@ -1787,21 +1788,68 @@ class TicketEmailParser(object):
 			## Drop HTML message
 			#
 			if ALTERNATIVE_MULTIPART and self.parameters.drop_alternative_html_version:
-				if part.get_content_type() == 'text/html':
+				if content_type == 'text/html':
 					self.logger.debug('Skipping alternative HTML message')
 					ALTERNATIVE_MULTIPART = False
 					continue
 
+
+			## Save all non plain text message as attachment
+			#
+			if not content_type in ['text/plain']:
+
+				if self.parameters.debug:
+					s = '              Filename: %s' % part.get_filename()
+					self.print_unicode(s)
+
+				## First try to use email header function to convert filename.
+				#  If this fails the use the plain filename 
+				#
+				try:
+					filename = self.email_to_unicode(part.get_filename())
+				except UnicodeEncodeError, detail:
+					filename = part.get_filename()
+
+				message_parts.append((filename, part))
+
 			## Inline text parts are where the body is
 			#
-			if part.get_content_type() == 'text/plain' and inline:
-				self.logger.debug('               Inline body part')
+			if (content_type in ['text/plain', 'text/html']) and inline:
+				self.logger.debug('               Inline body part (content_type = %s)' %(content_type))
 
 				## Try to decode, if fails then do not decode
 				#
 				body_text = part.get_payload(decode=1)
 				if not body_text:			
 					body_text = part.get_payload(decode=0)
+
+				#print type(body_text) must be string
+
+				## Convert html message to text if a conversion command is specified
+				#
+				if content_type == 'text/html' and self.parameters.html2text_cmd:
+					tmp_file = tempfile.mktemp('.email2trac')
+					cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file)
+
+					self.logger.debug('html2text conversion %s'%(cmd))
+
+					if self.parameters.dry_run:
+						print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
+					else:
+						f = open(tmp_file, "w+")
+						f.write(body_text)
+						f.close()
+
+						lines = os.popen(cmd).readlines()
+						body_text = ''.join(lines)
+
+						os.unlink(tmp_file)
+
+
+				else:
+					## Save only as attachment. No further processing 
+					#
+					continue
 
 				format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
 				delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
@@ -1840,20 +1888,6 @@ class TicketEmailParser(object):
 					message_parts.append('{{{\r\n%s\r\n}}}' %ubody_text)
 				else:
 					message_parts.append('%s' %ubody_text)
-			else:
-				if self.parameters.debug:
-					s = '              Filename: %s' % part.get_filename()
-					self.print_unicode(s)
-
-				## First try to use email header function to convert filename.
-				#  If this fails the use the plan filename 
-				#
-				try:
-					filename = self.email_to_unicode(part.get_filename())
-				except UnicodeEncodeError, detail:
-					filename = part.get_filename()
-
-				message_parts.append((filename, part))
 
 		return message_parts
 		
@@ -1960,6 +1994,10 @@ class TicketEmailParser(object):
 ########## TRAC Ticket Text ###########################################################
 			
 	def get_body_text(self, message_parts):
+		"""
+		"""
+		self.logger.debug('function get_body_text()')
+
 		body_text = []
 		
 		for part in message_parts:
@@ -1974,29 +2012,28 @@ class TicketEmailParser(object):
 			(original, filename, part) = part
 			inline = self.inline_part(part)
 
-#			if part.get_content_type() == 'text/html':
-#		
-#				body_text.append('{{{\n')
-#				body_text.append('#!html\n')
-#
-#				## Try to decode, if fails then do not decode
-#				#
-#				tmp  = part.get_payload(decode=1)
-#				if not tmp:			
-#					tmp = part.get_payload(decode=0)
-#				
-#				body_text.append(tmp)
-#				body_text.append('}}}\n')
+			## Skip generation of attachment link if html is converted to text
+			#
+			if part.get_content_type() == 'text/html' and self.parameters.html2text_cmd and inline:
+				s = 'Skipping attachment link for html part: %s' %(filename)
+				self.print_unicode(s)
+				continue
 			
 			if part.get_content_maintype() == 'image' and inline:
 				if self.system != 'discussion':
+					s = 'wiki image link for: %s' %(filename)
+					self.print_unicode(s)
 					body_text.append('[[Image(%s)]]' % filename)
 				body_text.append("")
 			else:
 				if self.system != 'discussion':
+					s = 'wiki attachment link for: %s' %(filename)
+					self.print_unicode(s)
 					body_text.append('[attachment:"%s"]' % filename)
 				body_text.append("")
 
+		## Convert list body_texts to string
+		#
 		body_text = '\r\n'.join(body_text)
 		return body_text
 
@@ -2158,7 +2195,6 @@ def setup_log(parameters, project_name, interactive=None):
 			parameters.log_file = 'email2trac.log'
 
 		if not os.path.isabs(parameters.log_file):
-			import tempfile
 			parameters.log_file = os.path.join(tempfile.gettempdir(), parameters.log_file)
 
 		log_handler = logging.FileHandler(parameters.log_file)
