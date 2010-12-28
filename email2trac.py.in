@@ -1534,7 +1534,7 @@ class TicketEmailParser(object):
 		#
 		discussion_enabled = None
 		discussion_regex = ''
-		if self.get_config('components', 'tracdiscussion.api.discussionapi' in ['enabled']:
+		if self.get_config('components', 'tracdiscussion.api.discussionapi') in ['enabled']:
 			self.logger.debug('Trac Discussion support enabled')
 			discussion_enabled = True
 			discussion_regex = r'''
