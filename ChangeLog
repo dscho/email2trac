@@ -53,6 +53,10 @@
      Reported by: hju add jochenkuhl dot de
      Author: Bas van der Vlies
 
+   * Fixed some errors in Discussion plugin support, closes #231
+     Author: Dennis (dmcrxi add Princeton dot EDU)
+     Applied by: Bas van der Vlies
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies

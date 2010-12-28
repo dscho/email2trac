@@ -578,7 +578,7 @@ class TicketEmailParser(object):
 
 	def print_unicode(self,s):
 		"""
-		This function prints unicode strings uif possible else it will quote it
+		This function prints unicode strings if possible else it will quote it
 		"""
 		try:
 			self.logger.debug(s)
@@ -1319,7 +1319,7 @@ class TicketEmailParser(object):
 		from tracdiscussion.api import DiscussionApi
 		from trac.util.datefmt import to_timestamp, utc
 
-		self.loggger.debug('Replying to discussion message', self.id)
+		self.logger.debug('Replying to discussion message', self.id)
 
 		## Get dissussion API component.
 		#
@@ -1377,6 +1377,7 @@ class TicketEmailParser(object):
 		req.tz = 'missing'
 		req.authname = self.author
 		req.perm = PermissionCache(self.env, self.author)
+		req.locale = None
 
 		## Create and return context.
 		#
@@ -1524,6 +1525,7 @@ class TicketEmailParser(object):
 		blog_enabled = None
 		blog_regex = ''
 		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
+			self.logger.debug('Trac BLOG support enabled')
 			blog_enabled = True
 		        blog_regex = '''|(?P<blog>blog:(?P<blog_id>\w*))'''
 
@@ -1532,7 +1534,8 @@ class TicketEmailParser(object):
 		#
 		discussion_enabled = None
 		discussion_regex = ''
-		if self.get_config('components', 'tracdiscussion.api.*') in ['enabled']:
+		if self.get_config('components', 'tracdiscussion.api.discussionapi' in ['enabled']:
+			self.logger.debug('Trac Discussion support enabled')
 			discussion_enabled = True
 			discussion_regex = r'''
 			|(?P<forum>Forum[ ][#](?P<forum_id>\d+)[ ]-[ ]?)
@@ -2185,6 +2188,7 @@ def setup_log(parameters, project_name, interactive=None):
 
 	if (parameters.log_level in ['DEBUG', 'ALL']) or (parameters.debug > 0):
 		logger.setLevel(logging.DEBUG)
+		parameters.debug = 1
 
 	elif parameters.log_level in ['INFO'] or parameters.verbose:
 		logger.setLevel(logging.INFO)
