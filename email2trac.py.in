@@ -1831,6 +1831,7 @@ class TicketEmailParser(object):
 			## Try to convert html message
 			#
 			if content_type == 'text/html':
+
 				if self.parameters.html2text_cmd:
 
 					tmp_file = tempfile.mktemp('.email2trac')
@@ -2158,14 +2159,14 @@ def ReadConfig(file, name):
 			print "or set parentdir in the [DEFAULT] section"
 			sys.exit(1)
 
-	## If parentdir the set project dir to parentdir + name
+	## If parentdir then set project dir to parentdir + name
 	#
 	if not project.has_key('project'):
 		if not parentdir: 
 			print "You must set project or parentdir in your configuration file"
 			sys.exit(1)
 		elif not name:
-			print "You must set project in your configuration file"
+			print "You must configure a  project section in your configuration file"
 		else:
 			project['project'] = os.path.join(parentdir, name)
 
