@@ -57,6 +57,12 @@
      Author: Dennis (dmcrxi add Princeton dot EDU)
      Applied by: Bas van der Vlies
 
+   * Added html conversion via external commmand: eg email2trac.conf
+      - html2text_cmd: /usr/bin/html2text -nobs
+     closes #218
+     Author: Bas van der Vlies
+     Applied by: Bas van der Vlies
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies
