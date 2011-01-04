@@ -1760,13 +1760,13 @@ class TicketEmailParser(object):
 			content_maintype = part.get_content_maintype()
 			content_type =  part.get_content_type()
 
-			self.logger.debug('Message part: Main-Type: %s' % content_maintype)
-			self.logger.debug('Message part: Content-Type: %s' % content_type)
+			self.logger.debug('\t Message part: Main-Type: %s' % content_maintype)
+			self.logger.debug('\t Message part: Content-Type: %s' % content_type)
 
 			## Check content type
 			# 
 			if content_type in self.STRIP_CONTENT_TYPES:
-				self.logger.debug("A %s attachment named '%s' was skipped" %(content_type, part.get_filename()))
+				self.logger.debug("\t A %s attachment named '%s' was skipped" %(content_type, part.get_filename()))
 				continue
 
 			## Catch some mulitpart execptions
@@ -1778,7 +1778,7 @@ class TicketEmailParser(object):
 			## Skip multipart containers
 			#
 			if content_maintype == 'multipart':
-				self.logger.debug("Skipping multipart container")
+				self.logger.debug("\t Skipping multipart container")
 				continue
 			
 			## Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
@@ -1789,7 +1789,7 @@ class TicketEmailParser(object):
 			#
 			if ALTERNATIVE_MULTIPART and self.parameters.drop_alternative_html_version:
 				if content_type == 'text/html':
-					self.logger.debug('Skipping alternative HTML message')
+					self.logger.debug('\t Skipping alternative HTML message')
 					ALTERNATIVE_MULTIPART = False
 					continue
 
@@ -1799,7 +1799,7 @@ class TicketEmailParser(object):
 			if not content_type in ['text/plain']:
 
 				if self.parameters.debug:
-					s = '              Filename: %s' % part.get_filename()
+					s = '\t Filename: %s' % part.get_filename()
 					self.print_unicode(s)
 
 				## First try to use email header function to convert filename.
@@ -1812,27 +1812,31 @@ class TicketEmailParser(object):
 
 				message_parts.append((filename, part))
 
-			## Inline text parts are where the body is
+				## We van only convert html messages
+				#
+				if not content_type == 'text/html':
+					self.logger.debug('\t Appending content_type = %s' %(content_type))
+					continue
+
+			if not inline:
+					self.logger.debug('\t Skipping %s, not an inline messsage part' %(content_type))
+					continue
+				
+			## Try to decode message part. We have a html or plain text messafe
 			#
-			if (content_type in ['text/plain', 'text/html']) and inline:
-				self.logger.debug('               Inline body part (content_type = %s)' %(content_type))
+			body_text = part.get_payload(decode=1)
+			if not body_text:			
+				body_text = part.get_payload(decode=0)
 
-				## Try to decode, if fails then do not decode
-				#
-				body_text = part.get_payload(decode=1)
-				if not body_text:			
-					body_text = part.get_payload(decode=0)
+			## Try to convert html message
+			#
+			if content_type == 'text/html':
+				if self.parameters.html2text_cmd:
 
-				#print type(body_text) must be string
-
-				## Convert html message to text if a conversion command is specified
-				#
-				if content_type == 'text/html' and self.parameters.html2text_cmd:
 					tmp_file = tempfile.mktemp('.email2trac')
-					cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file)
-
-					self.logger.debug('html2text conversion %s'%(cmd))
-
+					cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file) 
+					self.logger.debug('\t html2text conversion %s'%(cmd)) 
+					
 					if self.parameters.dry_run:
 						print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
 					else:
@@ -1845,49 +1849,47 @@ class TicketEmailParser(object):
 
 						os.unlink(tmp_file)
 
-
 				else:
-					## Save only as attachment. No further processing 
-					#
+					self.logger.debug('\t No html2text conversion tool specified in email2trac.conf') 
 					continue
 
-				format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
-				delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
+			format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
+			delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
 
-				if self.parameters.reflow and not self.parameters.verbatim_format and format == 'flowed':
-					body_text = self.reflow(body_text, delsp == 'yes')
+			if self.parameters.reflow and not self.parameters.verbatim_format and format == 'flowed':
+				body_text = self.reflow(body_text, delsp == 'yes')
 	
-				if self.parameters.strip_signature:
-					body_text = self.strip_signature(body_text)
+			if self.parameters.strip_signature:
+				body_text = self.strip_signature(body_text)
 
-				if self.parameters.strip_quotes: 
-					body_text = self.strip_quotes(body_text)
+			if self.parameters.strip_quotes: 
+				body_text = self.strip_quotes(body_text)
 
-				if self.parameters.inline_properties: 
-					body_text = self.inline_properties(body_text)
+			if self.parameters.inline_properties: 
+				body_text = self.inline_properties(body_text)
 
-				if self.parameters.use_textwrap:
-					body_text = self.wrap_text(body_text)
+			if self.parameters.use_textwrap:
+				body_text = self.wrap_text(body_text)
 
-				## Get contents charset (iso-8859-15 if not defined in mail headers)
-				#
-				charset = part.get_content_charset()
-				if not charset:
-					charset = 'iso-8859-15'
+			## Get contents charset (iso-8859-15 if not defined in mail headers)
+			#
+			charset = part.get_content_charset()
+			if not charset:
+				charset = 'iso-8859-15'
 
-				try:
-					ubody_text = unicode(body_text, charset)
+			try:
+				ubody_text = unicode(body_text, charset)
 
-				except UnicodeError, detail:
-					ubody_text = unicode(body_text, 'iso-8859-15')
+			except UnicodeError, detail:
+				ubody_text = unicode(body_text, 'iso-8859-15')
 
-				except LookupError, detail:
-					ubody_text = 'ERROR: Could not find charset: %s, please install' %(charset)
+			except LookupError, detail:
+				ubody_text = 'ERROR: Could not find charset: %s, please install' %(charset)
 
-				if self.parameters.verbatim_format:
-					message_parts.append('{{{\r\n%s\r\n}}}' %ubody_text)
-				else:
-					message_parts.append('%s' %ubody_text)
+			if self.parameters.verbatim_format:
+				message_parts.append('{{{\r\n%s\r\n}}}' %ubody_text)
+			else:
+				message_parts.append('%s' %ubody_text)
 
 		return message_parts
 		
