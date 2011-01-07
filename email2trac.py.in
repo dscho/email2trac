@@ -584,6 +584,54 @@ class TicketEmailParser(object):
 		except UnicodeEncodeError, detail:
 			self.logger.debug(util.text.unicode_quote(s))
 
+
+	def html_2_txt(self, data):
+		"""
+		Various routines to convert html syntax to valid trac wiki syntax
+		""" 
+		self.logger.debug('function html_2_txt')
+
+		## This routine make an safe html that can be include
+		#  in trac, but no further text processing can be done
+		#
+#		try:
+#			from lxml.html.clean import Cleaner
+#			tags_rm = list()
+#			tags_rm.append('body')
+#
+#			cleaner = Cleaner(remove_tags=tags_rm )
+#			parsed_data = cleaner.clean_html(data)
+#			parsed_data = '\n{{{\n#!html\n' + parsed_data + '\n}}}\n'
+#
+#			return parsed_data
+#			
+#		except ImportError::
+#			pass
+
+		parsed_data = None
+		if self.parameters.html2text_cmd: 
+			tmp_file = tempfile.mktemp('email2trac.html')
+			cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file) 
+			self.logger.debug('\t html2text conversion %s'%(cmd)) 
+	
+			if self.parameters.dry_run:
+				print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
+
+			else: 
+				f = open(tmp_file, "w+")
+				f.write(data)
+				f.close()
+
+				lines = os.popen(cmd).readlines()
+				parsed_data =  ''.join(lines)
+
+				os.unlink(tmp_file)
+
+		else:
+			self.logger.debug('\t No html2text conversion tool specified in email2trac.conf') 
+
+		return parsed_data
+
 ########## TRAC ticket functions  ###########################################################
 
 	def check_permission_participants(self, tkt, action):
@@ -1832,26 +1880,8 @@ class TicketEmailParser(object):
 			#
 			if content_type == 'text/html':
 
-				if self.parameters.html2text_cmd:
-
-					tmp_file = tempfile.mktemp('.email2trac')
-					cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file) 
-					self.logger.debug('\t html2text conversion %s'%(cmd)) 
-					
-					if self.parameters.dry_run:
-						print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
-					else:
-						f = open(tmp_file, "w+")
-						f.write(body_text)
-						f.close()
-
-						lines = os.popen(cmd).readlines()
-						body_text = ''.join(lines)
-
-						os.unlink(tmp_file)
-
-				else:
-					self.logger.debug('\t No html2text conversion tool specified in email2trac.conf') 
+				body_text = self.html_2_txt(body_text)
+				if not body_text:
 					continue
 
 			format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()

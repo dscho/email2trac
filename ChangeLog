@@ -9,7 +9,8 @@
 
    * Support for parentdir. Can be used to avoid sections for each project
      or if all projects have a common parent directory, you can leave out
-     the project drectory setting for each project. 
+     the project drectory setting for each project, eg:
+      * parentdir: /data/trac/oss/projects
 
      If an section defines a project directory then this can NOT be overriden 
      by the parendir declatation. 
@@ -43,9 +44,9 @@
 
    * Fixed some bugs in function update_ticket_fields:
        - Can not clear values, repoterd by thomas dot moschny add gmx dot de
-	     closes #228
+     closes #228
        - Values were updated regardless if there are not allowed for the ticket
-	     field.
+     field.
      Author: Bas van der Vlies
 
    * Attachments without a name where named 'None' instead of 'untitled-part', 
@@ -59,6 +60,9 @@
 
    * Added html conversion via external commmand: eg email2trac.conf
       - html2text_cmd: /usr/bin/html2text -nobs
+      - html2text_cmd: /usr/bin/w3m -dump
+      - html2text_cmd: /usr/bin/lynx -dump
+      - html2text_cmd: /usr/bin/links -dump
      closes #218
      Author: Bas van der Vlies
      Applied by: Bas van der Vlies
@@ -74,20 +78,20 @@
    * Applied a patch to support workflow for all transitions. It will
      also honour the permission model if set, closes #198
      an example how to use it:
-	email2trac.conf:
+    email2trac.conf:
         	[project]
-		workflow_closed: reopen
-		workflow_infoneeded: provideinfo
+            workflow_closed: reopen
+            xworkflow_infoneeded: provideinfo
 
-	trac.ini:
-		[ticket-workflow]
-		reopen = closed -> reopened 
-		reopen.permissions = TICKET_CREATE 
-		reopen.operations = del_resolution 
-		
-		provideinfo = infoneeded -> moreinfo
-		provideinfo.permissions = TICKET_CREATE
-		provideinfo.name = info provided
+    trac.ini:
+    [ticket-workflow]
+    reopen = closed -> reopened 
+    reopen.permissions = TICKET_CREATE 
+    reopen.operations = del_resolution 
+
+    provideinfo = infoneeded -> moreinfo
+    provideinfo.permissions = TICKET_CREATE
+    provideinfo.name = info provided
 
      Authors: kroseneg add schmidham dot net and Bas van der Vlies
 
