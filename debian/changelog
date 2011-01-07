@@ -1,3 +1,9 @@
+email2trac (2.0.0-1) stable; urgency=low
+
+  * See Changelog 
+
+ -- bas van der Vlies <bas@sara.nl>  Fri, 07 Jan 2011 15:45:20 +0100
+
 email2trac (1.7.0-6) stable; urgency=low
 
   * html conversion bug fixes 
