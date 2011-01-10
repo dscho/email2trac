@@ -2074,6 +2074,7 @@ class TicketEmailParser(object):
 		"""
 		This function returns a HTML mailto tag with the ticket id and author email address
 		"""
+		self.logger.debug("function html_mailto_link")
 		if not self.author:
 			author = self.email_addr
 		else:	
@@ -2084,13 +2085,18 @@ class TicketEmailParser(object):
 
 		## use urllib to escape the chars
 		#
-		s = 'mailto:%s?Subject=%s&Cc=%s' %( 
+		s = '%s?Subject=%s&Cc=%s' %( 
 		       urllib.quote(self.email_addr), 
 			   urllib.quote('Re: #%s: %s' %(self.id, subject)),
 			   urllib.quote(self.parameters.mailto_cc)
 			   )
 
-		s = '\r\n{{{\r\n#!html\r\n<a\r\n href="%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
+		if self.VERSION in [ 0.10 ]:
+			s = '\r\n{{{\r\n#!html\r\n<a\r\n href="mailto:%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
+		else:
+			s = '[mailto:"%s" Reply to: %s]' %(s, author)
+
+		self.logger.debug("\tmailto link %s" %s)
 		return s
 
 ########## TRAC notify section ###########################################################
