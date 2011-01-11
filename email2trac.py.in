@@ -49,7 +49,7 @@ How to use
 
  * Commandline opions:
                 -h,--help
-				-d, --debug 
+                -d, --debug 
                 -f,--file  <configuration file>
                 -n,--dry-run
                 -p, --project <project name>
@@ -88,2356 +88,2356 @@ from trac import config as trac_config
 m = None 
 
 class SaraDict(UserDict.UserDict):
-	def __init__(self, dictin = None):
-		UserDict.UserDict.__init__(self)
-		self.name = None 
-		
-		if dictin:
-			if dictin.has_key('name'):
-				self.name = dictin['name']
-				del dictin['name']
-			self.data = dictin 
-			
-	def get_value(self, name):
-		if self.has_key(name):
-			return self[name]
-		else:
-			return None 
-				
-	def __repr__(self):
-		return repr(self.data) 
+    def __init__(self, dictin = None):
+        UserDict.UserDict.__init__(self)
+        self.name = None 
+        
+        if dictin:
+            if dictin.has_key('name'):
+                self.name = dictin['name']
+                del dictin['name']
+            self.data = dictin 
+            
+    def get_value(self, name):
+        if self.has_key(name):
+            return self[name]
+        else:
+            return None 
+                
+    def __repr__(self):
+        return repr(self.data) 
 
-	def __str__(self):
-		return str(self.data) 
-			
-	def __getattr__(self, name):
-		"""
-		override the class attribute get method. Return the value
-		from the dictionary
-		"""
-		if self.data.has_key(name):
-			return self.data[name] 
-		else:
-			return None
-			
-	def __setattr__(self, name, value):
-		"""
-		override the class attribute set method only when the UserDict
-		has set its class attribute
-		"""
-		if self.__dict__.has_key('data'):
-			self.data[name] = value
-		else:
-			self.__dict__[name] = value
+    def __str__(self):
+        return str(self.data) 
+            
+    def __getattr__(self, name):
+        """
+        override the class attribute get method. Return the value
+        from the dictionary
+        """
+        if self.data.has_key(name):
+            return self.data[name] 
+        else:
+            return None
+            
+    def __setattr__(self, name, value):
+        """
+        override the class attribute set method only when the UserDict
+        has set its class attribute
+        """
+        if self.__dict__.has_key('data'):
+            self.data[name] = value
+        else:
+            self.__dict__[name] = value
 
-	def __iter__(self):
-		return iter(self.data.keys())
+    def __iter__(self):
+        return iter(self.data.keys())
 
 class TicketEmailParser(object):
-	env = None
-	comment = '> '
+    env = None
+    comment = '> '
 
-	def __init__(self, env, parameters, logger, version):
-		self.env = env
+    def __init__(self, env, parameters, logger, version):
+        self.env = env
 
-		# Database connection
-		#
-		self.db = None
+        # Database connection
+        #
+        self.db = None
 
-		# Save parameters
-		#
-		self.parameters = parameters
-		self.logger = logger
+        # Save parameters
+        #
+        self.parameters = parameters
+        self.logger = logger
 
-		# Some useful mail constants
-		#
-		self.email_name = None
-		self.email_addr = None
-		self.email_from = None
-		self.author     = None
-		self.id         = None
-		
-		self.STRIP_CONTENT_TYPES = list()
+        # Some useful mail constants
+        #
+        self.email_name = None
+        self.email_addr = None
+        self.email_from = None
+        self.author     = None
+        self.id         = None
+        
+        self.STRIP_CONTENT_TYPES = list()
 
-		## fields properties via body_text
-		#
-		self.properties = dict()
+        ## fields properties via body_text
+        #
+        self.properties = dict()
 
-		self.VERSION = version
+        self.VERSION = version
 
-		self.get_config = self.env.config.get
+        self.get_config = self.env.config.get
 
-		## init function ##
-		#
-		self.setup_parameters()
+        ## init function ##
+        #
+        self.setup_parameters()
 
-	def setup_parameters(self):
-		if self.parameters.umask:
-			os.umask(self.parameters.umask)
+    def setup_parameters(self):
+        if self.parameters.umask:
+            os.umask(self.parameters.umask)
 
-		if not self.parameters.spam_level:
-			self.parameters.spam_level = 0
+        if not self.parameters.spam_level:
+            self.parameters.spam_level = 0
 
-		if not self.parameters.spam_header:
-			self.parameters.spam_header = 'X-Spam-Score'
+        if not self.parameters.spam_header:
+            self.parameters.spam_header = 'X-Spam-Score'
 
-		if not self.parameters.email_quote:
-			self.parameters.email_quote = '> '
+        if not self.parameters.email_quote:
+            self.parameters.email_quote = '> '
 
-		if not self.parameters.ticket_update_by_subject_lookback:
-			self.parameters.ticket_update_by_subject_lookback = 30
+        if not self.parameters.ticket_update_by_subject_lookback:
+            self.parameters.ticket_update_by_subject_lookback = 30
 
-		if self.parameters.verbatim_format == None:
-			self.parameters.verbatim_format = 1
+        if self.parameters.verbatim_format == None:
+            self.parameters.verbatim_format = 1
 
-		if self.parameters.reflow == None:
-			self.parameters.reflow = 1
+        if self.parameters.reflow == None:
+            self.parameters.reflow = 1
 
-		if self.parameters.binhex:
-			self.STRIP_CONTENT_TYPES.append('application/mac-binhex40')
+        if self.parameters.binhex:
+            self.STRIP_CONTENT_TYPES.append('application/mac-binhex40')
 
-		if self.parameters.applesingle:
-			self.STRIP_CONTENT_TYPES.append('application/applefile')
+        if self.parameters.applesingle:
+            self.STRIP_CONTENT_TYPES.append('application/applefile')
 
-		if self.parameters.appledouble:
-			self.STRIP_CONTENT_TYPES.append('application/applefile')
+        if self.parameters.appledouble:
+            self.STRIP_CONTENT_TYPES.append('application/applefile')
 
-		if self.parameters.strip_content_types:
-			items = self.parameters.strip_content_types.split(',')
-			for item in items:
-				self.STRIP_CONTENT_TYPES.append(item.strip())
+        if self.parameters.strip_content_types:
+            items = self.parameters.strip_content_types.split(',')
+            for item in items:
+                self.STRIP_CONTENT_TYPES.append(item.strip())
 
-		if self.parameters.tmpdir:
-			self.parameters.tmpdir = os.path.normcase(str(self.parameters['tmpdir']))
-		else:
-			self.parameters.tmpdir = os.path.normcase('/tmp')
+        if self.parameters.tmpdir:
+            self.parameters.tmpdir = os.path.normcase(str(self.parameters['tmpdir']))
+        else:
+            self.parameters.tmpdir = os.path.normcase('/tmp')
 
-		if self.parameters.email_triggers_workflow == None:
-			self.parameters.email_triggers_workflow = 1
+        if self.parameters.email_triggers_workflow == None:
+            self.parameters.email_triggers_workflow = 1
 
-		if not self.parameters.subject_field_separator:
-			self.parameters.subject_field_separator = '&'
-		else:
-			self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
+        if not self.parameters.subject_field_separator:
+            self.parameters.subject_field_separator = '&'
+        else:
+            self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
 
-		self.trac_smtp_from = self.get_config('notification', 'smtp_from')
-		self.smtp_default_domain = self.get_config('notification', 'smtp_default_domain')
+        self.trac_smtp_from = self.get_config('notification', 'smtp_from')
+        self.smtp_default_domain = self.get_config('notification', 'smtp_default_domain')
 
 
-		self.system = None
+        self.system = None
 
 ########## Email Header Functions ###########################################################
 
-	def spam(self, message):
-		"""
-		# X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
-		# Note if Spam_level then '*' are included
-		"""
-		spam = False
-		if message.has_key(self.parameters.spam_header):
-			spam_l = string.split(message[self.parameters.spam_header])
+    def spam(self, message):
+        """
+        # X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
+        # Note if Spam_level then '*' are included
+        """
+        spam = False
+        if message.has_key(self.parameters.spam_header):
+            spam_l = string.split(message[self.parameters.spam_header])
 
-			try:
-				number = spam_l[0].count('*')
-			except IndexError, detail:
-				number = 0
-				
-			if number >= self.parameters.spam_level:
-				spam = True
-				
-		# treat virus mails as spam
-		#
-		elif message.has_key('X-Virus-found'):			
-			spam = True
+            try:
+                number = spam_l[0].count('*')
+            except IndexError, detail:
+                number = 0
+                
+            if number >= self.parameters.spam_level:
+                spam = True
+                
+        # treat virus mails as spam
+        #
+        elif message.has_key('X-Virus-found'):          
+            spam = True
 
-		# How to handle SPAM messages
-		#
-		if self.parameters.drop_spam and spam:
+        # How to handle SPAM messages
+        #
+        if self.parameters.drop_spam and spam:
 
-			self.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' %self.parameters.spam_level)
-			return 'drop'	
+            self.logger.info('Message is a SPAM. Automatic ticket insertion refused (SPAM level > %d)' %self.parameters.spam_level)
+            return 'drop'   
 
-		elif spam:
+        elif spam:
 
-			return 'Spam'	
-		else:
+            return 'Spam'   
+        else:
 
-			return False
+            return False
 
-	def email_header_acl(self, keyword, header_field, default):
-		"""
-		This function wil check if the email address is allowed or denied
-		to send mail to the ticket list
-	    """	
-		self.logger.debug('function email_header_acl: %s' %keyword)
+    def email_header_acl(self, keyword, header_field, default):
+        """
+        This function wil check if the email address is allowed or denied
+        to send mail to the ticket list
+        """ 
+        self.logger.debug('function email_header_acl: %s' %keyword)
 
-		try:
-			mail_addresses = self.parameters[keyword]
+        try:
+            mail_addresses = self.parameters[keyword]
 
-			# Check if we have an empty string
-			#
-			if not mail_addresses:
-				return default 
+            # Check if we have an empty string
+            #
+            if not mail_addresses:
+                return default 
 
-		except KeyError, detail:
-			self.logger.debug('%s not defined, all messages are allowed.' %(keyword))
+        except KeyError, detail:
+            self.logger.debug('%s not defined, all messages are allowed.' %(keyword))
 
-			return default 
+            return default 
 
-		mail_addresses = string.split(mail_addresses, ',')
+        mail_addresses = string.split(mail_addresses, ',')
 
-		for entry in mail_addresses:
-			entry = entry.strip()
-			TO_RE = re.compile(entry, re.VERBOSE|re.IGNORECASE)
-			result =  TO_RE.search(header_field)
-			if result:
-				return True
+        for entry in mail_addresses:
+            entry = entry.strip()
+            TO_RE = re.compile(entry, re.VERBOSE|re.IGNORECASE)
+            result =  TO_RE.search(header_field)
+            if result:
+                return True
 
-		return False
+        return False
 
-	def email_header_txt(self, m):
-		"""
-		Display To and CC addresses in description field
-		"""
-		s = ''
+    def email_header_txt(self, m):
+        """
+        Display To and CC addresses in description field
+        """
+        s = ''
 
-		if m['To'] and len(m['To']) > 0:
-			s = "'''To:''' %s\r\n" %(m['To'])
-		if m['Cc'] and len(m['Cc']) > 0:
-			s = "%s'''Cc:''' %s\r\n" % (s, m['Cc'])
+        if m['To'] and len(m['To']) > 0:
+            s = "'''To:''' %s\r\n" %(m['To'])
+        if m['Cc'] and len(m['Cc']) > 0:
+            s = "%s'''Cc:''' %s\r\n" % (s, m['Cc'])
 
-		return  self.email_to_unicode(s)
-
-
-	def get_sender_info(self, message):
-		"""
-		Get the default author name and email address from the message
-		""" 
-
-		self.email_to = self.email_to_unicode(message['to']) 
-		self.to_name, self.to_email_addr = email.Utils.parseaddr (self.email_to) 
-
-		self.email_from = self.email_to_unicode(message['from'])
-		self.email_name, self.email_addr  = email.Utils.parseaddr(self.email_from)
-
-		## Trac can not handle author's name that contains spaces
-		#
-		if self.email_addr == self.trac_smtp_from:
-			if self.email_name:
-				self.author = self.email_name
-			else:
-				self.author = "email2trac"
-		else:
-			self.author = self.email_addr
-
-		if self.parameters.ignore_trac_user_settings:
-			return
-
-		# Is this a registered user, use email address as search key:
-		# result:
-		#   u : login name
-		#   n : Name that the user has set in the settings tab
-		#   e : email address that the user has set in the settings tab 
-		#
-		users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
-			if ( 
-				(e and (e.lower() == self.email_addr.lower())) or
-			    (u + '@' + self.smtp_default_domain.lower() == self.email_addr.lower())
-			)
-			]
-
-		if len(users) >= 1:
-			self.email_from = users[0][0]
-			self.author = users[0][0]
-
-	def set_reply_fields(self, ticket, message):
-		"""
-		Set all the right fields for a new ticket
-		"""
-		self.logger.debug('function set_reply_fields')
-
-		## Only use name or email adress
-		#ticket['reporter'] = self.email_from
-		ticket['reporter'] = self.author
+        return  self.email_to_unicode(s)
 
 
-		# Put all CC-addresses in ticket CC field
-		#
-		if self.parameters.reply_all:
+    def get_sender_info(self, message):
+        """
+        Get the default author name and email address from the message
+        """ 
 
-			email_cc = ''
+        self.email_to = self.email_to_unicode(message['to']) 
+        self.to_name, self.to_email_addr = email.Utils.parseaddr (self.email_to) 
 
-			cc_addrs = email.Utils.getaddresses( message.get_all('cc', []) )
+        self.email_from = self.email_to_unicode(message['from'])
+        self.email_name, self.email_addr  = email.Utils.parseaddr(self.email_from)
 
-			if not cc_addrs:
-				return
+        ## Trac can not handle author's name that contains spaces
+        #
+        if self.email_addr == self.trac_smtp_from:
+            if self.email_name:
+                self.author = self.email_name
+            else:
+                self.author = "email2trac"
+        else:
+            self.author = self.email_addr
 
-			## Build a list of forbidden CC addresses
-			#
-			#to_addrs = email.Utils.getaddresses( message.get_all('to', []) )
-			#to_list = list()
-			#for n,e in to_addrs:
-			#	to_list.append(e)
-				
-			# Always Remove reporter email address from cc-list 
-			#
-			try:
-				cc_addrs.remove((self.author, self.email_addr))
-			except ValueError, detail:
-				pass
+        if self.parameters.ignore_trac_user_settings:
+            return
 
-			for name,addr in cc_addrs:
-		
-				## Prevent mail loop
-				#
-				#if addr in to_list:
+        # Is this a registered user, use email address as search key:
+        # result:
+        #   u : login name
+        #   n : Name that the user has set in the settings tab
+        #   e : email address that the user has set in the settings tab 
+        #
+        users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
+            if ( 
+                (e and (e.lower() == self.email_addr.lower())) or
+                (u + '@' + self.smtp_default_domain.lower() == self.email_addr.lower())
+            )
+            ]
 
-				if addr == self.trac_smtp_from:
-					self.logger.debug("Skipping %s mail address for CC-field" %(addr))
-					continue
+        if len(users) >= 1:
+            self.email_from = users[0][0]
+            self.author = users[0][0]
 
-				if email_cc:
-					email_cc = '%s, %s' %(email_cc, addr)
-				else:
-					email_cc = addr
+    def set_reply_fields(self, ticket, message):
+        """
+        Set all the right fields for a new ticket
+        """
+        self.logger.debug('function set_reply_fields')
 
-			if email_cc:
-				self.logger.debug('set_reply_fields: %s' %email_cc)
+        ## Only use name or email adress
+        #ticket['reporter'] = self.email_from
+        ticket['reporter'] = self.author
 
-				ticket['cc'] = self.email_to_unicode(email_cc)
+
+        # Put all CC-addresses in ticket CC field
+        #
+        if self.parameters.reply_all:
+
+            email_cc = ''
+
+            cc_addrs = email.Utils.getaddresses( message.get_all('cc', []) )
+
+            if not cc_addrs:
+                return
+
+            ## Build a list of forbidden CC addresses
+            #
+            #to_addrs = email.Utils.getaddresses( message.get_all('to', []) )
+            #to_list = list()
+            #for n,e in to_addrs:
+            #   to_list.append(e)
+                
+            # Always Remove reporter email address from cc-list 
+            #
+            try:
+                cc_addrs.remove((self.author, self.email_addr))
+            except ValueError, detail:
+                pass
+
+            for name,addr in cc_addrs:
+        
+                ## Prevent mail loop
+                #
+                #if addr in to_list:
+
+                if addr == self.trac_smtp_from:
+                    self.logger.debug("Skipping %s mail address for CC-field" %(addr))
+                    continue
+
+                if email_cc:
+                    email_cc = '%s, %s' %(email_cc, addr)
+                else:
+                    email_cc = addr
+
+            if email_cc:
+                self.logger.debug('set_reply_fields: %s' %email_cc)
+
+                ticket['cc'] = self.email_to_unicode(email_cc)
 
 
 ########## DEBUG functions  ###########################################################
 
-	def debug_body(self, message_body, temporary_file=False):
-		if temporary_file:
-			body_file = tempfile.mktemp('.email2trac')
-		else:
-			body_file = os.path.join(self.parameters.tmpdir, 'body.txt')
+    def debug_body(self, message_body, temporary_file=False):
+        if temporary_file:
+            body_file = tempfile.mktemp('.email2trac')
+        else:
+            body_file = os.path.join(self.parameters.tmpdir, 'body.txt')
 
-		if self.parameters.dry_run:
-			print 'DRY-RUN: not saving body to %s' %(body_file)
-			return
+        if self.parameters.dry_run:
+            print 'DRY-RUN: not saving body to %s' %(body_file)
+            return
 
-		print 'writing body to %s' %(body_file)
-		fx = open(body_file, 'wb') 
-		if not message_body:
-				message_body = '(None)'
+        print 'writing body to %s' %(body_file)
+        fx = open(body_file, 'wb') 
+        if not message_body:
+                message_body = '(None)'
 
-		message_body = message_body.encode('utf-8')
-		#message_body = unicode(message_body, 'iso-8859-15')
+        message_body = message_body.encode('utf-8')
+        #message_body = unicode(message_body, 'iso-8859-15')
 
-		fx.write(message_body)
-		fx.close()
-		try:
-			os.chmod(body_file,S_IRWXU|S_IRWXG|S_IRWXO)
-		except OSError:
-			pass
+        fx.write(message_body)
+        fx.close()
+        try:
+            os.chmod(body_file,S_IRWXU|S_IRWXG|S_IRWXO)
+        except OSError:
+            pass
 
-	def debug_attachments(self, message_parts):
-		"""
-		"""
-		self.logger.debug('function debug_attachments')
-		
-		n = 0
-		for item in message_parts:
-			# Skip inline text parts
-			if not isinstance(item, tuple):
-				continue
-				
-			(original, filename, part) = item
+    def debug_attachments(self, message_parts):
+        """
+        """
+        self.logger.debug('function debug_attachments')
+        
+        n = 0
+        for item in message_parts:
+            # Skip inline text parts
+            if not isinstance(item, tuple):
+                continue
+                
+            (original, filename, part) = item
 
-			n = n + 1
-			print 'part%d: Content-Type: %s' % (n, part.get_content_type())
-		
-			s = 'part%d: filename: %s' %(n, filename)
-			self.print_unicode(s)
-	
-			## Forbidden chars
-			#
-			filename = filename.replace('\\', '_')
-			filename = filename.replace('/', '_') 
-	
+            n = n + 1
+            print 'part%d: Content-Type: %s' % (n, part.get_content_type())
+        
+            s = 'part%d: filename: %s' %(n, filename)
+            self.print_unicode(s)
+    
+            ## Forbidden chars
+            #
+            filename = filename.replace('\\', '_')
+            filename = filename.replace('/', '_') 
+    
 
-			part_file = os.path.join(self.parameters.tmpdir, filename)
-			s = 'writing part%d (%s)' % (n,part_file)
-			self.print_unicode(s)
+            part_file = os.path.join(self.parameters.tmpdir, filename)
+            s = 'writing part%d (%s)' % (n,part_file)
+            self.print_unicode(s)
 
-			if self.parameters.dry_run:
-				print 'DRY_RUN: NOT saving attachments'
-				continue
+            if self.parameters.dry_run:
+                print 'DRY_RUN: NOT saving attachments'
+                continue
 
-			part_file = util.text.unicode_quote(part_file)
+            part_file = util.text.unicode_quote(part_file)
 
-			fx = open(part_file, 'wb')
-			text = part.get_payload(decode=1)
+            fx = open(part_file, 'wb')
+            text = part.get_payload(decode=1)
 
-			if not text:
-				text = '(None)'
+            if not text:
+                text = '(None)'
 
-			fx.write(text)
-			fx.close()
+            fx.write(text)
+            fx.close()
 
-			try:
-				os.chmod(part_file,S_IRWXU|S_IRWXG|S_IRWXO)
-			except OSError:
-				pass
+            try:
+                os.chmod(part_file,S_IRWXU|S_IRWXG|S_IRWXO)
+            except OSError:
+                pass
 
-	def save_email_for_debug(self, message, create_tempfile=False):
+    def save_email_for_debug(self, message, create_tempfile=False):
 
-		if create_tempfile:
-			msg_file = tempfile.mktemp('.email2trac')
-		else:
-			#msg_file = '/var/tmp/msg.txt' 
-			msg_file = os.path.join(self.parameters.tmpdir, 'msg.txt')
+        if create_tempfile:
+            msg_file = tempfile.mktemp('.email2trac')
+        else:
+            #msg_file = '/var/tmp/msg.txt' 
+            msg_file = os.path.join(self.parameters.tmpdir, 'msg.txt')
 
-		if self.parameters.dry_run:
-			print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
-		else:
-			print 'saving email to %s' %(msg_file)
+        if self.parameters.dry_run:
+            print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
+        else:
+            print 'saving email to %s' %(msg_file)
 
-			fx = open(msg_file, 'wb')
-			fx.write('%s' % message)
-			fx.close()
-			
-			try:
-				os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
-			except OSError:
-				pass
+            fx = open(msg_file, 'wb')
+            fx.write('%s' % message)
+            fx.close()
+            
+            try:
+                os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
+            except OSError:
+                pass
 
-		message_parts = self.get_message_parts(message)
-		message_parts = self.unique_attachment_names(message_parts)
-		body_text = self.get_body_text(message_parts)
-		self.debug_body(body_text, True)
-		self.debug_attachments(message_parts)
+        message_parts = self.get_message_parts(message)
+        message_parts = self.unique_attachment_names(message_parts)
+        body_text = self.get_body_text(message_parts)
+        self.debug_body(body_text, True)
+        self.debug_attachments(message_parts)
 
 ########## Conversion functions  ###########################################################
 
-	def email_to_unicode(self, message_str):
-		"""
-		Email has 7 bit ASCII code, convert it to unicode with the charset
-		that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
-		understands it.
-		"""
-		self.logger.debug("function email_to_unicode")
+    def email_to_unicode(self, message_str):
+        """
+        Email has 7 bit ASCII code, convert it to unicode with the charset
+        that is encoded in 7-bit ASCII code and encode it as utf-8 so Trac 
+        understands it.
+        """
+        self.logger.debug("function email_to_unicode")
 
-		results =  email.Header.decode_header(message_str)
+        results =  email.Header.decode_header(message_str)
 
-		s = None
-		for text,format in results:
-			if format:
-				try:
-					temp = unicode(text, format)
-				except UnicodeError, detail:
-					# This always works 
-					#
-					temp = unicode(text, 'iso-8859-15')
-				except LookupError, detail:
-					#text = 'ERROR: Could not find charset: %s, please install' %format
-					#temp = unicode(text, 'iso-8859-15')
-					temp = message_str
-				    	
-			else:
-				temp = string.strip(text)
-				temp = unicode(text, 'iso-8859-15')
+        s = None
+        for text,format in results:
+            if format:
+                try:
+                    temp = unicode(text, format)
+                except UnicodeError, detail:
+                    # This always works 
+                    #
+                    temp = unicode(text, 'iso-8859-15')
+                except LookupError, detail:
+                    #text = 'ERROR: Could not find charset: %s, please install' %format
+                    #temp = unicode(text, 'iso-8859-15')
+                    temp = message_str
+                        
+            else:
+                temp = string.strip(text)
+                temp = unicode(text, 'iso-8859-15')
 
-			if s:
-				s = '%s %s' %(s, temp)
-			else:
-				s = '%s' %temp
+            if s:
+                s = '%s %s' %(s, temp)
+            else:
+                s = '%s' %temp
 
-		#s = s.encode('utf-8')
-		return s
+        #s = s.encode('utf-8')
+        return s
 
-	def str_to_dict(self, s):
-		"""
-		Transfrom a string of the form [<key>=<value>]+ to dict[<key>] = <value>
-		""" 
-		self.logger.debug("function str_to_dict")
+    def str_to_dict(self, s):
+        """
+        Transfrom a string of the form [<key>=<value>]+ to dict[<key>] = <value>
+        """ 
+        self.logger.debug("function str_to_dict")
 
-		fields = string.split(s, self.parameters.subject_field_separator)
+        fields = string.split(s, self.parameters.subject_field_separator)
 
-		result = dict()
-		for field in fields:
-			try: 
-				index, value = string.split(field, '=')
+        result = dict()
+        for field in fields:
+            try: 
+                index, value = string.split(field, '=')
 
-				# We can not change the description of a ticket via the subject
-				# line. The description is the body of the email
-				#
-				if index.lower() in ['description']:
-					continue
+                # We can not change the description of a ticket via the subject
+                # line. The description is the body of the email
+                #
+                if index.lower() in ['description']:
+                    continue
 
-				if value:
-					result[index.lower()] = value
+                if value:
+                    result[index.lower()] = value
 
-			except ValueError:
-				pass
-		return result
+            except ValueError:
+                pass
+        return result
 
-	def print_unicode(self,s):
-		"""
-		This function prints unicode strings if possible else it will quote it
-		"""
-		try:
-			self.logger.debug(s)
-		except UnicodeEncodeError, detail:
-			self.logger.debug(util.text.unicode_quote(s))
+    def print_unicode(self,s):
+        """
+        This function prints unicode strings if possible else it will quote it
+        """
+        try:
+            self.logger.debug(s)
+        except UnicodeEncodeError, detail:
+            self.logger.debug(util.text.unicode_quote(s))
 
 
-	def html_2_txt(self, data):
-		"""
-		Various routines to convert html syntax to valid trac wiki syntax
-		""" 
-		self.logger.debug('function html_2_txt')
+    def html_2_txt(self, data):
+        """
+        Various routines to convert html syntax to valid trac wiki syntax
+        """ 
+        self.logger.debug('function html_2_txt')
 
-		## This routine make an safe html that can be include
-		#  in trac, but no further text processing can be done
-		#
-#		try:
-#			from lxml.html.clean import Cleaner
-#			tags_rm = list()
-#			tags_rm.append('body')
+        ## This routine make an safe html that can be include
+        #  in trac, but no further text processing can be done
+        #
+#       try:
+#           from lxml.html.clean import Cleaner
+#           tags_rm = list()
+#           tags_rm.append('body')
 #
-#			cleaner = Cleaner(remove_tags=tags_rm )
-#			parsed_data = cleaner.clean_html(data)
-#			parsed_data = '\n{{{\n#!html\n' + parsed_data + '\n}}}\n'
+#           cleaner = Cleaner(remove_tags=tags_rm )
+#           parsed_data = cleaner.clean_html(data)
+#           parsed_data = '\n{{{\n#!html\n' + parsed_data + '\n}}}\n'
 #
-#			return parsed_data
-#			
-#		except ImportError::
-#			pass
+#           return parsed_data
+#           
+#       except ImportError::
+#           pass
 
-		parsed_data = None
-		if self.parameters.html2text_cmd: 
-			tmp_file = tempfile.mktemp('email2trac.html')
-			cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file) 
-			self.logger.debug('\t html2text conversion %s'%(cmd)) 
-	
-			if self.parameters.dry_run:
-				print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
+        parsed_data = None
+        if self.parameters.html2text_cmd: 
+            tmp_file = tempfile.mktemp('email2trac.html')
+            cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file) 
+            self.logger.debug('\t html2text conversion %s'%(cmd)) 
+    
+            if self.parameters.dry_run:
+                print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
 
-			else: 
-				f = open(tmp_file, "w+")
-				f.write(data)
-				f.close()
+            else: 
+                f = open(tmp_file, "w+")
+                f.write(data)
+                f.close()
 
-				lines = os.popen(cmd).readlines()
-				parsed_data =  ''.join(lines)
+                lines = os.popen(cmd).readlines()
+                parsed_data =  ''.join(lines)
 
-				os.unlink(tmp_file)
+                os.unlink(tmp_file)
 
-		else:
-			self.logger.debug('\t No html2text conversion tool specified in email2trac.conf') 
+        else:
+            self.logger.debug('\t No html2text conversion tool specified in email2trac.conf') 
 
-		return parsed_data
+        return parsed_data
 
 ########## TRAC ticket functions  ###########################################################
 
-	def check_permission_participants(self, tkt, action):
-		"""
-		Check if the mailer is allowed to update the ticket
-		"""
-		self.logger.debug('function check_permission_participants')
+    def check_permission_participants(self, tkt, action):
+        """
+        Check if the mailer is allowed to update the ticket
+        """
+        self.logger.debug('function check_permission_participants')
 
-		if tkt['reporter'].lower() in [self.author, self.email_addr]:
-			self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
+        if tkt['reporter'].lower() in [self.author, self.email_addr]:
+            self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
 
-			return True
+            return True
 
-		perm = PermissionSystem(self.env)
-		if perm.check_permission(action, self.author):
-			self.logger.debug('ALLOW, %s has trac permission to update the ticket' %(self.author))
+        perm = PermissionSystem(self.env)
+        if perm.check_permission(action, self.author):
+            self.logger.debug('ALLOW, %s has trac permission to update the ticket' %(self.author))
 
-			return True
-		
-		# Is the updater in the CC?
-		try:
-			cc_list = tkt['cc'].split(',')
-			for cc in cc_list:
-				if self.email_addr.lower() in cc.strip():
-					self.logger.debug('ALLOW, %s is in the CC' %(self.email_addr))
+            return True
+        
+        # Is the updater in the CC?
+        try:
+            cc_list = tkt['cc'].split(',')
+            for cc in cc_list:
+                if self.email_addr.lower() in cc.strip():
+                    self.logger.debug('ALLOW, %s is in the CC' %(self.email_addr))
 
-					return True
+                    return True
 
-		except KeyError:
-			pass
+        except KeyError:
+            pass
 
-		return False
+        return False
 
-	def check_permission(self, tkt, action):
-		"""
-		check if the reporter has the right permission for the action: 
+    def check_permission(self, tkt, action):
+        """
+        check if the reporter has the right permission for the action: 
           - TICKET_CREATE
           - TICKET_MODIFY
           - TICKET_APPEND
           - TICKET_CHGPROP
 
-		There are three models:
-  			- None      : no checking at all
-			- trac      : check the permission via trac permission model
-			- email2trac: ....
-		"""
-		self.logger.debug("function check_permission")
-
-		if self.parameters.ticket_permission_system in ['trac']:
-
-			perm = PermissionSystem(self.env)
-			if perm.check_permission(action, self.author):
-				return True
-			else:
-				return False
-
-		elif self.parameters.ticket_permission_system in ['update_restricted_to_participants']:
-			return (self.check_permission_participants(tkt, action))	
-
-		## Default is to allow everybody ticket updates and ticket creation
-		#
-		else:
-				return True
-
-
-	def update_ticket_fields(self, ticket, user_dict, new=None): 
-		"""
-		This will update the ticket fields. It will check if the 
-		given fields are known and if the right values are specified
-		It will only update the ticket field value:
-			- If the field is known
-			- If the value supplied is valid for the ticket field.
-			  If not then there are two options:
-			   1) Skip the value (new=None)
-			   2) Set default value for field (new=1)
-		"""
-		self.logger.debug("function update_ticket_fields")
-
-		## Check only permission model on ticket updates
-		#
-		if not new:
-			if self.parameters.ticket_permission_system:
-				if not self.check_permission(ticket, 'TICKET_CHGPROP'):
-					self.logger.info('Reporter: %s has no permission to change ticket properties' %self.author)
-					return False
-
-		## Build a system dictionary from the ticket fields 
-		#  with field as index and option as value
-		#
-		sys_dict = dict()
-		for field in ticket.fields:
-			try:
-				sys_dict[field['name']] = field['options']
-
-			except KeyError:
-				#sys_dict[field['name']] = None
-				pass
-
-		## Check user supplied fields an compare them with the
-		#  system one's
-		#
-		for field,value in user_dict.items():
-			if self.parameters.debug:
-				s = 'user_field\t %s = %s' %(field,value) 
-				self.print_unicode(s)
-
-			## To prevent mail loop
-			#
-			if field == 'cc': 
-
-				cc_list = user_dict['cc'].split(',')
-
-				if self.trac_smtp_from in cc_list:
-					self.logger.debug('MAIL LOOP: %s is not allowed as CC address' %(self.trac_smtp_from))
-
-					cc_list.remove(self.trac_smtp_from)
-
-				value = ','.join(cc_list)
-				
-
-			## Check if every value is allowed for this field
-			# 
-			if sys_dict.has_key(field): 
-
-				if value in sys_dict[field]: 
-					ticket[field] = value
-				else:
-					## Must we set a default if value is not allowed
-					#
-					if new:
-						value = self.get_config('ticket', 'default_%s' %(field) )
-
-			else:
-				## Only set if we have a value
-				#
-				#if value:
-				#	ticket[field] = value
-				ticket[field] = value
-
-			if self.parameters.debug:
-				s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
-				self.print_unicode(s)
-
-	def ticket_update(self, m, id, spam):
-		"""
-		If the current email is a reply to an existing ticket, this function
-		will append the contents of this email to that ticket, instead of 
-		creating a new one.
-		"""
-		self.logger.debug("function ticket_update")
-
-		if not self.parameters.ticket_update:
-			self.logger.debug("ticket_update disabled")
-			return False
-
-		## Must we update ticket fields
-		#
-		update_fields = dict()
-		try:
-			id, keywords = string.split(id, '?')
-
-			update_fields = self.str_to_dict(keywords)
-
-			## Strip '#' 
-			#
-			self.id = int(id[1:])
-
-		except ValueError:
-
-			## Strip '#' 
-			#
-			self.id = int(id[1:])
-
-		self.logger.debug("ticket_update id %s" %id)
-
-		## When is the change committed
-		# 
-		if self.VERSION < 0.11:
-			when = int(time.time())
-		else:
-			when = datetime.now(util.datefmt.utc)
-
-		try:
-			tkt = Ticket(self.env, self.id, self.db)
+        There are three models:
+            - None      : no checking at all
+            - trac      : check the permission via trac permission model
+            - email2trac: ....
+        """
+        self.logger.debug("function check_permission")
+
+        if self.parameters.ticket_permission_system in ['trac']:
+
+            perm = PermissionSystem(self.env)
+            if perm.check_permission(action, self.author):
+                return True
+            else:
+                return False
+
+        elif self.parameters.ticket_permission_system in ['update_restricted_to_participants']:
+            return (self.check_permission_participants(tkt, action))    
+
+        ## Default is to allow everybody ticket updates and ticket creation
+        #
+        else:
+                return True
+
+
+    def update_ticket_fields(self, ticket, user_dict, new=None): 
+        """
+        This will update the ticket fields. It will check if the 
+        given fields are known and if the right values are specified
+        It will only update the ticket field value:
+            - If the field is known
+            - If the value supplied is valid for the ticket field.
+              If not then there are two options:
+               1) Skip the value (new=None)
+               2) Set default value for field (new=1)
+        """
+        self.logger.debug("function update_ticket_fields")
+
+        ## Check only permission model on ticket updates
+        #
+        if not new:
+            if self.parameters.ticket_permission_system:
+                if not self.check_permission(ticket, 'TICKET_CHGPROP'):
+                    self.logger.info('Reporter: %s has no permission to change ticket properties' %self.author)
+                    return False
+
+        ## Build a system dictionary from the ticket fields 
+        #  with field as index and option as value
+        #
+        sys_dict = dict()
+        for field in ticket.fields:
+            try:
+                sys_dict[field['name']] = field['options']
+
+            except KeyError:
+                #sys_dict[field['name']] = None
+                pass
+
+        ## Check user supplied fields an compare them with the
+        #  system one's
+        #
+        for field,value in user_dict.items():
+            if self.parameters.debug:
+                s = 'user_field\t %s = %s' %(field,value) 
+                self.print_unicode(s)
+
+            ## To prevent mail loop
+            #
+            if field == 'cc': 
+
+                cc_list = user_dict['cc'].split(',')
+
+                if self.trac_smtp_from in cc_list:
+                    self.logger.debug('MAIL LOOP: %s is not allowed as CC address' %(self.trac_smtp_from))
+
+                    cc_list.remove(self.trac_smtp_from)
+
+                value = ','.join(cc_list)
+                
+
+            ## Check if every value is allowed for this field
+            # 
+            if sys_dict.has_key(field): 
+
+                if value in sys_dict[field]: 
+                    ticket[field] = value
+                else:
+                    ## Must we set a default if value is not allowed
+                    #
+                    if new:
+                        value = self.get_config('ticket', 'default_%s' %(field) )
+
+            else:
+                ## Only set if we have a value
+                #
+                #if value:
+                #   ticket[field] = value
+                ticket[field] = value
+
+            if self.parameters.debug:
+                s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
+                self.print_unicode(s)
+
+    def ticket_update(self, m, id, spam):
+        """
+        If the current email is a reply to an existing ticket, this function
+        will append the contents of this email to that ticket, instead of 
+        creating a new one.
+        """
+        self.logger.debug("function ticket_update")
+
+        if not self.parameters.ticket_update:
+            self.logger.debug("ticket_update disabled")
+            return False
+
+        ## Must we update ticket fields
+        #
+        update_fields = dict()
+        try:
+            id, keywords = string.split(id, '?')
+
+            update_fields = self.str_to_dict(keywords)
+
+            ## Strip '#' 
+            #
+            self.id = int(id[1:])
+
+        except ValueError:
+
+            ## Strip '#' 
+            #
+            self.id = int(id[1:])
+
+        self.logger.debug("ticket_update id %s" %id)
+
+        ## When is the change committed
+        # 
+        if self.VERSION < 0.11:
+            when = int(time.time())
+        else:
+            when = datetime.now(util.datefmt.utc)
+
+        try:
+            tkt = Ticket(self.env, self.id, self.db)
 
-		except util.TracError, detail:
-
-			## Not a valid ticket
-			#
-			self.id = None
-			return False
-
-		## Check the permission of the reporter
-		#
-		if self.parameters.ticket_permission_system:
-			if not self.check_permission(tkt, 'TICKET_APPEND'):
-				self.logger.info('Reporter: %s has no permission to add comments or attachments to tickets' %self.author)
-				return False
-
-		## How many changes has this ticket
-		#
-		# cnum = len(tkt.get_changelog())
-		grouped = TicketModule(self.env).grouped_changelog_entries(tkt, self.db)
-		cnum = sum(1 for e in grouped) + 1
-
-
-		## reopen the ticket if it is was closed
-		#  We must use the ticket workflow framework
-		#
-		if self.parameters.email_triggers_workflow and (self.VERSION >= 0.11):
-
-			self.logger.debug('Workflow ticket update fields: ')
-
-			from trac.ticket.default_workflow import ConfigurableTicketWorkflow
-			from trac.test import Mock, MockPerm
-
-			req = Mock(authname=self.author, perm=MockPerm(), args={})
-			try:
-				workflow = self.parameters['workflow_%s' %tkt['status']]
-			except KeyError: 
-				## fallback for compability (Will be deprecated)
-				#
-				if tkt['status'] in ['closed']:
-					workflow = self.parameters.workflow
-				else:	
- 					workflow = None
-
-			controller = ConfigurableTicketWorkflow(self.env)
-			#print controller.actions
-			#print controller.actions.keys()
-			#print controller.get_ticket_actions(req, tkt)
-			#print controller.actions[workflow]
-			#print controller.actions[workflow]['permissions'] is a list
-
-			if workflow:
-
-				if self.parameters.ticket_permission_system:
-
-					if self.check_permission(tkt, controller.actions[workflow]['permissions'][0]):
-						fields = controller.get_ticket_changes(req, tkt, workflow)
-					else:
-						fields = dict()
-						self.logger.info('Reporter: %s has no permission to trigger workflow' %self.author)
-
-				else:
-					fields = controller.get_ticket_changes(req, tkt, workflow)
-
-				for key in fields.keys():
-					self.logger.debug('\t %s : %s' %(key, fields[key]))
-					tkt[key] = fields[key]
-
-		## Old pre 0.11 situation
-		# 
-		elif self.parameters.email_triggers_workflow:
-
-			self.logger.debug('email triggers workflow pre trac 0.11')
-
-			if tkt['status'] in ['closed']:
-				tkt['status'] = 'reopened'
-				tkt['resolution'] = ''
-
-		else:
-			self.logger.debug('email triggers workflow disabled')
-
-		## Must we update some ticket fields properties via subject line
-		#
-		if update_fields:
-			self.update_ticket_fields(tkt, update_fields)
-
-		message_parts = self.get_message_parts(m)
-		message_parts = self.unique_attachment_names(message_parts)
-
-		## Must we update some ticket fields properties via body_text
-		#
-		if self.properties:
-				self.update_ticket_fields(tkt, self.properties)
-
-		if self.parameters.email_header:
-			message_parts.insert(0, self.email_header_txt(m))
-
-		body_text = self.get_body_text(message_parts)
-
-		error_with_attachments = self.attach_attachments(message_parts)
-
-		if body_text.strip() or update_fields or self.properties: 
-			if self.parameters.dry_run:
-				print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
-			else:
-				if error_with_attachments:
-					body_text = '%s\\%s' %(error_with_attachments, body_text)
-				self.logger.debug('tkt.save_changes(%s, %d)' %(self.author, cnum))
-				tkt.save_changes(self.author, body_text, when, None, str(cnum))
-			
-
-		if not spam:
-			self.notify(tkt, False, when)
-
-		return True
-
-	def set_ticket_fields(self, ticket):
-		"""
-		set the ticket fields to value specified
-			- /etc/email2trac.conf with <prefix>_<field>
-			- trac default values, trac.ini
-		"""
-		self.logger.debug('function set_ticket_fields')
-
-		user_dict = dict()
-
-		for field in ticket.fields:
-
-			name = field['name'] 
-
-			## default trac value
-			#
-			if not field.get('custom'):
-				value = self.get_config('ticket', 'default_%s' %(name) )
-				if (name in ['resolution']) and (value in ['fixed']):
-					value = None 
-			else:
-				##  Else get the default value for reporter
-				#
-				value = field.get('value')
-				options = field.get('options')
-
-				if value and options and (value not in options):
-					 value = options[int(value)]
-	
-			if self.parameters.debug:
-				s = 'trac[%s] = %s' %(name, value)
-				self.print_unicode(s)
-
-			## email2trac.conf settings
-			#
-			prefix = self.parameters.ticket_prefix
-			try:
-				value = self.parameters['%s_%s' %(prefix, name)]
-				if self.parameters.debug:
-					s = 'email2trac[%s] = %s ' %(name, value)
-					self.print_unicode(s)
-
-			except KeyError, detail:
-				pass
-		
-			if value:
-				user_dict[name] = value
-				if self.parameters.debug:
-					s = 'used %s = %s' %(name, value)
-					self.print_unicode(s)
-
-		self.update_ticket_fields(ticket, user_dict, new=1)
-
-		if 'status' not in user_dict.keys():
-			ticket['status'] = 'new'
-
-
-	def ticket_update_by_subject(self, subject):
-		"""
-		This list of Re: prefixes is probably incomplete. Taken from
-		wikipedia. Here is how the subject is matched
-		  - Re: <subject> 
-		  - Re: (<Mail list label>:)+ <subject>
-
-		So we must have the last column
-		"""
-		self.logger.debug('function ticket_update_by_subject')
-
-		matched_id = None
-		if self.parameters.ticket_update and self.parameters.ticket_update_by_subject:
-				
-			SUBJECT_RE = re.compile(r'^(?:(?:RE|AW|VS|SV|FW|FWD):\s*)+(.*)', re.IGNORECASE)
-			result = SUBJECT_RE.search(subject)
-
-			if result:
-				## This is a reply
-				#
-				orig_subject = result.group(1)
-
-				self.logger.debug('subject search string: %s' %(orig_subject))
-
-				cursor = self.db.cursor()
-				summaries = [orig_subject, '%%: %s' % orig_subject]
-
-				## Convert days to seconds
-				#
-				lookback = int(time.mktime(time.gmtime())) - \
-						self.parameters.ticket_update_by_subject_lookback * 24 * 3600
-
-
-				for summary in summaries:
-					self.logger.debug('Looking for summary matching: "%s"' % summary)
-
-					sql = """SELECT id FROM ticket
-						 	WHERE changetime >= %s AND summary LIKE %s
-							ORDER BY changetime DESC"""
-					cursor.execute(sql, [lookback, summary.strip()])
-
-					for row in cursor:
-						(matched_id,) = row
-
-						self.logger.debug('Found matching ticket id: %d' % matched_id)
-
-						break
-
-					if matched_id:
-						matched_id = '#%d' % matched_id
-						return (matched_id, orig_subject)
-					
-					subject = orig_subject
-
-		return (matched_id, subject)
-
-
-	def new_ticket(self, msg, subject, spam, set_fields = None):
-		"""
-		Create a new ticket
-		"""
-		self.logger.debug('function new_ticket')
-
-		tkt = Ticket(self.env)
-
-		self.set_reply_fields(tkt, msg)
-
-		self.set_ticket_fields(tkt)
-
-		## Check the permission of the reporter
-		#
-		if self.parameters.ticket_permission_system:
-			if not self.check_permission(tkt, 'TICKET_CREATE'):
-				self.logger.info('Reporter: %s has no permission to create tickets' %self.author)
-				return False
-
-		## Old style setting for component, will be removed
-		#
-		if spam:
-			tkt['component'] = 'Spam'
-
-		elif self.parameters.has_key('component'):
-			tkt['component'] = self.parameters['component']
-
-		if not msg['Subject']:
-			tkt['summary'] = u'(No subject)'
-		else:
-			tkt['summary'] = subject
-
-
-		if set_fields:
-			rest, keywords = string.split(set_fields, '?')
-
-			if keywords:
-				update_fields = self.str_to_dict(keywords)
-				self.update_ticket_fields(tkt, update_fields)
-
-
-		message_parts = self.get_message_parts(msg)
-
-		## Must we update some ticket fields properties via body_text
-		#
-		if self.properties:
-				self.update_ticket_fields(tkt, self.properties)
-
-		message_parts = self.unique_attachment_names(message_parts)
-		
-		## produce e-mail like header
-		#
-		head = ''
-		if self.parameters.email_header:
-			head = self.email_header_txt(msg)
-			message_parts.insert(0, head)
-			
-		body_text = self.get_body_text(message_parts)
-
-		tkt['description'] = body_text
-
-		## When is the change committed
-		# 
-		if self.VERSION < 0.11:
-			when = int(time.time())
-		else:
-			when = datetime.now(util.datefmt.utc)
-
-		if self.parameters.dry_run:
-			print 'DRY_RUN: tkt.insert()'
-		else:
-			self.id = tkt.insert()
-	
-		changed = False
-		comment = ''
-
-		## some routines in trac are dependend on ticket id	
-		#  like alternate notify template
-		#
-		if self.parameters.alternate_notify_template:
-			tkt['id'] = self.id
-			changed = True
-
-		## Rewrite the description if we have mailto enabled
-		#
-		if self.parameters.mailto_link:
-			changed = True
-			comment = u'\nadded mailto line\n'
-			mailto = self.html_mailto_link( m['Subject'])
-
-			tkt['description'] = u'%s\r\n%s%s\r\n' \
-				%(head, mailto, body_text)
-	
-		## Save the attachments to the ticket	
-		#
-		error_with_attachments =  self.attach_attachments(message_parts)
-
-		if error_with_attachments:
-			changed = True
-			comment = '%s\n%s\n' %(comment, error_with_attachments)
-
-		if changed:
-			if self.parameters.dry_run:
-				print 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
-			else:
-				tkt.save_changes(tkt['reporter'], comment)
-				#print tkt.get_changelog(self.db, when)
-
-		if not spam:
-			self.notify(tkt, True)
-
-
-	def attach_attachments(self, message_parts, update=False):
-		'''
-		save any attachments as files in the ticket's directory
-		'''
-		self.logger.debug('function attach_attachments()')
-
-		if self.parameters.dry_run:
-			print "DRY_RUN: no attachments attached to tickets"
-			return ''
-
-		count = 0
-
-		## Get Maxium attachment size
-		#
-		max_size = int(self.get_config('attachment', 'max_size'))
-		status   = None
-		
-		for item in message_parts:
-			## Skip body parts
-			#
-			if not isinstance(item, tuple):
-				continue
-				
-			(original, filename, part) = item
-
-			## We have to determine the size so we use this temporary solution. we must escape it
-			#  else we get UnicodeErrors. 
-			#
-			path, fd =  util.create_unique_file(os.path.join(self.parameters.tmpdir, util.text.unicode_quote(filename)))
-			text = part.get_payload(decode=1)
-			if not text:
-				text = '(None)'
-			fd.write(text)
-			fd.close()
-
-			## get the file_size
-			#
-			stats = os.lstat(path) 
-			file_size = stats[ST_SIZE]
-
-			## Check if the attachment size is allowed
-			#
-			if (max_size != -1) and (file_size > max_size):
-				status = '%s\nFile %s is larger then allowed attachment size (%d > %d)\n\n' \
-					%(status, original, file_size, max_size)
-
-				os.unlink(path)
-				continue
-			else:
-				count = count + 1
-					
-			## Insert the attachment
-			# 
-			fd = open(path, 'rb')
-			if self.system == 'discussion':
-				att = attachment.Attachment(self.env, 'discussion', 'topic/%s'
-				  % (self.id,))
-			else:
-				self.logger.debug('Attach %s to ticket %d' %(util.text.unicode_quote(filename), self.id))
-				att = attachment.Attachment(self.env, 'ticket', self.id)
+        except util.TracError, detail:
+
+            ## Not a valid ticket
+            #
+            self.id = None
+            return False
+
+        ## Check the permission of the reporter
+        #
+        if self.parameters.ticket_permission_system:
+            if not self.check_permission(tkt, 'TICKET_APPEND'):
+                self.logger.info('Reporter: %s has no permission to add comments or attachments to tickets' %self.author)
+                return False
+
+        ## How many changes has this ticket
+        #
+        # cnum = len(tkt.get_changelog())
+        grouped = TicketModule(self.env).grouped_changelog_entries(tkt, self.db)
+        cnum = sum(1 for e in grouped) + 1
+
+
+        ## reopen the ticket if it is was closed
+        #  We must use the ticket workflow framework
+        #
+        if self.parameters.email_triggers_workflow and (self.VERSION >= 0.11):
+
+            self.logger.debug('Workflow ticket update fields: ')
+
+            from trac.ticket.default_workflow import ConfigurableTicketWorkflow
+            from trac.test import Mock, MockPerm
+
+            req = Mock(authname=self.author, perm=MockPerm(), args={})
+            try:
+                workflow = self.parameters['workflow_%s' %tkt['status']]
+            except KeyError: 
+                ## fallback for compability (Will be deprecated)
+                #
+                if tkt['status'] in ['closed']:
+                    workflow = self.parameters.workflow
+                else:   
+                    workflow = None
+
+            controller = ConfigurableTicketWorkflow(self.env)
+            #print controller.actions
+            #print controller.actions.keys()
+            #print controller.get_ticket_actions(req, tkt)
+            #print controller.actions[workflow]
+            #print controller.actions[workflow]['permissions'] is a list
+
+            if workflow:
+
+                if self.parameters.ticket_permission_system:
+
+                    if self.check_permission(tkt, controller.actions[workflow]['permissions'][0]):
+                        fields = controller.get_ticket_changes(req, tkt, workflow)
+                    else:
+                        fields = dict()
+                        self.logger.info('Reporter: %s has no permission to trigger workflow' %self.author)
+
+                else:
+                    fields = controller.get_ticket_changes(req, tkt, workflow)
+
+                for key in fields.keys():
+                    self.logger.debug('\t %s : %s' %(key, fields[key]))
+                    tkt[key] = fields[key]
+
+        ## Old pre 0.11 situation
+        # 
+        elif self.parameters.email_triggers_workflow:
+
+            self.logger.debug('email triggers workflow pre trac 0.11')
+
+            if tkt['status'] in ['closed']:
+                tkt['status'] = 'reopened'
+                tkt['resolution'] = ''
+
+        else:
+            self.logger.debug('email triggers workflow disabled')
+
+        ## Must we update some ticket fields properties via subject line
+        #
+        if update_fields:
+            self.update_ticket_fields(tkt, update_fields)
+
+        message_parts = self.get_message_parts(m)
+        message_parts = self.unique_attachment_names(message_parts)
+
+        ## Must we update some ticket fields properties via body_text
+        #
+        if self.properties:
+                self.update_ticket_fields(tkt, self.properties)
+
+        if self.parameters.email_header:
+            message_parts.insert(0, self.email_header_txt(m))
+
+        body_text = self.get_body_text(message_parts)
+
+        error_with_attachments = self.attach_attachments(message_parts)
+
+        if body_text.strip() or update_fields or self.properties: 
+            if self.parameters.dry_run:
+                print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
+            else:
+                if error_with_attachments:
+                    body_text = '%s\\%s' %(error_with_attachments, body_text)
+                self.logger.debug('tkt.save_changes(%s, %d)' %(self.author, cnum))
+                tkt.save_changes(self.author, body_text, when, None, str(cnum))
+            
+
+        if not spam:
+            self.notify(tkt, False, when)
+
+        return True
+
+    def set_ticket_fields(self, ticket):
+        """
+        set the ticket fields to value specified
+            - /etc/email2trac.conf with <prefix>_<field>
+            - trac default values, trac.ini
+        """
+        self.logger.debug('function set_ticket_fields')
+
+        user_dict = dict()
+
+        for field in ticket.fields:
+
+            name = field['name'] 
+
+            ## default trac value
+            #
+            if not field.get('custom'):
+                value = self.get_config('ticket', 'default_%s' %(name) )
+                if (name in ['resolution']) and (value in ['fixed']):
+                    value = None 
+            else:
+                ##  Else get the default value for reporter
+                #
+                value = field.get('value')
+                options = field.get('options')
+
+                if value and options and (value not in options):
+                     value = options[int(value)]
+    
+            if self.parameters.debug:
+                s = 'trac[%s] = %s' %(name, value)
+                self.print_unicode(s)
+
+            ## email2trac.conf settings
+            #
+            prefix = self.parameters.ticket_prefix
+            try:
+                value = self.parameters['%s_%s' %(prefix, name)]
+                if self.parameters.debug:
+                    s = 'email2trac[%s] = %s ' %(name, value)
+                    self.print_unicode(s)
+
+            except KeyError, detail:
+                pass
+        
+            if value:
+                user_dict[name] = value
+                if self.parameters.debug:
+                    s = 'used %s = %s' %(name, value)
+                    self.print_unicode(s)
+
+        self.update_ticket_fields(ticket, user_dict, new=1)
+
+        if 'status' not in user_dict.keys():
+            ticket['status'] = 'new'
+
+
+    def ticket_update_by_subject(self, subject):
+        """
+        This list of Re: prefixes is probably incomplete. Taken from
+        wikipedia. Here is how the subject is matched
+          - Re: <subject> 
+          - Re: (<Mail list label>:)+ <subject>
+
+        So we must have the last column
+        """
+        self.logger.debug('function ticket_update_by_subject')
+
+        matched_id = None
+        if self.parameters.ticket_update and self.parameters.ticket_update_by_subject:
+                
+            SUBJECT_RE = re.compile(r'^(?:(?:RE|AW|VS|SV|FW|FWD):\s*)+(.*)', re.IGNORECASE)
+            result = SUBJECT_RE.search(subject)
+
+            if result:
+                ## This is a reply
+                #
+                orig_subject = result.group(1)
+
+                self.logger.debug('subject search string: %s' %(orig_subject))
+
+                cursor = self.db.cursor()
+                summaries = [orig_subject, '%%: %s' % orig_subject]
+
+                ## Convert days to seconds
+                #
+                lookback = int(time.mktime(time.gmtime())) - \
+                        self.parameters.ticket_update_by_subject_lookback * 24 * 3600
+
+
+                for summary in summaries:
+                    self.logger.debug('Looking for summary matching: "%s"' % summary)
+
+                    sql = """SELECT id FROM ticket
+                            WHERE changetime >= %s AND summary LIKE %s
+                            ORDER BY changetime DESC"""
+                    cursor.execute(sql, [lookback, summary.strip()])
+
+                    for row in cursor:
+                        (matched_id,) = row
+
+                        self.logger.debug('Found matching ticket id: %d' % matched_id)
+
+                        break
+
+                    if matched_id:
+                        matched_id = '#%d' % matched_id
+                        return (matched_id, orig_subject)
+                    
+                    subject = orig_subject
+
+        return (matched_id, subject)
+
+
+    def new_ticket(self, msg, subject, spam, set_fields = None):
+        """
+        Create a new ticket
+        """
+        self.logger.debug('function new_ticket')
+
+        tkt = Ticket(self.env)
+
+        self.set_reply_fields(tkt, msg)
+
+        self.set_ticket_fields(tkt)
+
+        ## Check the permission of the reporter
+        #
+        if self.parameters.ticket_permission_system:
+            if not self.check_permission(tkt, 'TICKET_CREATE'):
+                self.logger.info('Reporter: %s has no permission to create tickets' %self.author)
+                return False
+
+        ## Old style setting for component, will be removed
+        #
+        if spam:
+            tkt['component'] = 'Spam'
+
+        elif self.parameters.has_key('component'):
+            tkt['component'] = self.parameters['component']
+
+        if not msg['Subject']:
+            tkt['summary'] = u'(No subject)'
+        else:
+            tkt['summary'] = subject
+
+
+        if set_fields:
+            rest, keywords = string.split(set_fields, '?')
+
+            if keywords:
+                update_fields = self.str_to_dict(keywords)
+                self.update_ticket_fields(tkt, update_fields)
+
+
+        message_parts = self.get_message_parts(msg)
+
+        ## Must we update some ticket fields properties via body_text
+        #
+        if self.properties:
+                self.update_ticket_fields(tkt, self.properties)
+
+        message_parts = self.unique_attachment_names(message_parts)
+        
+        ## produce e-mail like header
+        #
+        head = ''
+        if self.parameters.email_header:
+            head = self.email_header_txt(msg)
+            message_parts.insert(0, head)
+            
+        body_text = self.get_body_text(message_parts)
+
+        tkt['description'] = body_text
+
+        ## When is the change committed
+        # 
+        if self.VERSION < 0.11:
+            when = int(time.time())
+        else:
+            when = datetime.now(util.datefmt.utc)
+
+        if self.parameters.dry_run:
+            print 'DRY_RUN: tkt.insert()'
+        else:
+            self.id = tkt.insert()
+    
+        changed = False
+        comment = ''
+
+        ## some routines in trac are dependend on ticket id 
+        #  like alternate notify template
+        #
+        if self.parameters.alternate_notify_template:
+            tkt['id'] = self.id
+            changed = True
+
+        ## Rewrite the description if we have mailto enabled
+        #
+        if self.parameters.mailto_link:
+            changed = True
+            comment = u'\nadded mailto line\n'
+            mailto = self.html_mailto_link( m['Subject'])
+
+            tkt['description'] = u'%s\r\n%s%s\r\n' \
+                %(head, mailto, body_text)
+    
+        ## Save the attachments to the ticket   
+        #
+        error_with_attachments =  self.attach_attachments(message_parts)
+
+        if error_with_attachments:
+            changed = True
+            comment = '%s\n%s\n' %(comment, error_with_attachments)
+
+        if changed:
+            if self.parameters.dry_run:
+                print 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
+            else:
+                tkt.save_changes(tkt['reporter'], comment)
+                #print tkt.get_changelog(self.db, when)
+
+        if not spam:
+            self.notify(tkt, True)
+
+
+    def attach_attachments(self, message_parts, update=False):
+        '''
+        save any attachments as files in the ticket's directory
+        '''
+        self.logger.debug('function attach_attachments()')
+
+        if self.parameters.dry_run:
+            print "DRY_RUN: no attachments attached to tickets"
+            return ''
+
+        count = 0
+
+        ## Get Maxium attachment size
+        #
+        max_size = int(self.get_config('attachment', 'max_size'))
+        status   = None
+        
+        for item in message_parts:
+            ## Skip body parts
+            #
+            if not isinstance(item, tuple):
+                continue
+                
+            (original, filename, part) = item
+
+            ## We have to determine the size so we use this temporary solution. we must escape it
+            #  else we get UnicodeErrors. 
+            #
+            path, fd =  util.create_unique_file(os.path.join(self.parameters.tmpdir, util.text.unicode_quote(filename)))
+            text = part.get_payload(decode=1)
+            if not text:
+                text = '(None)'
+            fd.write(text)
+            fd.close()
+
+            ## get the file_size
+            #
+            stats = os.lstat(path) 
+            file_size = stats[ST_SIZE]
+
+            ## Check if the attachment size is allowed
+            #
+            if (max_size != -1) and (file_size > max_size):
+                status = '%s\nFile %s is larger then allowed attachment size (%d > %d)\n\n' \
+                    %(status, original, file_size, max_size)
+
+                os.unlink(path)
+                continue
+            else:
+                count = count + 1
+                    
+            ## Insert the attachment
+            # 
+            fd = open(path, 'rb')
+            if self.system == 'discussion':
+                att = attachment.Attachment(self.env, 'discussion', 'topic/%s'
+                  % (self.id,))
+            else:
+                self.logger.debug('Attach %s to ticket %d' %(util.text.unicode_quote(filename), self.id))
+                att = attachment.Attachment(self.env, 'ticket', self.id)
   
-			## This will break the ticket_update system, the body_text is vaporized
-			#  ;-(
-			#
-			if not update:
-				att.author = self.author
-				att.description = self.email_to_unicode('Added by email2trac')
+            ## This will break the ticket_update system, the body_text is vaporized
+            #  ;-(
+            #
+            if not update:
+                att.author = self.author
+                att.description = self.email_to_unicode('Added by email2trac')
 
-			try:
-				self.logger.debug('Insert atachment')
-				att.insert(filename, fd, file_size)
-			except OSError, detail:
-				self.logger.info('%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail))
-				status = '%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail)
+            try:
+                self.logger.debug('Insert atachment')
+                att.insert(filename, fd, file_size)
+            except OSError, detail:
+                self.logger.info('%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail))
+                status = '%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail)
 
-			## Remove the created temporary filename
-			#
-			fd.close()
-			os.unlink(path)
+            ## Remove the created temporary filename
+            #
+            fd.close()
+            os.unlink(path)
 
-		## return error
-		#
-		return status
+        ## return error
+        #
+        return status
 
 ########## Fullblog functions  #################################################
 
-	def blog(self, id): 
-		"""
-		The blog create/update function
-		"""
-		## import the modules
-		#
-		from tracfullblog.core import FullBlogCore
-		from tracfullblog.model import BlogPost, BlogComment
-		from trac.test import Mock, MockPerm
+    def blog(self, id): 
+        """
+        The blog create/update function
+        """
+        ## import the modules
+        #
+        from tracfullblog.core import FullBlogCore
+        from tracfullblog.model import BlogPost, BlogComment
+        from trac.test import Mock, MockPerm
 
-		## instantiate blog core
-		#
-		blog = FullBlogCore(self.env)
-		req = Mock(authname='anonymous', perm=MockPerm(), args={})
+        ## instantiate blog core
+        #
+        blog = FullBlogCore(self.env)
+        req = Mock(authname='anonymous', perm=MockPerm(), args={})
 
-		if id: 
+        if id: 
 
-			## update blog
-			#
-			comment = BlogComment(self.env, id)
-			comment.author = self.author
+            ## update blog
+            #
+            comment = BlogComment(self.env, id)
+            comment.author = self.author
 
-			message_parts = self.get_message_parts(m)
-			comment.comment = self.get_body_text(message_parts)
+            message_parts = self.get_message_parts(m)
+            comment.comment = self.get_body_text(message_parts)
 
-			blog.create_comment(req, comment)
+            blog.create_comment(req, comment)
 
-		else:
-			## create blog
-			#
-			import time
-			post = BlogPost(self.env, 'blog_'+time.strftime("%Y%m%d%H%M%S", time.gmtime()))
+        else:
+            ## create blog
+            #
+            import time
+            post = BlogPost(self.env, 'blog_'+time.strftime("%Y%m%d%H%M%S", time.gmtime()))
 
-			#post = BlogPost(self.env, blog._get_default_postname(self.env)) 
-			
-			post.author = self.author
-			post.title = self.email_to_unicode(m['Subject'])
+            #post = BlogPost(self.env, blog._get_default_postname(self.env)) 
+            
+            post.author = self.author
+            post.title = self.email_to_unicode(m['Subject'])
 
-			message_parts = self.get_message_parts(m)
-			post.body = self.get_body_text(message_parts)
-			
-			blog.create_post(req, post, self.author, u'Created by email2trac', False)
+            message_parts = self.get_message_parts(m)
+            post.body = self.get_body_text(message_parts)
+            
+            blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
 
 ########## Discussion functions  ##############################################
 
-	def discussion_topic(self, content, subject):
+    def discussion_topic(self, content, subject):
 
-		## Import modules.
-		#
-		from tracdiscussion.api import DiscussionApi
-		from trac.util.datefmt import to_timestamp, utc
+        ## Import modules.
+        #
+        from tracdiscussion.api import DiscussionApi
+        from trac.util.datefmt import to_timestamp, utc
 
-		self.logger.debug('Creating a new topic in forum:', self.id)
+        self.logger.debug('Creating a new topic in forum:', self.id)
 
-		## Get dissussion API component.
-		#
-		api = self.env[DiscussionApi]
-		context = self._create_context(content, subject)
+        ## Get dissussion API component.
+        #
+        api = self.env[DiscussionApi]
+        context = self._create_context(content, subject)
 
-		## Get forum for new topic.
-		#
-		forum = api.get_forum(context, self.id)
+        ## Get forum for new topic.
+        #
+        forum = api.get_forum(context, self.id)
 
-		if not forum:
-			self.logger.error("ERROR: Replied forum doesn't exist")
+        if not forum:
+            self.logger.error("ERROR: Replied forum doesn't exist")
 
-		## Prepare topic.
-		#
-		topic = {'forum' : forum['id'],
-				 'subject' : context.subject,
-				 'time': to_timestamp(datetime.now(utc)),
-				 'author' : self.author,
-				 'subscribers' : [self.email_addr],
-				 'body' : self.get_body_text(context.content_parts)}
+        ## Prepare topic.
+        #
+        topic = {'forum' : forum['id'],
+                 'subject' : context.subject,
+                 'time': to_timestamp(datetime.now(utc)),
+                 'author' : self.author,
+                 'subscribers' : [self.email_addr],
+                 'body' : self.get_body_text(context.content_parts)}
 
-		## Add topic to DB and commit it.
-		#
-		self._add_topic(api, context, topic)
-		self.db.commit()
+        ## Add topic to DB and commit it.
+        #
+        self._add_topic(api, context, topic)
+        self.db.commit()
 
-	def discussion_topic_reply(self, content, subject):
+    def discussion_topic_reply(self, content, subject):
 
-		## Import modules.
-		#
-		from tracdiscussion.api import DiscussionApi
-		from trac.util.datefmt import to_timestamp, utc
+        ## Import modules.
+        #
+        from tracdiscussion.api import DiscussionApi
+        from trac.util.datefmt import to_timestamp, utc
 
-		self.logger.debug('Replying to discussion topic', self.id)
+        self.logger.debug('Replying to discussion topic', self.id)
 
-		## Get dissussion API component.
-		#
-		api = self.env[DiscussionApi]
-		context = self._create_context(content, subject)
+        ## Get dissussion API component.
+        #
+        api = self.env[DiscussionApi]
+        context = self._create_context(content, subject)
 
-		## Get replied topic.
-		#
-		topic = api.get_topic(context, self.id)
+        ## Get replied topic.
+        #
+        topic = api.get_topic(context, self.id)
 
-		if not topic:
-			self.logger.error("ERROR: Replied topic doesn't exist")
+        if not topic:
+            self.logger.error("ERROR: Replied topic doesn't exist")
 
-		## Prepare message.
-		#
-		message = {'forum' : topic['forum'],
-				   'topic' : topic['id'],
-				   'replyto' : -1,
-				   'time' : to_timestamp(datetime.now(utc)),
-				   'author' : self.author,
-				   'body' : self.get_body_text(context.content_parts)}
+        ## Prepare message.
+        #
+        message = {'forum' : topic['forum'],
+                   'topic' : topic['id'],
+                   'replyto' : -1,
+                   'time' : to_timestamp(datetime.now(utc)),
+                   'author' : self.author,
+                   'body' : self.get_body_text(context.content_parts)}
 
-		## Add message to DB and commit it.
-		#
-		self._add_message(api, context, message)
-		self.db.commit()
+        ## Add message to DB and commit it.
+        #
+        self._add_message(api, context, message)
+        self.db.commit()
 
-	def discussion_message_reply(self, content, subject):
+    def discussion_message_reply(self, content, subject):
 
-		## Import modules.
-		#
-		from tracdiscussion.api import DiscussionApi
-		from trac.util.datefmt import to_timestamp, utc
+        ## Import modules.
+        #
+        from tracdiscussion.api import DiscussionApi
+        from trac.util.datefmt import to_timestamp, utc
 
-		self.logger.debug('Replying to discussion message', self.id)
+        self.logger.debug('Replying to discussion message', self.id)
 
-		## Get dissussion API component.
-		#
-		api = self.env[DiscussionApi]
-		context = self._create_context(content, subject)
+        ## Get dissussion API component.
+        #
+        api = self.env[DiscussionApi]
+        context = self._create_context(content, subject)
 
-		## Get replied message.
-		#
-		message = api.get_message(context, self.id)
+        ## Get replied message.
+        #
+        message = api.get_message(context, self.id)
 
-		if not message:
-			self.logger.error("ERROR: Replied message doesn't exist")
+        if not message:
+            self.logger.error("ERROR: Replied message doesn't exist")
 
-		## Prepare message.
-		#
-		message = {'forum' : message['forum'],
-				   'topic' : message['topic'],
-				   'replyto' : message['id'],
-				   'time' : to_timestamp(datetime.now(utc)),
-				   'author' : self.author,
-				   'body' : self.get_body_text(context.content_parts)}
+        ## Prepare message.
+        #
+        message = {'forum' : message['forum'],
+                   'topic' : message['topic'],
+                   'replyto' : message['id'],
+                   'time' : to_timestamp(datetime.now(utc)),
+                   'author' : self.author,
+                   'body' : self.get_body_text(context.content_parts)}
 
-		## Add message to DB and commit it.
-		#
-		self._add_message(api, context, message)
-		self.db.commit()
+        ## Add message to DB and commit it.
+        #
+        self._add_message(api, context, message)
+        self.db.commit()
 
-	def _create_context(self, content, subject):
+    def _create_context(self, content, subject):
 
-		## Import modules.
-		#
-		from trac.mimeview import Context
-		from trac.web.api import Request
-		from trac.perm import PermissionCache
+        ## Import modules.
+        #
+        from trac.mimeview import Context
+        from trac.web.api import Request
+        from trac.perm import PermissionCache
 
-		## TODO: Read server base URL from config.
-		#  Create request object to mockup context creation.
-		#
-		environ = {'SERVER_PORT' : 80,
-				   'SERVER_NAME' : 'test',
-				   'REQUEST_METHOD' : 'POST',
-				   'wsgi.url_scheme' : 'http',
-				   'wsgi.input' : sys.stdin}
-		chrome =  {'links': {},
-				   'scripts': [],
-				   'ctxtnav': [],
-				   'warnings': [],
-				   'notices': []}
+        ## TODO: Read server base URL from config.
+        #  Create request object to mockup context creation.
+        #
+        environ = {'SERVER_PORT' : 80,
+                   'SERVER_NAME' : 'test',
+                   'REQUEST_METHOD' : 'POST',
+                   'wsgi.url_scheme' : 'http',
+                   'wsgi.input' : sys.stdin}
+        chrome =  {'links': {},
+                   'scripts': [],
+                   'ctxtnav': [],
+                   'warnings': [],
+                   'notices': []}
 
-		if self.env.base_url_for_redirect:
-			environ['trac.base_url'] = self.env.base_url
+        if self.env.base_url_for_redirect:
+            environ['trac.base_url'] = self.env.base_url
 
-		req = Request(environ, None)
-		req.chrome = chrome
-		req.tz = 'missing'
-		req.authname = self.author
-		req.perm = PermissionCache(self.env, self.author)
-		req.locale = None
+        req = Request(environ, None)
+        req.chrome = chrome
+        req.tz = 'missing'
+        req.authname = self.author
+        req.perm = PermissionCache(self.env, self.author)
+        req.locale = None
 
-		## Create and return context.
-		#
-		context = Context.from_request(req)
-		context.realm = 'discussion-email2trac'
-		context.cursor = self.db.cursor()
-		context.content = content
-		context.subject = subject
+        ## Create and return context.
+        #
+        context = Context.from_request(req)
+        context.realm = 'discussion-email2trac'
+        context.cursor = self.db.cursor()
+        context.content = content
+        context.subject = subject
 
-		## Read content parts from content.
-		#
-		context.content_parts = self.get_message_parts(content)
-		context.content_parts = self.unique_attachment_names(
-		  context.content_parts)
+        ## Read content parts from content.
+        #
+        context.content_parts = self.get_message_parts(content)
+        context.content_parts = self.unique_attachment_names(
+          context.content_parts)
 
-		return context
+        return context
 
-	def _add_topic(self, api, context, topic):
-		context.req.perm.assert_permission('DISCUSSION_APPEND')
+    def _add_topic(self, api, context, topic):
+        context.req.perm.assert_permission('DISCUSSION_APPEND')
 
-		## Filter topic.
-		#
-		for discussion_filter in api.discussion_filters:
-			accept, topic_or_error = discussion_filter.filter_topic(
-			  context, topic)
-			if accept:
-				topic = topic_or_error
-			else:
-				raise TracError(topic_or_error)
+        ## Filter topic.
+        #
+        for discussion_filter in api.discussion_filters:
+            accept, topic_or_error = discussion_filter.filter_topic(
+              context, topic)
+            if accept:
+                topic = topic_or_error
+            else:
+                raise TracError(topic_or_error)
 
-		## Add a new topic.
-		#
-		api.add_topic(context, topic)
+        ## Add a new topic.
+        #
+        api.add_topic(context, topic)
 
-		## Get inserted topic with new ID.
-		#
-		topic = api.get_topic_by_time(context, topic['time'])
+        ## Get inserted topic with new ID.
+        #
+        topic = api.get_topic_by_time(context, topic['time'])
 
-		## Attach attachments.
-		#
-		self.id = topic['id']
-		self.attach_attachments(context.content_parts, True)
+        ## Attach attachments.
+        #
+        self.id = topic['id']
+        self.attach_attachments(context.content_parts, True)
 
-		## Notify change listeners.
-		#
-		for listener in api.topic_change_listeners:
-			listener.topic_created(context, topic)
+        ## Notify change listeners.
+        #
+        for listener in api.topic_change_listeners:
+            listener.topic_created(context, topic)
 
-	def _add_message(self, api, context, message):
-		context.req.perm.assert_permission('DISCUSSION_APPEND')
+    def _add_message(self, api, context, message):
+        context.req.perm.assert_permission('DISCUSSION_APPEND')
 
-		## Filter message.
-		#
-		for discussion_filter in api.discussion_filters:
-			accept, message_or_error = discussion_filter.filter_message(
-			  context, message)
-			if accept:
-				message = message_or_error
-			else:
-				raise TracError(message_or_error)
+        ## Filter message.
+        #
+        for discussion_filter in api.discussion_filters:
+            accept, message_or_error = discussion_filter.filter_message(
+              context, message)
+            if accept:
+                message = message_or_error
+            else:
+                raise TracError(message_or_error)
 
-		## Add message.
-		#
-		api.add_message(context, message)
+        ## Add message.
+        #
+        api.add_message(context, message)
 
-		## Get inserted message with new ID.
-		#
-		message = api.get_message_by_time(context, message['time'])
+        ## Get inserted message with new ID.
+        #
+        message = api.get_message_by_time(context, message['time'])
 
-		## Attach attachments.
-		#
-		self.id = message['topic']
-		self.attach_attachments(context.content_parts, True)
+        ## Attach attachments.
+        #
+        self.id = message['topic']
+        self.attach_attachments(context.content_parts, True)
 
-		## Notify change listeners.
-		#
-		for listener in api.message_change_listeners:
-			listener.message_created(context, message)
+        ## Notify change listeners.
+        #
+        for listener in api.message_change_listeners:
+            listener.message_created(context, message)
 
 ########## MAIN function  ######################################################
 
-	def parse(self, fp):
-		"""
-		"""
-		self.logger.debug('Main function parse')
-		global m
+    def parse(self, fp):
+        """
+        """
+        self.logger.debug('Main function parse')
+        global m
 
-		m = email.message_from_file(fp)
-		
-		if not m:
-			self.logger.debug('This is not a valid email message format')
-			return
-			
-		## Work around lack of header folding in Python; see http://bugs.python.org/issue4696
-		#
-		try:
-			m.replace_header('Subject', m['Subject'].replace('\r', '').replace('\n', ''))
-		except AttributeError, detail:
-			pass
+        m = email.message_from_file(fp)
+        
+        if not m:
+            self.logger.debug('This is not a valid email message format')
+            return
+            
+        ## Work around lack of header folding in Python; see http://bugs.python.org/issue4696
+        #
+        try:
+            m.replace_header('Subject', m['Subject'].replace('\r', '').replace('\n', ''))
+        except AttributeError, detail:
+            pass
 
-		if self.parameters.debug:	  # save the entire e-mail message text
-			self.save_email_for_debug(m, True)
+        if self.parameters.debug:     # save the entire e-mail message text
+            self.save_email_for_debug(m, True)
 
-		self.db = self.env.get_db_cnx()
- 		self.get_sender_info(m)
+        self.db = self.env.get_db_cnx()
+        self.get_sender_info(m)
 
-		if not self.email_header_acl('white_list', self.email_addr, True):
-			self.logger.info('Message rejected : %s not in white list' %(self.email_addr))
-			return False
+        if not self.email_header_acl('white_list', self.email_addr, True):
+            self.logger.info('Message rejected : %s not in white list' %(self.email_addr))
+            return False
 
-		if self.email_header_acl('black_list', self.email_addr, False):
-			self.logger.info('Message rejected : %s in black list' %(self.email_addr))
-			return False
+        if self.email_header_acl('black_list', self.email_addr, False):
+            self.logger.info('Message rejected : %s in black list' %(self.email_addr))
+            return False
 
-		if not self.email_header_acl('recipient_list', self.to_email_addr, True):
-			self.logger.info('Message rejected : %s not in recipient list' %(self.to_email_addr))
-			return False
+        if not self.email_header_acl('recipient_list', self.to_email_addr, True):
+            self.logger.info('Message rejected : %s not in recipient list' %(self.to_email_addr))
+            return False
 
-		## If spam drop the message
-		#
-		if self.spam(m) == 'drop':
-			return False
+        ## If spam drop the message
+        #
+        if self.spam(m) == 'drop':
+            return False
 
-		elif self.spam(m) == 'spam':
-			spam_msg = True
-		else:
-			spam_msg = False
+        elif self.spam(m) == 'spam':
+            spam_msg = True
+        else:
+            spam_msg = False
 
-		if not m['Subject']:
-			subject  = 'No Subject'
-		else:
-			subject  = self.email_to_unicode(m['Subject'])
+        if not m['Subject']:
+            subject  = 'No Subject'
+        else:
+            subject  = self.email_to_unicode(m['Subject'])
 
-		self.logger.debug('subject: %s' %subject)
+        self.logger.debug('subject: %s' %subject)
 
-		## [hic] #1529: Re: LRZ
-		#  [hic] #1529?owner=bas,priority=medium: Re: LRZ
-		#
-		ticket_regex = r'''
-			(?P<new_fields>[#][?].*)
-			|(?P<reply>(?P<id>[#][\d]+)(?P<fields>\?.*)?:)
-			'''
-		## Check if  FullBlogPlugin is installed
-		#
-		blog_enabled = None
-		blog_regex = ''
-		if self.get_config('components', 'tracfullblog.*') in ['enabled']:
-			self.logger.debug('Trac BLOG support enabled')
-			blog_enabled = True
-		        blog_regex = '''|(?P<blog>blog:(?P<blog_id>\w*))'''
-
-
-		## Check if DiscussionPlugin is installed
-		#
-		discussion_enabled = None
-		discussion_regex = ''
-		if self.get_config('components', 'tracdiscussion.api.discussionapi') in ['enabled']:
-			self.logger.debug('Trac Discussion support enabled')
-			discussion_enabled = True
-			discussion_regex = r'''
-			|(?P<forum>Forum[ ][#](?P<forum_id>\d+)[ ]-[ ]?)
-			|(?P<topic>Topic[ ][#](?P<topic_id>\d+)[ ]-[ ]?)
-			|(?P<message>Message[ ][#](?P<message_id>\d+)[ ]-[ ]?)
-			'''
+        ## [hic] #1529: Re: LRZ
+        #  [hic] #1529?owner=bas,priority=medium: Re: LRZ
+        #
+        ticket_regex = r'''
+            (?P<new_fields>[#][?].*)
+            |(?P<reply>(?P<id>[#][\d]+)(?P<fields>\?.*)?:)
+            '''
+        ## Check if  FullBlogPlugin is installed
+        #
+        blog_enabled = None
+        blog_regex = ''
+        if self.get_config('components', 'tracfullblog.*') in ['enabled']:
+            self.logger.debug('Trac BLOG support enabled')
+            blog_enabled = True
+            blog_regex = '''|(?P<blog>blog:(?P<blog_id>\w*))'''
 
 
-		regex_str = ticket_regex + blog_regex + discussion_regex
-		SYSTEM_RE = re.compile(regex_str, re.VERBOSE)
+        ## Check if DiscussionPlugin is installed
+        #
+        discussion_enabled = None
+        discussion_regex = ''
+        if self.get_config('components', 'tracdiscussion.api.discussionapi') in ['enabled']:
+            self.logger.debug('Trac Discussion support enabled')
+            discussion_enabled = True
+            discussion_regex = r'''
+            |(?P<forum>Forum[ ][#](?P<forum_id>\d+)[ ]-[ ]?)
+            |(?P<topic>Topic[ ][#](?P<topic_id>\d+)[ ]-[ ]?)
+            |(?P<message>Message[ ][#](?P<message_id>\d+)[ ]-[ ]?)
+            '''
 
-		## Find out if this is a ticket, a blog or a discussion
-		#
-		result =  SYSTEM_RE.search(subject)
 
-		if result:
-			## update ticket + fields
-			#
-			if result.group('reply'):
-				self.system = 'ticket'
+        regex_str = ticket_regex + blog_regex + discussion_regex
+        SYSTEM_RE = re.compile(regex_str, re.VERBOSE)
 
-				## Skip the last ':' character
-				#
-				if not self.ticket_update(m, result.group('reply')[:-1], spam_msg):
-					self.new_ticket(m, subject, spam_msg)
+        ## Find out if this is a ticket, a blog or a discussion
+        #
+        result =  SYSTEM_RE.search(subject)
 
-			## New ticket + fields
-			#
-			elif result.group('new_fields'):
-				self.system = 'ticket'
-				self.new_ticket(m, subject[:result.start('new_fields')], spam_msg, result.group('new_fields'))
+        if result:
+            ## update ticket + fields
+            #
+            if result.group('reply'):
+                self.system = 'ticket'
 
-			if blog_enabled: 
-				if result.group('blog'):
-					self.system = 'blog'
-					self.blog(result.group('blog_id'))
+                ## Skip the last ':' character
+                #
+                if not self.ticket_update(m, result.group('reply')[:-1], spam_msg):
+                    self.new_ticket(m, subject, spam_msg)
 
-			if discussion_enabled:
-				## New topic.
-				#
-				if result.group('forum'):
-					self.system = 'discussion'
-					self.id = int(result.group('forum_id'))
-					self.discussion_topic(m, subject[result.end('forum'):])
+            ## New ticket + fields
+            #
+            elif result.group('new_fields'):
+                self.system = 'ticket'
+                self.new_ticket(m, subject[:result.start('new_fields')], spam_msg, result.group('new_fields'))
 
-				## Reply to topic.
-				#
-				elif result.group('topic'): 
-					self.system = 'discussion'
-					self.id = int(result.group('topic_id'))
-					self.discussion_topic_reply(m, subject[result.end('topic'):])
+            if blog_enabled: 
+                if result.group('blog'):
+                    self.system = 'blog'
+                    self.blog(result.group('blog_id'))
 
-				## Reply to topic message.
-				#
-				elif result.group('message'):
-					self.system = 'discussion'
-					self.id = int(result.group('message_id'))
-					self.discussion_message_reply(m, subject[result.end('message'):])
+            if discussion_enabled:
+                ## New topic.
+                #
+                if result.group('forum'):
+                    self.system = 'discussion'
+                    self.id = int(result.group('forum_id'))
+                    self.discussion_topic(m, subject[result.end('forum'):])
 
-		else:
-			self.system = 'ticket'
-			(matched_id, subject) = self.ticket_update_by_subject(subject)
-			if matched_id:
-				if not self.ticket_update(m, matched_id, spam_msg):
-					self.new_ticket(m, subject, spam_msg)
-			else:
-				## No update by subject, so just create a new ticket
-				#
-				self.new_ticket(m, subject, spam_msg)
+                ## Reply to topic.
+                #
+                elif result.group('topic'): 
+                    self.system = 'discussion'
+                    self.id = int(result.group('topic_id'))
+                    self.discussion_topic_reply(m, subject[result.end('topic'):])
+
+                ## Reply to topic message.
+                #
+                elif result.group('message'):
+                    self.system = 'discussion'
+                    self.id = int(result.group('message_id'))
+                    self.discussion_message_reply(m, subject[result.end('message'):])
+
+        else:
+            self.system = 'ticket'
+            (matched_id, subject) = self.ticket_update_by_subject(subject)
+            if matched_id:
+                if not self.ticket_update(m, matched_id, spam_msg):
+                    self.new_ticket(m, subject, spam_msg)
+            else:
+                ## No update by subject, so just create a new ticket
+                #
+                self.new_ticket(m, subject, spam_msg)
 
 
 ########## BODY TEXT functions  ###########################################################
 
-	def strip_signature(self, text):
-		"""
-		Strip signature from message, inspired by Mailman software
-		"""
-		self.logger.debug('function strip_signature')
+    def strip_signature(self, text):
+        """
+        Strip signature from message, inspired by Mailman software
+        """
+        self.logger.debug('function strip_signature')
 
-		body = []
-		for line in text.splitlines():
-			if line == '-- ':
-				break 
-			body.append(line)
+        body = []
+        for line in text.splitlines():
+            if line == '-- ':
+                break 
+            body.append(line)
 
-		return ('\n'.join(body))
+        return ('\n'.join(body))
 
-	def reflow(self, text, delsp = 0):
-		"""
-		Reflow the message based on the format="flowed" specification (RFC 3676)
-		"""
-		flowedlines = []
-		quotelevel = 0
-		prevflowed = 0
+    def reflow(self, text, delsp = 0):
+        """
+        Reflow the message based on the format="flowed" specification (RFC 3676)
+        """
+        flowedlines = []
+        quotelevel = 0
+        prevflowed = 0
 
-		for line in text.splitlines():
-			from re import match
-			
-			## Figure out the quote level and the content of the current line
-			#
-			m = match('(>*)( ?)(.*)', line)
-			linequotelevel = len(m.group(1))
-			line = m.group(3)
+        for line in text.splitlines():
+            from re import match
+            
+            ## Figure out the quote level and the content of the current line
+            #
+            m = match('(>*)( ?)(.*)', line)
+            linequotelevel = len(m.group(1))
+            line = m.group(3)
 
-			## Determine whether this line is flowed
-			#
-			if line and line != '-- ' and line[-1] == ' ':
-				flowed = 1
-			else:
-				flowed = 0
+            ## Determine whether this line is flowed
+            #
+            if line and line != '-- ' and line[-1] == ' ':
+                flowed = 1
+            else:
+                flowed = 0
 
-			if flowed and delsp and line and line[-1] == ' ':
-				line = line[:-1]
+            if flowed and delsp and line and line[-1] == ' ':
+                line = line[:-1]
 
-			## If the previous line is flowed, append this line to it
-			#
-			if prevflowed and line != '-- ' and linequotelevel == quotelevel:
-				flowedlines[-1] += line
+            ## If the previous line is flowed, append this line to it
+            #
+            if prevflowed and line != '-- ' and linequotelevel == quotelevel:
+                flowedlines[-1] += line
 
-			## Otherwise, start a new line
-			#
-			else:
-				flowedlines.append('>' * linequotelevel + line)
+            ## Otherwise, start a new line
+            #
+            else:
+                flowedlines.append('>' * linequotelevel + line)
 
-			prevflowed = flowed
-			
+            prevflowed = flowed
+            
 
-		return '\n'.join(flowedlines)
+        return '\n'.join(flowedlines)
 
-	def strip_quotes(self, text): 
-		"""
-		Strip quotes from message by Nicolas Mendoza
-		"""
-		self.logger.debug('function strip_quotes')
+    def strip_quotes(self, text): 
+        """
+        Strip quotes from message by Nicolas Mendoza
+        """
+        self.logger.debug('function strip_quotes')
 
-		body = [] 
-		for line in text.splitlines():
-			try:
+        body = [] 
+        for line in text.splitlines():
+            try:
 
-				if line.startswith(self.parameters.email_quote): 
-					continue
+                if line.startswith(self.parameters.email_quote): 
+                    continue
 
-			except UnicodeDecodeError:
+            except UnicodeDecodeError:
 
-				tmp_line = self.email_to_unicode(line) 
-				if tmp_line.startswith(self.parameters.email_quote): 
-					continue
-				
-			body.append(line)
+                tmp_line = self.email_to_unicode(line) 
+                if tmp_line.startswith(self.parameters.email_quote): 
+                    continue
+                
+            body.append(line)
 
-		return ('\n'.join(body))
+        return ('\n'.join(body))
 
-	def inline_properties(self, text): 
-		"""
-		Parse text if we use inline keywords to set ticket fields
-		"""
-		self.logger.debug('function inline_properties')
+    def inline_properties(self, text): 
+        """
+        Parse text if we use inline keywords to set ticket fields
+        """
+        self.logger.debug('function inline_properties')
 
-		properties = dict()
-		body = list()
+        properties = dict()
+        body = list()
 
-		INLINE_EXP = re.compile('\s*[@]\s*(\w+)\s*:(.*)$') 
+        INLINE_EXP = re.compile('\s*[@]\s*(\w+)\s*:(.*)$') 
 
-		for line in text.splitlines():
-			match = INLINE_EXP.match(line)
-			if match:
-				keyword, value = match.groups()
-				self.properties[keyword] = value.strip()
+        for line in text.splitlines():
+            match = INLINE_EXP.match(line)
+            if match:
+                keyword, value = match.groups()
+                self.properties[keyword] = value.strip()
 
-				self.logger.debug('inline properties: %s : %s' %(keyword,value))
+                self.logger.debug('inline properties: %s : %s' %(keyword,value))
 
-			else:
-				body.append(line)
-				
-		return '\n'.join(body)
+            else:
+                body.append(line)
+                
+        return '\n'.join(body)
 
 
-	def wrap_text(self, text, replace_whitespace = False):
-		"""
-		Will break a lines longer then given length into several small 
-		lines of size given length
-		"""
-		import textwrap
+    def wrap_text(self, text, replace_whitespace = False):
+        """
+        Will break a lines longer then given length into several small 
+        lines of size given length
+        """
+        import textwrap
 
-		LINESEPARATOR = '\n'
-		reformat = ''
+        LINESEPARATOR = '\n'
+        reformat = ''
 
-		for s in text.split(LINESEPARATOR):
-			tmp = textwrap.fill(s, self.parameters.use_textwrap)
-			if tmp:
-				reformat = '%s\n%s' %(reformat,tmp)
-			else:
-				reformat = '%s\n' %reformat
+        for s in text.split(LINESEPARATOR):
+            tmp = textwrap.fill(s, self.parameters.use_textwrap)
+            if tmp:
+                reformat = '%s\n%s' %(reformat,tmp)
+            else:
+                reformat = '%s\n' %reformat
 
-		return reformat
+        return reformat
 
-		# Python2.4 and higher
-		#
-		#return LINESEPARATOR.join(textwrap.fill(s,width) for s in str.split(LINESEPARATOR))
-		#
+        # Python2.4 and higher
+        #
+        #return LINESEPARATOR.join(textwrap.fill(s,width) for s in str.split(LINESEPARATOR))
+        #
 
 ########## EMAIL attachements functions ###########################################################
 
-	def inline_part(self, part):
-		"""
-		"""
-		self.logger.debug('function inline_part()')
+    def inline_part(self, part):
+        """
+        """
+        self.logger.debug('function inline_part()')
 
-		return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
+        return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
 
-	def get_message_parts(self, msg):
-		"""
-		parses the email message and returns a list of body parts and attachments
-		body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
-		"""
-		self.logger.debug('function get_message_parts()')
+    def get_message_parts(self, msg):
+        """
+        parses the email message and returns a list of body parts and attachments
+        body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
+        """
+        self.logger.debug('function get_message_parts()')
 
-		message_parts = list()
-	
-		ALTERNATIVE_MULTIPART = False
+        message_parts = list()
+    
+        ALTERNATIVE_MULTIPART = False
 
-		for part in msg.walk():
-			content_maintype = part.get_content_maintype()
-			content_type =  part.get_content_type()
+        for part in msg.walk():
+            content_maintype = part.get_content_maintype()
+            content_type =  part.get_content_type()
 
-			self.logger.debug('\t Message part: Main-Type: %s' % content_maintype)
-			self.logger.debug('\t Message part: Content-Type: %s' % content_type)
+            self.logger.debug('\t Message part: Main-Type: %s' % content_maintype)
+            self.logger.debug('\t Message part: Content-Type: %s' % content_type)
 
-			## Check content type
-			# 
-			if content_type in self.STRIP_CONTENT_TYPES:
-				self.logger.debug("\t A %s attachment named '%s' was skipped" %(content_type, part.get_filename()))
-				continue
+            ## Check content type
+            # 
+            if content_type in self.STRIP_CONTENT_TYPES:
+                self.logger.debug("\t A %s attachment named '%s' was skipped" %(content_type, part.get_filename()))
+                continue
 
-			## Catch some mulitpart execptions
-			#
-			if content_type == 'multipart/alternative':
-				ALTERNATIVE_MULTIPART = True
-				continue
+            ## Catch some mulitpart execptions
+            #
+            if content_type == 'multipart/alternative':
+                ALTERNATIVE_MULTIPART = True
+                continue
 
-			## Skip multipart containers
-			#
-			if content_maintype == 'multipart':
-				self.logger.debug("\t Skipping multipart container")
-				continue
-			
-			## Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
-			#
-			inline = self.inline_part(part)
+            ## Skip multipart containers
+            #
+            if content_maintype == 'multipart':
+                self.logger.debug("\t Skipping multipart container")
+                continue
+            
+            ## Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
+            #
+            inline = self.inline_part(part)
 
-			## Drop HTML message
-			#
-			if ALTERNATIVE_MULTIPART and self.parameters.drop_alternative_html_version:
-				if content_type == 'text/html':
-					self.logger.debug('\t Skipping alternative HTML message')
-					ALTERNATIVE_MULTIPART = False
-					continue
+            ## Drop HTML message
+            #
+            if ALTERNATIVE_MULTIPART and self.parameters.drop_alternative_html_version:
+                if content_type == 'text/html':
+                    self.logger.debug('\t Skipping alternative HTML message')
+                    ALTERNATIVE_MULTIPART = False
+                    continue
 
 
-			## Save all non plain text message as attachment
-			#
-			if not content_type in ['text/plain']:
+            ## Save all non plain text message as attachment
+            #
+            if not content_type in ['text/plain']:
 
-				if self.parameters.debug:
-					s = '\t Filename: %s' % part.get_filename()
-					self.print_unicode(s)
+                if self.parameters.debug:
+                    s = '\t Filename: %s' % part.get_filename()
+                    self.print_unicode(s)
 
-				## First try to use email header function to convert filename.
-				#  If this fails the use the plain filename 
-				#
-				try:
-					filename = self.email_to_unicode(part.get_filename())
-				except UnicodeEncodeError, detail:
-					filename = part.get_filename()
+                ## First try to use email header function to convert filename.
+                #  If this fails the use the plain filename 
+                #
+                try:
+                    filename = self.email_to_unicode(part.get_filename())
+                except UnicodeEncodeError, detail:
+                    filename = part.get_filename()
 
-				message_parts.append((filename, part))
+                message_parts.append((filename, part))
 
-				## We van only convert html messages
-				#
-				if not content_type == 'text/html':
-					self.logger.debug('\t Appending content_type = %s' %(content_type))
-					continue
+                ## We van only convert html messages
+                #
+                if not content_type == 'text/html':
+                    self.logger.debug('\t Appending content_type = %s' %(content_type))
+                    continue
 
-			if not inline:
-					self.logger.debug('\t Skipping %s, not an inline messsage part' %(content_type))
-					continue
-				
-			## Try to decode message part. We have a html or plain text messafe
-			#
-			body_text = part.get_payload(decode=1)
-			if not body_text:			
-				body_text = part.get_payload(decode=0)
+            if not inline:
+                    self.logger.debug('\t Skipping %s, not an inline messsage part' %(content_type))
+                    continue
+                
+            ## Try to decode message part. We have a html or plain text messafe
+            #
+            body_text = part.get_payload(decode=1)
+            if not body_text:           
+                body_text = part.get_payload(decode=0)
 
-			## Try to convert html message
-			#
-			if content_type == 'text/html':
+            ## Try to convert html message
+            #
+            if content_type == 'text/html':
 
-				body_text = self.html_2_txt(body_text)
-				if not body_text:
-					continue
+                body_text = self.html_2_txt(body_text)
+                if not body_text:
+                    continue
 
-			format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
-			delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
+            format = email.Utils.collapse_rfc2231_value(part.get_param('Format', 'fixed')).lower()
+            delsp = email.Utils.collapse_rfc2231_value(part.get_param('DelSp', 'no')).lower()
 
-			if self.parameters.reflow and not self.parameters.verbatim_format and format == 'flowed':
-				body_text = self.reflow(body_text, delsp == 'yes')
-	
-			if self.parameters.strip_signature:
-				body_text = self.strip_signature(body_text)
+            if self.parameters.reflow and not self.parameters.verbatim_format and format == 'flowed':
+                body_text = self.reflow(body_text, delsp == 'yes')
+    
+            if self.parameters.strip_signature:
+                body_text = self.strip_signature(body_text)
 
-			if self.parameters.strip_quotes: 
-				body_text = self.strip_quotes(body_text)
+            if self.parameters.strip_quotes: 
+                body_text = self.strip_quotes(body_text)
 
-			if self.parameters.inline_properties: 
-				body_text = self.inline_properties(body_text)
+            if self.parameters.inline_properties: 
+                body_text = self.inline_properties(body_text)
 
-			if self.parameters.use_textwrap:
-				body_text = self.wrap_text(body_text)
+            if self.parameters.use_textwrap:
+                body_text = self.wrap_text(body_text)
 
-			## Get contents charset (iso-8859-15 if not defined in mail headers)
-			#
-			charset = part.get_content_charset()
-			if not charset:
-				charset = 'iso-8859-15'
+            ## Get contents charset (iso-8859-15 if not defined in mail headers)
+            #
+            charset = part.get_content_charset()
+            if not charset:
+                charset = 'iso-8859-15'
 
-			try:
-				ubody_text = unicode(body_text, charset)
+            try:
+                ubody_text = unicode(body_text, charset)
 
-			except UnicodeError, detail:
-				ubody_text = unicode(body_text, 'iso-8859-15')
+            except UnicodeError, detail:
+                ubody_text = unicode(body_text, 'iso-8859-15')
 
-			except LookupError, detail:
-				ubody_text = 'ERROR: Could not find charset: %s, please install' %(charset)
+            except LookupError, detail:
+                ubody_text = 'ERROR: Could not find charset: %s, please install' %(charset)
 
-			if self.parameters.verbatim_format:
-				message_parts.append('{{{\r\n%s\r\n}}}' %ubody_text)
-			else:
-				message_parts.append('%s' %ubody_text)
+            if self.parameters.verbatim_format:
+                message_parts.append('{{{\r\n%s\r\n}}}' %ubody_text)
+            else:
+                message_parts.append('%s' %ubody_text)
 
-		return message_parts
-		
-	def unique_attachment_names(self, message_parts):
-		"""
-	    Make sure we have unique names attachments:
-		  - check if it contains illegal characters
-		  - Rename "None" filenames to "untitled-part"
-		"""
-		self.logger.debug('function unique_attachment_names()')
-		renamed_parts = []
-		attachment_names = set()
+        return message_parts
+        
+    def unique_attachment_names(self, message_parts):
+        """
+        Make sure we have unique names attachments:
+          - check if it contains illegal characters
+          - Rename "None" filenames to "untitled-part"
+        """
+        self.logger.debug('function unique_attachment_names()')
+        renamed_parts = []
+        attachment_names = set()
 
-		for item in message_parts:
-			
-			## If not an attachment, leave it alone
-			#
-			if not isinstance(item, tuple):
-				renamed_parts.append(item)
-				continue
-				
-			(filename, part) = item
+        for item in message_parts:
+            
+            ## If not an attachment, leave it alone
+            #
+            if not isinstance(item, tuple):
+                renamed_parts.append(item)
+                continue
+                
+            (filename, part) = item
 
-			## If filename = None, use a default one
-			#
-			if filename in [ 'None']:
-				filename = 'untitled-part'
-				self.logger.info('Rename filename "None" to: %s' %filename)
+            ## If filename = None, use a default one
+            #
+            if filename in [ 'None']:
+                filename = 'untitled-part'
+                self.logger.info('Rename filename "None" to: %s' %filename)
 
-				## Guess the extension from the content type, use non strict mode
-				#  some additional non-standard but commonly used MIME types 
-				#  are also recognized
-				#
-				ext = mimetypes.guess_extension(part.get_content_type(), False)
-				if not ext:
-					ext = '.bin'
+                ## Guess the extension from the content type, use non strict mode
+                #  some additional non-standard but commonly used MIME types 
+                #  are also recognized
+                #
+                ext = mimetypes.guess_extension(part.get_content_type(), False)
+                if not ext:
+                    ext = '.bin'
 
-				filename = '%s%s' % (filename, ext)
+                filename = '%s%s' % (filename, ext)
 
-			## Discard relative paths for windows/unix in attachment names
-			#
-			#filename = filename.replace('\\', '/').replace(':', '/') 
-			filename = filename.replace('\\', '_')
-			filename = filename.replace('/', '_') 
+            ## Discard relative paths for windows/unix in attachment names
+            #
+            #filename = filename.replace('\\', '/').replace(':', '/') 
+            filename = filename.replace('\\', '_')
+            filename = filename.replace('/', '_') 
 
-			## remove linefeed char
-			#
-			for forbidden_char in ['\r', '\n']:
-				filename = filename.replace(forbidden_char,'')
+            ## remove linefeed char
+            #
+            for forbidden_char in ['\r', '\n']:
+                filename = filename.replace(forbidden_char,'')
 
-			## We try to normalize the filename to utf-8 NFC if we can.
-			#  Files uploaded from OS X might be in NFD.
-			#  Check python version and then try it
-			#
-			#if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
-			#	try:
-			#		filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
-			#	except TypeError:
-			#		pass
+            ## We try to normalize the filename to utf-8 NFC if we can.
+            #  Files uploaded from OS X might be in NFD.
+            #  Check python version and then try it
+            #
+            #if sys.version_info[0] > 2 or (sys.version_info[0] == 2 and sys.version_info[1] >= 3):
+            #   try:
+            #       filename = unicodedata.normalize('NFC', unicode(filename, 'utf-8')).encode('utf-8')  
+            #   except TypeError:
+            #       pass
 
-			## Make the filename unique for this ticket
-			#
-			num = 0
-			unique_filename = filename
-			dummy_filename, ext = os.path.splitext(filename)
+            ## Make the filename unique for this ticket
+            #
+            num = 0
+            unique_filename = filename
+            dummy_filename, ext = os.path.splitext(filename)
 
-			while (unique_filename in attachment_names) or self.attachment_exists(unique_filename):
-				num += 1
-				unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
-				
-			if self.parameters.debug:
-				s = 'Attachment with filename %s will be saved as %s' % (filename, unique_filename)
-				self.print_unicode(s)
+            while (unique_filename in attachment_names) or self.attachment_exists(unique_filename):
+                num += 1
+                unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
+                
+            if self.parameters.debug:
+                s = 'Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+                self.print_unicode(s)
 
-			attachment_names.add(unique_filename)
+            attachment_names.add(unique_filename)
 
-			renamed_parts.append((filename, unique_filename, part))
-	
-		return renamed_parts
-			
-			
-	def attachment_exists(self, filename):
+            renamed_parts.append((filename, unique_filename, part))
+    
+        return renamed_parts
+            
+            
+    def attachment_exists(self, filename):
 
-		if self.parameters.debug:
-			s = 'attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
-			self.print_unicode(s)
+        if self.parameters.debug:
+            s = 'attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
+            self.print_unicode(s)
 
-		## We have no valid ticket id
-		#
-		if not self.id:
-			return False
+        ## We have no valid ticket id
+        #
+        if not self.id:
+            return False
 
-		try:
-			if self.system == 'discussion':
-				att = attachment.Attachment(self.env, 'discussion', 'ticket/%s'
-				  % (self.id,), filename)
-			else:
-				att = attachment.Attachment(self.env, 'ticket', self.id,
-				  filename)
-			return True
-		except attachment.ResourceNotFound:
-			return False
+        try:
+            if self.system == 'discussion':
+                att = attachment.Attachment(self.env, 'discussion', 'ticket/%s'
+                  % (self.id,), filename)
+            else:
+                att = attachment.Attachment(self.env, 'ticket', self.id,
+                  filename)
+            return True
+        except attachment.ResourceNotFound:
+            return False
 
 ########## TRAC Ticket Text ###########################################################
-			
-	def get_body_text(self, message_parts):
-		"""
-		"""
-		self.logger.debug('function get_body_text()')
+            
+    def get_body_text(self, message_parts):
+        """
+        """
+        self.logger.debug('function get_body_text()')
 
-		body_text = []
-		
-		for part in message_parts:
-		
-			## Plain text part, append it
-			#
-			if not isinstance(part, tuple):
-				body_text.extend(part.strip().splitlines())
-				body_text.append("")
-				continue
+        body_text = []
+        
+        for part in message_parts:
+        
+            ## Plain text part, append it
+            #
+            if not isinstance(part, tuple):
+                body_text.extend(part.strip().splitlines())
+                body_text.append("")
+                continue
 
-			(original, filename, part) = part
-			inline = self.inline_part(part)
+            (original, filename, part) = part
+            inline = self.inline_part(part)
 
-			## Skip generation of attachment link if html is converted to text
-			#
-			if part.get_content_type() == 'text/html' and self.parameters.html2text_cmd and inline:
-				s = 'Skipping attachment link for html part: %s' %(filename)
-				self.print_unicode(s)
-				continue
-			
-			if part.get_content_maintype() == 'image' and inline:
-				if self.system != 'discussion':
-					s = 'wiki image link for: %s' %(filename)
-					self.print_unicode(s)
-					body_text.append('[[Image(%s)]]' % filename)
-				body_text.append("")
-			else:
-				if self.system != 'discussion':
-					s = 'wiki attachment link for: %s' %(filename)
-					self.print_unicode(s)
-					body_text.append('[attachment:"%s"]' % filename)
-				body_text.append("")
+            ## Skip generation of attachment link if html is converted to text
+            #
+            if part.get_content_type() == 'text/html' and self.parameters.html2text_cmd and inline:
+                s = 'Skipping attachment link for html part: %s' %(filename)
+                self.print_unicode(s)
+                continue
+            
+            if part.get_content_maintype() == 'image' and inline:
+                if self.system != 'discussion':
+                    s = 'wiki image link for: %s' %(filename)
+                    self.print_unicode(s)
+                    body_text.append('[[Image(%s)]]' % filename)
+                body_text.append("")
+            else:
+                if self.system != 'discussion':
+                    s = 'wiki attachment link for: %s' %(filename)
+                    self.print_unicode(s)
+                    body_text.append('[attachment:"%s"]' % filename)
+                body_text.append("")
 
-		## Convert list body_texts to string
-		#
-		body_text = '\r\n'.join(body_text)
-		return body_text
+        ## Convert list body_texts to string
+        #
+        body_text = '\r\n'.join(body_text)
+        return body_text
 
-	def html_mailto_link(self, subject):
-		"""
-		This function returns a HTML mailto tag with the ticket id and author email address
-		"""
-		self.logger.debug("function html_mailto_link")
-		if not self.author:
-			author = self.email_addr
-		else:	
-			author = self.author
+    def html_mailto_link(self, subject):
+        """
+        This function returns a HTML mailto tag with the ticket id and author email address
+        """
+        self.logger.debug("function html_mailto_link")
+        if not self.author:
+            author = self.email_addr
+        else:   
+            author = self.author
 
-		if not self.parameters.mailto_cc:
-			self.parameters.mailto_cc = ''
+        if not self.parameters.mailto_cc:
+            self.parameters.mailto_cc = ''
 
-		## use urllib to escape the chars
-		#
-		s = '%s?Subject=%s&Cc=%s' %( 
-		       urllib.quote(self.email_addr), 
-			   urllib.quote('Re: #%s: %s' %(self.id, subject)),
-			   urllib.quote(self.parameters.mailto_cc)
-			   )
+        ## use urllib to escape the chars
+        #
+        s = '%s?Subject=%s&Cc=%s' %( 
+               urllib.quote(self.email_addr), 
+               urllib.quote('Re: #%s: %s' %(self.id, subject)),
+               urllib.quote(self.parameters.mailto_cc)
+               )
 
-		if self.VERSION in [ 0.10 ]:
-			s = '\r\n{{{\r\n#!html\r\n<a\r\n href="mailto:%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
-		else:
-			s = '[mailto:"%s" Reply to: %s]' %(s, author)
+        if self.VERSION in [ 0.10 ]:
+            s = '\r\n{{{\r\n#!html\r\n<a\r\n href="mailto:%s">Reply to: %s\r\n</a>\r\n}}}\r\n' %(s, author)
+        else:
+            s = '[mailto:"%s" Reply to: %s]' %(s, author)
 
-		self.logger.debug("\tmailto link %s" %s)
-		return s
+        self.logger.debug("\tmailto link %s" %s)
+        return s
 
 ########## TRAC notify section ###########################################################
 
-	def notify(self, tkt, new=True, modtime=0):
-		"""
-		A wrapper for the TRAC notify function. So we can use templates
-		"""
-		self.logger.debug('function notify()')
+    def notify(self, tkt, new=True, modtime=0):
+        """
+        A wrapper for the TRAC notify function. So we can use templates
+        """
+        self.logger.debug('function notify()')
 
-		if self.parameters.dry_run:
-				print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
-				return
-		try:
+        if self.parameters.dry_run:
+                print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
+                return
+        try:
 
-			#from trac.ticket.web_ui import TicketModule
-			#from trac.ticket.notification import TicketNotificationSystem
-			#ticket_sys = TicketNotificationSystem(self.env)
-			#a = TicketModule(self.env)
-			#print a.__dict__
-			#tn_sys = TicketNotificationSystem(self.env)
-			#print tn_sys
-			#print tn_sys.__dict__
-			#sys.exit(0)
+            #from trac.ticket.web_ui import TicketModule
+            #from trac.ticket.notification import TicketNotificationSystem
+            #ticket_sys = TicketNotificationSystem(self.env)
+            #a = TicketModule(self.env)
+            #print a.__dict__
+            #tn_sys = TicketNotificationSystem(self.env)
+            #print tn_sys
+            #print tn_sys.__dict__
+            #sys.exit(0)
 
-			## create false {abs_}href properties, to trick Notify()
-			#
-			if not (self.VERSION in [0.11, 0.12]):
-				self.env.abs_href = Href(self.get_config('project', 'url'))
-				self.env.href = Href(self.get_config('project', 'url'))
+            ## create false {abs_}href properties, to trick Notify()
+            #
+            if not (self.VERSION in [0.11, 0.12]):
+                self.env.abs_href = Href(self.get_config('project', 'url'))
+                self.env.href = Href(self.get_config('project', 'url'))
 
 
-			tn = TicketNotifyEmail(self.env)
+            tn = TicketNotifyEmail(self.env)
 
-			if self.parameters.alternate_notify_template:
+            if self.parameters.alternate_notify_template:
 
-				if self.VERSION >= 0.11:
+                if self.VERSION >= 0.11:
 
-					from trac.web.chrome import Chrome
+                    from trac.web.chrome import Chrome
 
-					if  self.parameters.alternate_notify_template_update and not new:
-						tn.template_name = self.parameters.alternate_notify_template_update
-					else:
-						tn.template_name = self.parameters.alternate_notify_template
+                    if  self.parameters.alternate_notify_template_update and not new:
+                        tn.template_name = self.parameters.alternate_notify_template_update
+                    else:
+                        tn.template_name = self.parameters.alternate_notify_template
 
-					tn.template = Chrome(tn.env).load_template(tn.template_name, method='text')
-						
-				else:
+                    tn.template = Chrome(tn.env).load_template(tn.template_name, method='text')
+                        
+                else:
 
-					tn.template_name = self.parameters.alternate_notify_template
+                    tn.template_name = self.parameters.alternate_notify_template
 
-			tn.notify(tkt, new, modtime) 
+            tn.notify(tkt, new, modtime) 
 
-		except Exception, e:
-			self.logger.error('Failure sending notification on creation of ticket #%s: %s' %(self.id, e))
+        except Exception, e:
+            self.logger.error('Failure sending notification on creation of ticket #%s: %s' %(self.id, e))
 
 
 
 ########## Parse Config File  ###########################################################
 
 def ReadConfig(file, name):
-	"""
-	Parse the config file
-	"""
-	if not os.path.isfile(file):
-		print 'File %s does not exist' %file
-		sys.exit(1)
+    """
+    Parse the config file
+    """
+    if not os.path.isfile(file):
+        print 'File %s does not exist' %file
+        sys.exit(1)
 
-	config = trac_config.Configuration(file) 
-	
-	parentdir = config.get('DEFAULT', 'parentdir')
-	sections = config.sections()
+    config = trac_config.Configuration(file) 
+    
+    parentdir = config.get('DEFAULT', 'parentdir')
+    sections = config.sections()
 
-	## use some trac internals to get the defaults
-	#
-	tmp = config.parser.defaults()
-	project =  SaraDict()
+    ## use some trac internals to get the defaults
+    #
+    tmp = config.parser.defaults()
+    project =  SaraDict()
 
-	for option, value in tmp.items():
-		try:
-			project[option] = int(value)
-		except ValueError:
-			project[option] = value 
+    for option, value in tmp.items():
+        try:
+            project[option] = int(value)
+        except ValueError:
+            project[option] = value 
 
-	if name:
-		if name in sections: 
-			project =  SaraDict()
-			for option, value in  config.options(name):
-				try:
-					project[option] = int(value)
-				except ValueError: 
-					project[option] = value 
+    if name:
+        if name in sections: 
+            project =  SaraDict()
+            for option, value in  config.options(name):
+                try:
+                    project[option] = int(value)
+                except ValueError: 
+                    project[option] = value 
 
-		elif not parentdir:
-			print "Not a valid project name: %s, valid names are: %s" %(name, sections)
-			print "or set parentdir in the [DEFAULT] section"
-			sys.exit(1)
+        elif not parentdir:
+            print "Not a valid project name: %s, valid names are: %s" %(name, sections)
+            print "or set parentdir in the [DEFAULT] section"
+            sys.exit(1)
 
-	## If parentdir then set project dir to parentdir + name
-	#
-	if not project.has_key('project'):
-		if not parentdir: 
-			print "You must set project or parentdir in your configuration file"
-			sys.exit(1)
-		elif not name:
-			print "You must configure a  project section in your configuration file"
-		else:
-			project['project'] = os.path.join(parentdir, name)
+    ## If parentdir then set project dir to parentdir + name
+    #
+    if not project.has_key('project'):
+        if not parentdir: 
+            print "You must set project or parentdir in your configuration file"
+            sys.exit(1)
+        elif not name:
+            print "You must configure a  project section in your configuration file"
+        else:
+            project['project'] = os.path.join(parentdir, name)
 
-	return project
+    return project
 
 ########## Setup Logging ###############################################################
 
 def setup_log(parameters, project_name, interactive=None):
-	"""
-	Setup loging
+    """
+    Setup loging
 
-	Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
+    Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
     would be interpreted by the ConfigParser itself.
-	"""
-	logger = logging.getLogger('email2trac %s' %project_name)
+    """
+    logger = logging.getLogger('email2trac %s' %project_name)
 
-	if interactive:
-		parameters.log_type = 'stderr'
+    if interactive:
+        parameters.log_type = 'stderr'
 
-	if not parameters.log_type:
-		if sys.platform in ['win32', 'cygwin']:
-			paramters.log_type = 'eventlog'
-		else:
-			parameters.log_type = 'syslog'
+    if not parameters.log_type:
+        if sys.platform in ['win32', 'cygwin']:
+            paramters.log_type = 'eventlog'
+        else:
+            parameters.log_type = 'syslog'
 
-	if parameters.log_type == 'file':
+    if parameters.log_type == 'file':
 
-		if not parameters.log_file:
-			parameters.log_file = 'email2trac.log'
+        if not parameters.log_file:
+            parameters.log_file = 'email2trac.log'
 
-		if not os.path.isabs(parameters.log_file):
-			parameters.log_file = os.path.join(tempfile.gettempdir(), parameters.log_file)
+        if not os.path.isabs(parameters.log_file):
+            parameters.log_file = os.path.join(tempfile.gettempdir(), parameters.log_file)
 
-		log_handler = logging.FileHandler(parameters.log_file)
+        log_handler = logging.FileHandler(parameters.log_file)
 
-	elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
-		## Requires win32 extensions
-		#
-		log_handler = logging.handlers.NTEventLogHandler(logid, logtype='Application')
+    elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
+        ## Requires win32 extensions
+        #
+        log_handler = logging.handlers.NTEventLogHandler(logid, logtype='Application')
 
-	elif parameters.log_type in ('syslog', 'unix'):
-		log_handler = logging.handlers.SysLogHandler('/dev/log')
+    elif parameters.log_type in ('syslog', 'unix'):
+        log_handler = logging.handlers.SysLogHandler('/dev/log')
 
-	elif parameters.log_type in ('stderr'):
-		log_handler = logging.StreamHandler(sys.stderr)
+    elif parameters.log_type in ('stderr'):
+        log_handler = logging.StreamHandler(sys.stderr)
 
-	else:
-		log_handler = logging.handlers.BufferingHandler(0)
+    else:
+        log_handler = logging.handlers.BufferingHandler(0)
 
-	if parameters.log_format:
-		parameters.log_format = parameters.log_format.replace('$(', '%(')
-	else:
-		parameters.log_format = '%(name)s: %(message)s'
+    if parameters.log_format:
+        parameters.log_format = parameters.log_format.replace('$(', '%(')
+    else:
+        parameters.log_format = '%(name)s: %(message)s'
 
-	log_formatter = logging.Formatter(parameters.log_format)
-	log_handler.setFormatter(log_formatter) 
-	logger.addHandler(log_handler)
+    log_formatter = logging.Formatter(parameters.log_format)
+    log_handler.setFormatter(log_formatter) 
+    logger.addHandler(log_handler)
 
-	if (parameters.log_level in ['DEBUG', 'ALL']) or (parameters.debug > 0):
-		logger.setLevel(logging.DEBUG)
-		parameters.debug = 1
+    if (parameters.log_level in ['DEBUG', 'ALL']) or (parameters.debug > 0):
+        logger.setLevel(logging.DEBUG)
+        parameters.debug = 1
 
-	elif parameters.log_level in ['INFO'] or parameters.verbose:
-		logger.setLevel(logging.INFO)
+    elif parameters.log_level in ['INFO'] or parameters.verbose:
+        logger.setLevel(logging.INFO)
 
-	elif parameters.log_level in ['WARNING']:
-		logger.setLevel(logging.WARNING)
+    elif parameters.log_level in ['WARNING']:
+        logger.setLevel(logging.WARNING)
 
-	elif parameters.log_level in ['ERROR']:
-		logger.setLevel(logging.ERROR)
+    elif parameters.log_level in ['ERROR']:
+        logger.setLevel(logging.ERROR)
 
-	elif parameters.log_level in ['CRITICAL']:
-		logger.setLevel(logging.CRITICAL)
+    elif parameters.log_level in ['CRITICAL']:
+        logger.setLevel(logging.CRITICAL)
 
-	else:
-		logger.setLevel(logging.INFO)
+    else:
+        logger.setLevel(logging.INFO)
 
-	return logger
+    return logger
 
 
 if __name__ == '__main__':
-	## Default config file
-	#
-	configfile = '@email2trac_conf@'
-	project = ''
-	component = ''
-	ticket_prefix = 'default'
-	dry_run = None
-	verbose = None
-	debug_interactive = None
+    ## Default config file
+    #
+    configfile = '@email2trac_conf@'
+    project = ''
+    component = ''
+    ticket_prefix = 'default'
+    dry_run = None
+    verbose = None
+    debug_interactive = None
 
-	SHORT_OPT = 'cdhf:np:t:v'
-	LONG_OPT  =  ['component=', 'debug', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=', 'verbose']
+    SHORT_OPT = 'cdhf:np:t:v'
+    LONG_OPT  =  ['component=', 'debug', 'dry-run', 'help', 'file=', 'project=', 'ticket_prefix=', 'verbose']
 
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], SHORT_OPT, LONG_OPT)
-	except getopt.error,detail:
-		print __doc__
-		print detail
-		sys.exit(1)
-	
-	project_name = None
-	for opt,value in opts:
-		if opt in [ '-h', '--help']:
-			print __doc__
-			sys.exit(0)
-		elif opt in ['-c', '--component']:
-			component = value
-		elif opt in ['-d', '--debug']:
-			debug_interactive = 1
-		elif opt in ['-f', '--file']:
-			configfile = value
-		elif opt in ['-n', '--dry-run']:
-			dry_run = True
-		elif opt in ['-p', '--project']:
-			project_name = value
-		elif opt in ['-t', '--ticket_prefix']:
-			ticket_prefix = value
-		elif opt in ['-v', '--verbose']:
-			verbose = True
-	
-	settings = ReadConfig(configfile, project_name)
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], SHORT_OPT, LONG_OPT)
+    except getopt.error,detail:
+        print __doc__
+        print detail
+        sys.exit(1)
+    
+    project_name = None
+    for opt,value in opts:
+        if opt in [ '-h', '--help']:
+            print __doc__
+            sys.exit(0)
+        elif opt in ['-c', '--component']:
+            component = value
+        elif opt in ['-d', '--debug']:
+            debug_interactive = 1
+        elif opt in ['-f', '--file']:
+            configfile = value
+        elif opt in ['-n', '--dry-run']:
+            dry_run = True
+        elif opt in ['-p', '--project']:
+            project_name = value
+        elif opt in ['-t', '--ticket_prefix']:
+            ticket_prefix = value
+        elif opt in ['-v', '--verbose']:
+            verbose = True
+    
+    settings = ReadConfig(configfile, project_name)
 
-	## The default prefix for ticket values in email2trac.conf
-	#
-	settings.ticket_prefix = ticket_prefix
-	settings.dry_run = dry_run
-	settings.verbose = verbose
+    ## The default prefix for ticket values in email2trac.conf
+    #
+    settings.ticket_prefix = ticket_prefix
+    settings.dry_run = dry_run
+    settings.verbose = verbose
 
-	if not settings.debug and debug_interactive:
-		settings.debug = debug_interactive
+    if not settings.debug and debug_interactive:
+        settings.debug = debug_interactive
 
-	if not settings.project:
-		print __doc__
-		print 'No Trac project is defined in the email2trac config file.'
-		sys.exit(1)
+    if not settings.project:
+        print __doc__
+        print 'No Trac project is defined in the email2trac config file.'
+        sys.exit(1)
 
-	logger = setup_log(settings, os.path.basename(settings.project), debug_interactive)
-	
-	if component:
-		settings['component'] = component
+    logger = setup_log(settings, os.path.basename(settings.project), debug_interactive)
+    
+    if component:
+        settings['component'] = component
 
-	## Determine major trac version used to be in email2trac.conf
-	# Quick hack for 0.12
-	#
-	version = '0.%s' %(trac_version.split('.')[1])
-	if version.startswith('0.12'):
-		version = '0.12'
+    ## Determine major trac version used to be in email2trac.conf
+    # Quick hack for 0.12
+    #
+    version = '0.%s' %(trac_version.split('.')[1])
+    if version.startswith('0.12'):
+        version = '0.12'
 
-	logger.debug("Found trac version: %s" %(version))
-	
-	try:
-		if version == '0.10':
-			from trac import attachment 
-			from trac.env import Environment
-			from trac.ticket import Ticket
-			from trac.web.href import Href
-			from trac import util
-			from trac.ticket.web_ui import TicketModule
+    logger.debug("Found trac version: %s" %(version))
+    
+    try:
+        if version == '0.10':
+            from trac import attachment 
+            from trac.env import Environment
+            from trac.ticket import Ticket
+            from trac.web.href import Href
+            from trac import util
+            from trac.ticket.web_ui import TicketModule
 
-			#
-			# return  util.text.to_unicode(str)
-			#
-			# see http://projects.edgewall.com/trac/changeset/2799
-			from trac.ticket.notification import TicketNotifyEmail
-			from trac import config as trac_config
-			from trac.core import TracError
+            #
+            # return  util.text.to_unicode(str)
+            #
+            # see http://projects.edgewall.com/trac/changeset/2799
+            from trac.ticket.notification import TicketNotifyEmail
+            from trac import config as trac_config
+            from trac.core import TracError
 
-		elif version == '0.11':
-			from trac import attachment 
-			from trac.env import Environment
-			from trac.ticket import Ticket
-			from trac.web.href import Href
-			from trac import config as trac_config
-			from trac import util
-			from trac.core import TracError
-			from trac.perm import PermissionSystem
-			from trac.ticket.web_ui import TicketModule
+        elif version == '0.11':
+            from trac import attachment 
+            from trac.env import Environment
+            from trac.ticket import Ticket
+            from trac.web.href import Href
+            from trac import config as trac_config
+            from trac import util
+            from trac.core import TracError
+            from trac.perm import PermissionSystem
+            from trac.ticket.web_ui import TicketModule
 
-			#
-			# return  util.text.to_unicode(str)
-			#
-			# see http://projects.edgewall.com/trac/changeset/2799
-			from trac.ticket.notification import TicketNotifyEmail
+            #
+            # return  util.text.to_unicode(str)
+            #
+            # see http://projects.edgewall.com/trac/changeset/2799
+            from trac.ticket.notification import TicketNotifyEmail
 
-		elif version == '0.12':
-			from trac import attachment 
-			from trac.env import Environment
-			from trac.ticket import Ticket
-			from trac.web.href import Href
-			from trac import config as trac_config
-			from trac import util
-			from trac.core import TracError
-			from trac.perm import PermissionSystem
-			from trac.ticket.web_ui import TicketModule
+        elif version == '0.12':
+            from trac import attachment 
+            from trac.env import Environment
+            from trac.ticket import Ticket
+            from trac.web.href import Href
+            from trac import config as trac_config
+            from trac import util
+            from trac.core import TracError
+            from trac.perm import PermissionSystem
+            from trac.ticket.web_ui import TicketModule
 
-			#
-			# return  util.text.to_unicode(str)
-			#
-			# see http://projects.edgewall.com/trac/changeset/2799
-			from trac.ticket.notification import TicketNotifyEmail
+            #
+            # return  util.text.to_unicode(str)
+            #
+            # see http://projects.edgewall.com/trac/changeset/2799
+            from trac.ticket.notification import TicketNotifyEmail
 
 
-		else:
-			logger.error('TRAC version %s is not supported' %version)
-			sys.exit(1)
+        else:
+            logger.error('TRAC version %s is not supported' %version)
+            sys.exit(1)
 
-		## Must be set before environment is created
-		#
-		if settings.has_key('python_egg_cache'):
-			python_egg_cache = str(settings['python_egg_cache'])
-			os.environ['PYTHON_EGG_CACHE'] = python_egg_cache
+        ## Must be set before environment is created
+        #
+        if settings.has_key('python_egg_cache'):
+            python_egg_cache = str(settings['python_egg_cache'])
+            os.environ['PYTHON_EGG_CACHE'] = python_egg_cache
 
-		if settings.debug > 0:
-			logger.debug('Loading environment %s', settings.project)
+        if settings.debug > 0:
+            logger.debug('Loading environment %s', settings.project)
 
-		try:
-			env = Environment(settings['project'], create=0)
-		except IOError, detail:
-			print "Trac project does not exists: %s" %(settings['project'])
-			sys.exit(1)
+        try:
+            env = Environment(settings['project'], create=0)
+        except IOError, detail:
+            print "Trac project does not exists: %s" %(settings['project'])
+            sys.exit(1)
 
-		tktparser = TicketEmailParser(env, settings, logger, float(version))
-		tktparser.parse(sys.stdin)
+        tktparser = TicketEmailParser(env, settings, logger, float(version))
+        tktparser.parse(sys.stdin)
 
-	## Catch all errors and use the logging module
-	#
-	except Exception, error:
+    ## Catch all errors and use the logging module
+    #
+    except Exception, error:
 
-		etype, evalue, etb = sys.exc_info()
-		for e in traceback.format_exception(etype, evalue, etb):
-			logger.critical(e)
+        etype, evalue, etb = sys.exc_info()
+        for e in traceback.format_exception(etype, evalue, etb):
+            logger.critical(e)
 
-		if m:
-			tktparser.save_email_for_debug(m, True)
+        if m:
+            tktparser.save_email_for_debug(m, True)
 
-		sys.exit(1)
+        sys.exit(1)
 # EOB
