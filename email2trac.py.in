@@ -83,9 +83,12 @@ from stat import *
 from trac import __version__ as trac_version
 from trac import config as trac_config
 
-# Some global variables
+## Some global variables
 #
 m = None 
+
+# This is to for the function AlwaysNotifyReporter
+sender_email = None
 
 class SaraDict(UserDict.UserDict):
     def __init__(self, dictin = None):
@@ -2107,7 +2110,15 @@ class TicketEmailParser(object):
         """
         self.logger.debug('function notify()')
 
-        if self.parameters.dry_run:
+        if self.parameters.always_notify_reporter:
+            global sender_email
+            sender_email = self.email_addr
+ 
+            self.logger.debug('\t Using Email2TracNotification function AlwaysNotifyReporter')
+            import trac.notification as Email2TracNotification
+            Email2TracNotification.Notify.notify = AlwaysNotifyReporter
+
+        if self.parameters.dry_run  :
                 print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
                 return
         try:
@@ -2127,7 +2138,6 @@ class TicketEmailParser(object):
             if not (self.VERSION in [0.11, 0.12]):
                 self.env.abs_href = Href(self.get_config('project', 'url'))
                 self.env.href = Href(self.get_config('project', 'url'))
-
 
             tn = TicketNotifyEmail(self.env)
 
@@ -2153,7 +2163,25 @@ class TicketEmailParser(object):
         except Exception, e:
             self.logger.error('Failure sending notification on creation of ticket #%s: %s' %(self.id, e))
 
+########## END Class Definition  ########################################################
 
+########## Global Notificaition Function ################################################
+def AlwaysNotifyReporter(self, resid):
+    """
+    Copy of def notify() to manipulate recipents to always include reporter for the
+    notification.
+    """
+    (torcpts, ccrcpts) = self.get_recipients(resid)
+
+    if not tktparser.email_header_acl('notify_reporter_black_list', sender_email, False):
+        ## additionally append sender (regardeless of settings in trac.ini)
+        # 
+        if not sender_email in torcpts:
+            torcpts.append(sender_email)
+
+    self.begin_send()
+    self.send(torcpts, ccrcpts)
+    self.finish_send()
 
 ########## Parse Config File  ###########################################################
 

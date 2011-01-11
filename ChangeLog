@@ -71,7 +71,14 @@
      an html tag. The html tag does not work for trac 0.12
      Reported by: Wim Rijks
      Author: Bas van der Vlies
-    
+
+   * Added a notifcation function that always send an email to the reporter if
+     the ticket is updated via email: closes: #178, #229
+        - always_notify_reporter : 1 (default: 0)
+        - notify_reporter_black_list : basv@sara.nl (default: 0)
+     Author: hju add jochenkuhl dot de
+     Applied by: Bas van der Vlies
+
 1.6.0 (2010-8-10)
    * Fixed an Unicode error in strip_quotes
      Author: Bas van der Vlies

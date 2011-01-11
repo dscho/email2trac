@@ -1,3 +1,9 @@
+email2trac (2.0.1-2) stable; urgency=low
+
+  *  See Changelog
+
+ -- Bas van der Vlies <basv@sara.nl>  Tue, 11 Jan 2011 16:39:49 +0100
+
 email2trac (2.0.1-1) stable; urgency=low
 
   * mailto fix for trac 0.12
