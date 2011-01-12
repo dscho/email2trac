@@ -72,7 +72,7 @@
      Reported by: Wim Rijks
      Author: Bas van der Vlies
 
-   * Added a notifcation function that always send an email to the reporter if
+   * Added a notification function that always send an email to the reporter if
      the ticket is updated via email. This independed of trac.ini setting
      , closes: #178, #229
         - notify_reporter: 1 (default: 0)
@@ -86,9 +86,9 @@
      
      When an email has two of the same inline entries:
      	{{{
-	@status: closed
-	@status: accepted
-	}}}
+        @status: closed
+        @status: accepted
+        }}}
       Only the first one is used '@status: closed' 
 
      Author: Konstantin Ryabitsev <icon add mricon dot com>
