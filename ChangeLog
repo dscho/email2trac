@@ -1,5 +1,5 @@
 2.0.1 (2011-02-12)
-   * An email adress can match multiple trac accounts, closes #218
+   * An email address can match multiple trac accounts, closes #218
      Author: Konstantin Ryabitsev <icon add mricon dot com>
 
    * Added check to detect valid users when smtp_default_domain in 
@@ -9,11 +9,11 @@
 
    * Support for parentdir. Can be used to avoid sections for each project
      or if all projects have a common parent directory, you can leave out
-     the project drectory setting for each project, eg:
+     the project directory setting for each project, eg:
       * parentdir: /data/trac/oss/projects
 
-     If an section defines a project directory then this can NOT be overriden 
-     by the parendir declatation. 
+     If an section defines a project directory then this can NOT be overridden 
+     by the parendir declaration. 
 
      This closes #217
 
@@ -43,7 +43,7 @@
      Applied by: Bas van der Vlies
 
    * Fixed some bugs in function update_ticket_fields:
-       - Can not clear values, repoterd by thomas dot moschny add gmx dot de
+       - Can not clear values, reported by thomas dot moschny add gmx dot de
      closes #228
        - Values were updated regardless if there are not allowed for the ticket
      field.
@@ -58,7 +58,7 @@
      Author: Dennis (dmcrxi add Princeton dot EDU)
      Applied by: Bas van der Vlies
 
-   * Added html conversion via external commmand: eg email2trac.conf
+   * Added html conversion via external command: eg email2trac.conf
       - html2text_cmd: /usr/bin/html2text -nobs
       - html2text_cmd: /usr/bin/w3m -dump
       - html2text_cmd: /usr/bin/lynx -dump
@@ -73,7 +73,7 @@
      Author: Bas van der Vlies
 
    * Added a notification function that always send an email to the reporter if
-     the ticket is updated via email. This independed of trac.ini setting
+     the ticket is updated via email. This independent of trac.ini setting
      , closes: #178, #229
         - notify_reporter: 1 (default: 0)
         - notify_reporter_black_list : basv@sara.nl (default: 0)
