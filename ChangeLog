@@ -1,4 +1,4 @@
-2.0.1 (2010-XX-XX)
+2.0.1 (2011-02-12)
    * An email adress can match multiple trac accounts, closes #218
      Author: Konstantin Ryabitsev <icon add mricon dot com>
 
