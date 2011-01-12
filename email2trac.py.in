@@ -1753,9 +1753,13 @@ class TicketEmailParser(object):
             match = INLINE_EXP.match(line)
             if match:
                 keyword, value = match.groups()
-                self.properties[keyword] = value.strip()
 
-                self.logger.debug('inline properties: %s : %s' %(keyword,value))
+                if self.parameters.inline_properties_first_wins:
+                    if keyword in self.properties.keys():
+                        continue
+
+                self.properties[keyword] = value.strip()
+                self.logger.debug('\tinline properties: %s : %s' %(keyword,value))
 
             else:
                 body.append(line)
@@ -2110,7 +2114,8 @@ class TicketEmailParser(object):
         """
         self.logger.debug('function notify()')
 
-        if self.parameters.always_notify_reporter:
+        if self.parameters.notify_reporter:
+            self.logger.debug('\t Notify reporter set')
             global sender_email
             sender_email = self.email_addr
  

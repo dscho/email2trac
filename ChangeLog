@@ -73,10 +73,25 @@
      Author: Bas van der Vlies
 
    * Added a notifcation function that always send an email to the reporter if
-     the ticket is updated via email: closes: #178, #229
-        - always_notify_reporter : 1 (default: 0)
+     the ticket is updated via email. This independed of trac.ini setting
+     , closes: #178, #229
+        - notify_reporter: 1 (default: 0)
         - notify_reporter_black_list : basv@sara.nl (default: 0)
      Author: hju add jochenkuhl dot de
+     Applied by: Bas van der Vlies
+
+  
+   * Added a new parameter for processing inline properties: (closes #216)
+       -  inline_properties_first_wins: 1 (default: 0)
+     
+     When an email has two of the same inline entries:
+     	{{{
+	@status: closed
+	@status: accepted
+	}}}
+      Only the first one is used '@status: closed' 
+
+     Author: Konstantin Ryabitsev <icon add mricon dot com>
      Applied by: Bas van der Vlies
 
 1.6.0 (2010-8-10)
