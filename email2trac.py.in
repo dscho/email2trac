@@ -414,16 +414,17 @@ class TicketEmailParser(object):
 
     def debug_body(self, message_body, temporary_file=False):
         if temporary_file:
-            body_file = tempfile.mktemp('.email2trac')
+            (fd, body_file) = tempfile.mkstemp('.email2trac')
+            fx = os.fdopen(fd, 'wb')
         else:
             body_file = os.path.join(self.parameters.tmpdir, 'body.txt')
+            fx = open(body_file, 'wb') 
 
         if self.parameters.dry_run:
             print 'DRY-RUN: not saving body to %s' %(body_file)
             return
 
         print 'writing body to %s' %(body_file)
-        fx = open(body_file, 'wb') 
         if not message_body:
                 message_body = '(None)'
 
@@ -489,17 +490,18 @@ class TicketEmailParser(object):
     def save_email_for_debug(self, message, create_tempfile=False):
 
         if create_tempfile:
-            msg_file = tempfile.mktemp('.email2trac')
+            (fd, msg_file) = tempfile.mkstemp('.email2trac')
+            fx = os.fdopen(fd, 'wb')
         else:
             #msg_file = '/var/tmp/msg.txt' 
             msg_file = os.path.join(self.parameters.tmpdir, 'msg.txt')
+            fx = open(msg_file, 'wb')
 
         if self.parameters.dry_run:
             print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
         else:
             print 'saving email to %s' %(msg_file)
 
-            fx = open(msg_file, 'wb')
             fx.write('%s' % message)
             fx.close()
             
@@ -536,7 +538,8 @@ class TicketEmailParser(object):
                     #
                     temp = unicode(text, 'iso-8859-15')
                 except LookupError, detail:
-                    #text = 'ERROR: Could not find charset: %s, please install' %format
+                    msg = 'ERROR: Could not find charset: %s, please install' %format
+                    sys.logger.error(msg)
                     #temp = unicode(text, 'iso-8859-15')
                     temp = message_str
                         
@@ -613,7 +616,9 @@ class TicketEmailParser(object):
 
         parsed_data = None
         if self.parameters.html2text_cmd: 
-            tmp_file = tempfile.mktemp('email2trac.html')
+            (fd, tmp_file) = tempfile.mkstemp('email2trac.html')
+            f = os.fdopen(fd, 'w')
+
             cmd = '%s %s' %(self.parameters.html2text_cmd, tmp_file) 
             self.logger.debug('\t html2text conversion %s'%(cmd)) 
     
@@ -621,7 +626,6 @@ class TicketEmailParser(object):
                 print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
 
             else: 
-                f = open(tmp_file, "w+")
                 f.write(data)
                 f.close()
 

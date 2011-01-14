@@ -1,3 +1,15 @@
+email2trac (2.0.2-1) stable; urgency=low
+
+  * see Changelog 
+
+ -- bas van der Vlies <bas@sara.nl>  Fri, 14 Jan 2011 16:04:21 +0100
+
+email2trac (2.0.1-4) stable; urgency=low
+
+  * added info message for syslog of charset not found 
+
+ -- bas van der Vlies <basv@sara.nl>  Wed, 12 Jan 2011 15:32:16 +0100
+
 email2trac (2.0.1-3) stable; urgency=low
 
   *  See Changelog

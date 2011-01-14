@@ -1,3 +1,8 @@
+2.0.2 (2011-02-13)
+   * Use tempfile.mkstemp instead of tempfile.mktemp
+     Reported by: Dennis Stam (SARA)
+     Author: Bas van der Vlies
+
 2.0.1 (2011-02-12)
    * An email address can match multiple trac accounts, closes #218
      Author: Konstantin Ryabitsev <icon add mricon dot com>
