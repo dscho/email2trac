@@ -1565,7 +1565,7 @@ class TicketEmailParser(object):
         else:
             subject  = self.email_to_unicode(m['Subject'])
 
-        self.logger.debug('subject: %s' %subject)
+        self.logger.info('subject: %s' %subject)
 
         ## [hic] #1529: Re: LRZ
         #  [hic] #1529?owner=bas,priority=medium: Re: LRZ
@@ -2249,7 +2249,7 @@ def ReadConfig(file, name):
 
 def setup_log(parameters, project_name, interactive=None):
     """
-    Setup loging
+    Setup logging
 
     Note for log format the usage of `$(...)s` instead of `%(...)s` as the latter form
     would be interpreted by the ConfigParser itself.
@@ -2293,6 +2293,8 @@ def setup_log(parameters, project_name, interactive=None):
         parameters.log_format = parameters.log_format.replace('$(', '%(')
     else:
         parameters.log_format = '%(name)s: %(message)s'
+        if parameters.log_type in ('file', 'stderr'):
+            parameters.log_format = '%(asctime)s ' + parameters.log_format
 
     log_formatter = logging.Formatter(parameters.log_format)
     log_handler.setFormatter(log_formatter) 

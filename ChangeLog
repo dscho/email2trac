@@ -1,3 +1,9 @@
+2.X.X
+  * Added timestamp when log_file stderr or file is used. Move log level of 
+    reporting subject line to info instead of debug, closes #236
+    Author: Dennis McRitchie <dmcr add Princeton dot EDU >
+    Applied by: Bas van der Vlies
+
 2.0.2 (2011-02-13)
    * Use tempfile.mkstemp instead of tempfile.mktemp
      Reported by: Dennis Stam (SARA)
