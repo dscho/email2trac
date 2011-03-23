@@ -2096,7 +2096,7 @@ class TicketEmailParser(object):
 
         ## use urllib to escape the chars
         #
-        s = '%s?Subject=%s&Cc=%s' %( 
+        s = '%s?Subject=%s&cc=%s' %( 
                urllib.quote(self.email_addr), 
                urllib.quote('Re: #%s: %s' %(self.id, subject)),
                urllib.quote(self.parameters.mailto_cc)

@@ -4,6 +4,10 @@
     Author: Dennis McRitchie <dmcr add Princeton dot EDU >
     Applied by: Bas van der Vlies
 
+  * Small fix in mailto link. Uses 'cc' instead of 'Cc'
+    Author: Sil Westerveld (SARA)
+    Applied by: Bas van der Vlies
+
 2.0.2 (2011-02-13)
    * Use tempfile.mkstemp instead of tempfile.mktemp
      Reported by: Dennis Stam (SARA)
