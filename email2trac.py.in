@@ -325,7 +325,7 @@ class TicketEmailParser(object):
 
         ## Trac can not handle author's name that contains spaces
         #
-        if self.email_addr == self.trac_smtp_from:
+        if self.email_addr.lower() == self.trac_smtp_from.lower():
             if self.email_name:
                 self.author = self.email_name
             else:
@@ -345,7 +345,7 @@ class TicketEmailParser(object):
         users = [ (u,n,e) for (u, n, e) in self.env.get_known_users(self.db)
             if ( 
                 (e and (e.lower() == self.email_addr.lower())) or
-                (u + '@' + self.smtp_default_domain.lower() == self.email_addr.lower())
+                (u.lower() + '@' + self.smtp_default_domain.lower() == self.email_addr.lower())
             )
             ]
 
@@ -647,7 +647,7 @@ class TicketEmailParser(object):
         """
         self.logger.debug('function check_permission_participants')
 
-        if tkt['reporter'].lower() in [self.author, self.email_addr]:
+        if tkt['reporter'].lower() in [self.author.lower(), self.email_addr.lower()]:
             self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
 
             return True
@@ -662,7 +662,7 @@ class TicketEmailParser(object):
         try:
             cc_list = tkt['cc'].split(',')
             for cc in cc_list:
-                if self.email_addr.lower() in cc.strip():
+                if self.email_addr.lower() in cc.lower.strip():
                     self.logger.debug('ALLOW, %s is in the CC' %(self.email_addr))
 
                     return True

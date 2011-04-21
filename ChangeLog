@@ -1,4 +1,9 @@
 2.X.X
+  * Convert all email addresses and author names to lower case in compare 
+    functions.  closes #242.
+    Author: Dennis McRitchie <dmcr add Princeton dot EDU >
+    Applied by: Bas van der Vlies
+
   * Added timestamp when log_file stderr or file is used. Move log level of 
     reporting subject line to info instead of debug, closes #236
     Author: Dennis McRitchie <dmcr add Princeton dot EDU >
