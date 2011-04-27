@@ -2447,7 +2447,7 @@ if __name__ == '__main__':
 
         else:
             logger.error('TRAC version %s is not supported' %version)
-            sys.exit(1)
+            sys.exit(0)
 
         ## Must be set before environment is created
         #
@@ -2461,8 +2461,8 @@ if __name__ == '__main__':
         try:
             env = Environment(settings['project'], create=0)
         except IOError, detail:
-            print "Trac project does not exists: %s" %(settings['project'])
-            sys.exit(1)
+            logger.error("Trac project does not exists: %s" %settings['project'])
+            sys.exit(0)
 
         tktparser = TicketEmailParser(env, settings, logger, float(version))
         tktparser.parse(sys.stdin)
