@@ -1,4 +1,4 @@
-2.X.X
+2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
     Author: Dennis McRitchie <dmcr add Princeton dot EDU >
@@ -18,6 +18,10 @@
     seconds.
     Reported by: Walter Lioen (SARA)
     Author: Bas van der Vlies & Dennis Stam
+
+  * Fixed an error in the setup the logging environment for Windows oses.
+    Reported by: Mike Henke <henkemike at gmail dot com> 
+    Author: Bas van der Vlies
 
 2.0.2 (2011-02-13)
    * Use tempfile.mkstemp instead of tempfile.mktemp

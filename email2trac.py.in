@@ -2260,7 +2260,7 @@ def setup_log(parameters, project_name, interactive=None):
 
     if not parameters.log_type:
         if sys.platform in ['win32', 'cygwin']:
-            paramters.log_type = 'eventlog'
+            parameters.log_type = 'eventlog'
         else:
             parameters.log_type = 'syslog'
 
