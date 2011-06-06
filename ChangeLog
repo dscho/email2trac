@@ -13,6 +13,12 @@
     Author: Sil Westerveld (SARA)
     Applied by: Bas van der Vlies
 
+  * The time format for subject mapping was wrong (ticket_update_by_subject). 
+    So all tickets matched. Converted it to use microseconds instead of 
+    seconds.
+    Reported by: Walter Lioen (SARA)
+    Author: Bas van der Vlies & Dennis Stam
+
 2.0.2 (2011-02-13)
    * Use tempfile.mkstemp instead of tempfile.mktemp
      Reported by: Dennis Stam (SARA)

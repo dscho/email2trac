@@ -76,7 +76,7 @@ import logging.handlers
 import UserDict
 import tempfile
 
-from datetime import tzinfo, timedelta, datetime
+from datetime import timedelta, datetime
 from stat import *
 
 
@@ -1022,11 +1022,10 @@ class TicketEmailParser(object):
                 cursor = self.db.cursor()
                 summaries = [orig_subject, '%%: %s' % orig_subject]
 
-                ## Convert days to seconds
+                ## Time resolution is in micoseconds
                 #
-                lookback = int(time.mktime(time.gmtime())) - \
-                        self.parameters.ticket_update_by_subject_lookback * 24 * 3600
-
+                search_date = datetime.now(util.datefmt.utc) - timedelta(days=self.parameters.ticket_update_by_subject_lookback)
+                lookback = util.datefmt.to_utimestamp(search_date)
 
                 for summary in summaries:
                     self.logger.debug('Looking for summary matching: "%s"' % summary)
