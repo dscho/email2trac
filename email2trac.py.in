@@ -741,9 +741,14 @@ class TicketEmailParser(object):
         #  system one's
         #
         for field,value in user_dict.items():
+
             if self.parameters.debug:
                 s = 'user_field\t %s = %s' %(field,value) 
                 self.print_unicode(s)
+
+            if not field in ticket.fields:  
+                self.logger.debug('%s is not a valid field for tickets' %(field))
+                continue
 
             ## To prevent mail loop
             #

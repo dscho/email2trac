@@ -1,3 +1,14 @@
+2.X.X 
+  * Fixed an error in ticket_update_fields. Always check if given ticket
+    field is a valid ticket field for trac. The error could be triggered
+    by:
+      * ticket_update_by_subject
+      * inline_properties
+
+    Reported by: Maarten van Ingen (SARA)
+    Fixed by: Bas van der Vlies
+
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
