@@ -8,6 +8,9 @@
     Reported by: Maarten van Ingen (SARA)
     Fixed by: Bas van der Vlies
 
+  * Fixed a typo in logging an error: email_to_unicode
+    Fixed by: Bas van der Vlies
+
 
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 

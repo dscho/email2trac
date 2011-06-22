@@ -536,10 +536,12 @@ class TicketEmailParser(object):
                 except UnicodeError, detail:
                     # This always works 
                     #
+                    msg = 'ERROR: Could not find charset: %s, please install' %format
+                    self.logger.error(msg)
                     temp = unicode(text, 'iso-8859-15')
                 except LookupError, detail:
                     msg = 'ERROR: Could not find charset: %s, please install' %format
-                    sys.logger.error(msg)
+                    self.logger.error(msg)
                     #temp = unicode(text, 'iso-8859-15')
                     temp = message_str
                         
