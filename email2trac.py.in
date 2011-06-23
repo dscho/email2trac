@@ -870,6 +870,7 @@ class TicketEmailParser(object):
                 # fallback for compability (Will be deprecated)
                 # workflow can be none.
                 #
+                workflow = None
                 if tkt['status'] in ['closed']:
                     workflow = self.parameters.workflow
 
