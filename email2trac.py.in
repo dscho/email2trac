@@ -414,7 +414,7 @@ class TicketEmailParser(object):
 
     def debug_body(self, message_body, temporary_file=False):
         if temporary_file:
-            (fd, body_file) = tempfile.mkstemp('.email2trac')
+            (fd, body_file) = tempfile.mkstemp('.body_email2trac')
             fx = os.fdopen(fd, 'wb')
         else:
             body_file = os.path.join(self.parameters.tmpdir, 'body.txt')
@@ -461,8 +461,8 @@ class TicketEmailParser(object):
             #
             filename = filename.replace('\\', '_')
             filename = filename.replace('/', '_') 
+            filename = filename + '.att_email2trac'
     
-
             part_file = os.path.join(self.parameters.tmpdir, filename)
             s = 'writing part%d (%s)' % (n,part_file)
             self.print_unicode(s)
@@ -487,28 +487,29 @@ class TicketEmailParser(object):
             except OSError:
                 pass
 
-    def save_email_for_debug(self, message, create_tempfile=False):
+    def save_email_for_debug(self, message, project_name, create_tempfile=False):
+
+        if self.parameters.dry_run:
+            print 'DRY_RUN: NOT saving email message'
+            return
 
         if create_tempfile:
-            (fd, msg_file) = tempfile.mkstemp('.email2trac')
+            (fd, msg_file) = tempfile.mkstemp('.%s.email2trac' %project_name)
             fx = os.fdopen(fd, 'wb')
         else:
             #msg_file = '/var/tmp/msg.txt' 
-            msg_file = os.path.join(self.parameters.tmpdir, 'msg.txt')
+            msg_file = os.path.join(self.parameters.tmpdir, 'msg.%s.email2trac' %project_name)
             fx = open(msg_file, 'wb')
 
-        if self.parameters.dry_run:
-            print 'DRY_RUN: NOT saving email message to %s' %(msg_file)
-        else:
-            print 'saving email to %s' %(msg_file)
 
-            fx.write('%s' % message)
-            fx.close()
-            
-            try:
-                os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
-            except OSError:
-                pass
+        print 'saving email to %s' %(msg_file)
+        fx.write('%s' % message)
+        fx.close() 
+        
+        try:
+            os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
+        except OSError:
+            pass
 
         message_parts = self.get_message_parts(message)
         message_parts = self.unique_attachment_names(message_parts)
@@ -1546,7 +1547,7 @@ class TicketEmailParser(object):
             pass
 
         if self.parameters.debug:     # save the entire e-mail message text
-            self.save_email_for_debug(m, True)
+            self.save_email_for_debug(m, self.parameters.project_name, True)
 
         self.db = self.env.get_db_cnx()
         self.get_sender_info(m)
@@ -2256,6 +2257,11 @@ def ReadConfig(file, name):
         else:
             project['project'] = os.path.join(parentdir, name)
 
+    ##
+    # Save the project name
+    #
+    project['project_name'] = os.path.basename(project['project'])
+
     return project
 
 ########## Setup Logging ###############################################################
@@ -2489,7 +2495,7 @@ if __name__ == '__main__':
             logger.critical(e)
 
         if m:
-            tktparser.save_email_for_debug(m, True)
+            tktparser.save_email_for_debug(m, settings.project_name, True)
 
         sys.exit(1)
 # EOB

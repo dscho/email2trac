@@ -17,6 +17,11 @@
     Reported by: Sergey V.Levin <slevin add adriver dot ru >
     Fixed by: Bas van der Vlies & Sergey V.Levin
 
+  * enhanced save_email_for_debug(). Store also the project name in the 
+    filename and easily see the difference between the raw message and
+    the body/attachments files.
+    Author: Bas van der Vlies
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
