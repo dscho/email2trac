@@ -866,12 +866,12 @@ class TicketEmailParser(object):
             try:
                 workflow = self.parameters['workflow_%s' %tkt['status']]
             except KeyError: 
-                ## fallback for compability (Will be deprecated)
+                ## 
+                # fallback for compability (Will be deprecated)
+                # workflow can be none.
                 #
                 if tkt['status'] in ['closed']:
                     workflow = self.parameters.workflow
-                else:   
-                    workflow = None
 
             controller = ConfigurableTicketWorkflow(self.env)
             #print controller.actions
@@ -896,6 +896,12 @@ class TicketEmailParser(object):
                 for key in fields.keys():
                     self.logger.debug('\t %s : %s' %(key, fields[key]))
                     tkt[key] = fields[key]
+
+            else:
+
+                if tkt['status'] in ['closed']:
+                    tkt['status'] = 'reopened'
+                    tkt['resolution'] = ''
 
         ## Old pre 0.11 situation
         # 

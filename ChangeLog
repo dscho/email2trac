@@ -11,6 +11,11 @@
   * Fixed a typo in logging an error: email_to_unicode
     Fixed by: Bas van der Vlies
 
+  * Closed tickets for trac version >= 0,12 where not re-opened if there was 
+    no workflow defined in email2trac.conf, see #247
+  
+    Reported by: Sergey V.Levin <slevin add adriver dot ru >
+    Fixed by: Bas van der Vlies & Sergey V.Levin
 
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
