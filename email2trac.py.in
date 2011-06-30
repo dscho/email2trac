@@ -1040,7 +1040,11 @@ class TicketEmailParser(object):
                 ## Time resolution is in micoseconds
                 #
                 search_date = datetime.now(util.datefmt.utc) - timedelta(days=self.parameters.ticket_update_by_subject_lookback)
-                lookback = util.datefmt.to_utimestamp(search_date)
+
+                if self.VERSION < 0.12:
+                    lookback = util.datefmt.to_timestamp(search_date)
+                else:
+                    lookback = util.datefmt.to_utimestamp(search_date)
 
                 for summary in summaries:
                     self.logger.debug('Looking for summary matching: "%s"' % summary)

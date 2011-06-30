@@ -22,6 +22,10 @@
     the body/attachments files.
     Author: Bas van der Vlies
 
+  * Ticket update by subject did not work for trac version below 0.12
+    Reported by: naumann add tu-berlin dot de
+    Fixed by: Bas van der Vlies
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
