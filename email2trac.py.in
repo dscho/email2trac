@@ -732,7 +732,12 @@ class TicketEmailParser(object):
         #  with field as index and option as value
         #
         sys_dict = dict()
+        sys_field_list = list()
+
         for field in ticket.fields:
+
+            sys_field_list.append(field['name'])
+
             try:
                 sys_dict[field['name']] = field['options']
 
@@ -749,7 +754,7 @@ class TicketEmailParser(object):
                 s = 'user_field\t %s = %s' %(field,value) 
                 self.print_unicode(s)
 
-            if not field in ticket.fields:  
+            if not field in sys_field_list:  
                 self.logger.debug('%s is not a valid field for tickets' %(field))
                 continue
 
