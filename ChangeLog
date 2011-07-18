@@ -26,6 +26,10 @@
     Reported by: naumann add tu-berlin dot de
     Fixed by: Bas van der Vlies
 
+  * Fixed an error in the logging environment for Windows oses, closes #251
+    Reported by:  kofal002 add umn dot edu
+    Fixed by: Bas van der Vlies
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.

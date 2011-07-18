@@ -2303,6 +2303,7 @@ def setup_log(parameters, project_name, interactive=None):
     elif parameters.log_type in ('winlog', 'eventlog', 'nteventlog'):
         ## Requires win32 extensions
         #
+        logid = "email2trac"
         log_handler = logging.handlers.NTEventLogHandler(logid, logtype='Application')
 
     elif parameters.log_type in ('syslog', 'unix'):
