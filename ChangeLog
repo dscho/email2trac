@@ -30,6 +30,12 @@
     Reported by:  kofal002 add umn dot edu
     Fixed by: Bas van der Vlies
 
+  * Ticket_update_by_subject enhancement. If multiple tickets are found 
+    with the same subject then we try a author/reporter match. If fails
+    use most recent ticket entry, closes #253
+    Reported by: kofal002 att umn dot edu
+    Fixed by: Bas van der Vlies
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.

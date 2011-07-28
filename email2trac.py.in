@@ -1023,7 +1023,7 @@ class TicketEmailParser(object):
         """
         self.logger.debug('function ticket_update_by_subject')
 
-        matched_id = None
+        found_id = None
         if self.parameters.ticket_update and self.parameters.ticket_update_by_subject:
                 
             SUBJECT_RE = re.compile(r'^(?:(?:RE|AW|VS|SV|FW|FWD):\s*)+(.*)', re.IGNORECASE)
@@ -1051,25 +1051,37 @@ class TicketEmailParser(object):
                 for summary in summaries:
                     self.logger.debug('Looking for summary matching: "%s"' % summary)
 
-                    sql = """SELECT id FROM ticket
+                    sql = """SELECT id, reporter FROM ticket
                             WHERE changetime >= %s AND summary LIKE %s
                             ORDER BY changetime DESC"""
+
                     cursor.execute(sql, [lookback, summary.strip()])
 
                     for row in cursor:
-                        (matched_id,) = row
 
-                        self.logger.debug('Found matching ticket id: %d' % matched_id)
+                        (matched_id, sql_reporter) = row
 
-                        break
+                        ## Save first entry. 
+                        #
+                        if not found_id:
+                            found_id = matched_id
+                           
+                        ## If subject and reporter are the same. The we certainly have found the right ticket
+                        #
+                        if sql_reporter == self.author:
+                            self.logger.debug('Found matching reporter: %s with ticket id: %d' %(sql_reporter, matched_id))
+                            found_id = matched_id
+                            break
 
-                    if matched_id:
-                        matched_id = '#%d' % matched_id
-                        return (matched_id, orig_subject)
-                    
-                    subject = orig_subject
+                    if found_id:
+                        self.logger.debug('Found matching ticket id: %d' % found_id)
+                        found_id = '#%d' % found_id
+                        return (found_id, orig_subject)
+                   
+                    # obesolete !??
+                    #subject = orig_subject
 
-        return (matched_id, subject)
+        return (found_id, subject)
 
 
     def new_ticket(self, msg, subject, spam, set_fields = None):
