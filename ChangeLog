@@ -36,6 +36,10 @@
     Reported by: kofal002 att umn dot edu
     Fixed by: Bas van der Vlies
 
+  * Log trac error if opening of trac project environment failse, closes #256
+    Reported by: edward dot b dot matheson at nasa.gov
+    Fixed by: Bas van der Vlies
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
