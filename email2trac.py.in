@@ -2499,7 +2499,7 @@ if __name__ == '__main__':
         try:
             env = Environment(settings['project'], create=0)
         except IOError, detail:
-            logger.error("Trac project does not exists: %s" %settings['project'])
+            logger.error("trac error: %s" %detail)
             sys.exit(0)
 
         tktparser = TicketEmailParser(env, settings, logger, float(version))
