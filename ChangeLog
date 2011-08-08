@@ -40,6 +40,12 @@
     Reported by: edward dot b dot matheson at nasa.gov
     Fixed by: Bas van der Vlies
 
+  * If a status is using upper case character(s) (i.e waitingExternal) 
+    email2trac does not find the appropiate workflow entry in the 
+    email2trac.conf, closes #264
+    Author: hju add jochenkuhl dot de
+    Applied by: Bas van der Vlies
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
