@@ -867,7 +867,7 @@ class TicketEmailParser(object):
 
             req = Mock(authname=self.author, perm=MockPerm(), args={})
             try:
-                workflow = self.parameters['workflow_%s' %tkt['status']]
+                workflow = self.parameters['workflow_%s' %tkt['status'].lower()]
             except KeyError: 
                 ## 
                 # fallback for compability (Will be deprecated)
