@@ -2175,7 +2175,7 @@ class TicketEmailParser(object):
 
             ## create false {abs_}href properties, to trick Notify()
             #
-            if not (self.VERSION in [0.11, 0.12]):
+            if self.VERSION in [0.10]:
                 self.env.abs_href = Href(self.get_config('project', 'url'))
                 self.env.href = Href(self.get_config('project', 'url'))
 
