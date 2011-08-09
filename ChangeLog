@@ -46,6 +46,15 @@
     Author: hju add jochenkuhl dot de
     Applied by: Bas van der Vlies
 
+  * Process all workflows not only the default trac workflow, 
+    eg: AdvancedTicketWorkflowPlugin, closes #226
+    Reported by: Frédéric DUARTE <f dot duarte add akka dot eu>
+    Fixed by: Bas van der Vlies
+
+  * permission check fails when PrivateTicketsPlugin is installed, closes #262
+    Reported by: glenn
+    Fixed by: Bas van der Vlies
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.

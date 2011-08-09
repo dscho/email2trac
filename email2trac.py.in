@@ -692,8 +692,8 @@ class TicketEmailParser(object):
 
         if self.parameters.ticket_permission_system in ['trac']:
 
-            perm = PermissionSystem(self.env)
-            if perm.check_permission(action, self.author):
+            perm = PermissionCache(self.env, self.author) 
+            if perm.has_permission(action): 
                 return True
             else:
                 return False
@@ -2456,6 +2456,7 @@ if __name__ == '__main__':
             from trac import util
             from trac.core import TracError
             from trac.perm import PermissionSystem
+            from trac.perm import PermissionCache
             from trac.ticket.web_ui import TicketModule
             from trac.ticket.api import TicketSystem
             from trac.test import Mock, MockPerm
@@ -2475,6 +2476,7 @@ if __name__ == '__main__':
             from trac import util
             from trac.core import TracError
             from trac.perm import PermissionSystem
+            from trac.perm import PermissionCache
             from trac.ticket.web_ui import TicketModule
             from trac.ticket.api import TicketSystem
             from trac.test import Mock, MockPerm
