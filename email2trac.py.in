@@ -648,7 +648,7 @@ class TicketEmailParser(object):
         """
         Check if the mailer is allowed to update the ticket
         """
-        self.logger.debug('function check_permission_participants')
+        self.logger.debug('function check_permission_participants %s')
 
         if tkt['reporter'].lower() in [self.author.lower(), self.email_addr.lower()]:
             self.logger.debug('ALLOW, %s is the ticket reporter' %(self.email_addr))
@@ -688,7 +688,7 @@ class TicketEmailParser(object):
             - trac      : check the permission via trac permission model
             - email2trac: ....
         """
-        self.logger.debug("function check_permission")
+        self.logger.debug("function check_permission: %s" %(action))
 
         if self.parameters.ticket_permission_system in ['trac']:
 
@@ -862,10 +862,10 @@ class TicketEmailParser(object):
 
             self.logger.debug('Workflow ticket update fields: ')
 
-            from trac.ticket.default_workflow import ConfigurableTicketWorkflow
-            from trac.test import Mock, MockPerm
 
             req = Mock(authname=self.author, perm=MockPerm(), args={})
+            ticket_system = TicketSystem(self.env)
+
             try:
                 workflow = self.parameters['workflow_%s' %tkt['status'].lower()]
             except KeyError: 
@@ -877,30 +877,30 @@ class TicketEmailParser(object):
                 if tkt['status'] in ['closed']:
                     workflow = self.parameters.workflow
 
-            controller = ConfigurableTicketWorkflow(self.env)
-            #print controller.actions
-            #print controller.actions.keys()
-            #print controller.get_ticket_actions(req, tkt)
-            #print controller.actions[workflow]
-            #print controller.actions[workflow]['permissions'] is a list
 
             if workflow:
 
-                if self.parameters.ticket_permission_system:
+                ## There can be several workflow implementations
+                #
+                for controller in ticket_system.action_controllers:
 
-                    if self.check_permission(tkt, controller.actions[workflow]['permissions'][0]):
-                        fields = controller.get_ticket_changes(req, tkt, workflow)
-                    else:
-                        fields = dict()
-                        self.logger.info('Reporter: %s has no permission to trigger workflow' %self.author)
+                    if self.parameters.ticket_permission_system:
 
-                else:
+                        ## Could be disabled in the future !?
+                        #
+                        try:
+                            if not self.check_permission(tkt, controller.actions[workflow]['permissions'][0]):
+                                self.logger.info('Reporter: %s has no permission to trigger workflow' %self.author)
+                                break
+                        except AttributeError, detail:
+                                self.logger.info('controller %s has no actions implementations' %(controller))
+
                     fields = controller.get_ticket_changes(req, tkt, workflow)
 
-                for key in fields.keys():
-                    self.logger.debug('\t %s : %s' %(key, fields[key]))
-                    tkt[key] = fields[key]
-
+                    for key in fields.keys():
+                        self.logger.debug('\t workflow %s %s : %s' %(controller, key, fields[key]))
+                        tkt[key] = fields[key]
+                            
             else:
 
                 if tkt['status'] in ['closed']:
@@ -1290,7 +1290,6 @@ class TicketEmailParser(object):
         #
         from tracfullblog.core import FullBlogCore
         from tracfullblog.model import BlogPost, BlogComment
-        from trac.test import Mock, MockPerm
 
         ## instantiate blog core
         #
@@ -2458,6 +2457,8 @@ if __name__ == '__main__':
             from trac.core import TracError
             from trac.perm import PermissionSystem
             from trac.ticket.web_ui import TicketModule
+            from trac.ticket.api import TicketSystem
+            from trac.test import Mock, MockPerm
 
             #
             # return  util.text.to_unicode(str)
@@ -2475,6 +2476,8 @@ if __name__ == '__main__':
             from trac.core import TracError
             from trac.perm import PermissionSystem
             from trac.ticket.web_ui import TicketModule
+            from trac.ticket.api import TicketSystem
+            from trac.test import Mock, MockPerm
 
             #
             # return  util.text.to_unicode(str)
