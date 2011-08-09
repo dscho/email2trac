@@ -55,6 +55,11 @@
     Reported by: glenn
     Fixed by: Bas van der Vlies
 
+  * Added support for trac version 0.13, closes #250
+    Reported by: simeonov add gmail dot com 
+    Fixed by: Bas van der Vlies
+
+
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
