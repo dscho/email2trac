@@ -2427,6 +2427,8 @@ if __name__ == '__main__':
     version = '0.%s' %(trac_version.split('.')[1])
     if version.startswith('0.12'):
         version = '0.12'
+    elif version.startswith('0.13'):
+        version = '0.13'
 
     logger.debug("Found trac version: %s" %(version))
     
@@ -2468,6 +2470,26 @@ if __name__ == '__main__':
             from trac.ticket.notification import TicketNotifyEmail
 
         elif version == '0.12':
+            from trac import attachment 
+            from trac.env import Environment
+            from trac.ticket import Ticket
+            from trac.web.href import Href
+            from trac import config as trac_config
+            from trac import util
+            from trac.core import TracError
+            from trac.perm import PermissionSystem
+            from trac.perm import PermissionCache
+            from trac.ticket.web_ui import TicketModule
+            from trac.ticket.api import TicketSystem
+            from trac.test import Mock, MockPerm
+
+            #
+            # return  util.text.to_unicode(str)
+            #
+            # see http://projects.edgewall.com/trac/changeset/2799
+            from trac.ticket.notification import TicketNotifyEmail
+
+        elif version == '0.13':
             from trac import attachment 
             from trac.env import Environment
             from trac.ticket import Ticket
