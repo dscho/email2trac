@@ -20,32 +20,21 @@
 # For vi/emacs or other use tabstop=4 (vi: set ts=4)
 #
 """
-email2trac.py -- Email tickets to Trac.
+email2trac.py -- Email -> TRAC tickets
 
-A simple MTA filter to create Trac tickets from inbound emails.
+A MTA filter to create Trac tickets from inbound emails.
 
-Copyright 2005, Daniel Lundin <daniel@edgewall.com>
-Copyright 2005, Edgewall Software
+first proof of concept from:
+ Copyright 2005, Daniel Lundin <daniel@edgewall.com>
+ Copyright 2005, Edgewall Software
 
 Authors:
   Bas van der Vlies <basv@sara.nl>
   Walter de Jong <walter@sara.nl>
 
-The scripts reads emails from stdin and inserts directly into a Trac database.
-
 How to use
 ----------
  * See https://subtrac.sara.nl/oss/email2trac/
-
- * Create an config file:
-    [DEFAULT]                        # REQUIRED
-    project      : /data/trac/test   # REQUIRED
-    debug        : 1                 # OPTIONAL, if set print some DEBUG info
-
-    [jouvin]                         # OPTIONAL project declaration, if set both fields necessary
-    project      : /data/trac/jouvin # use -p|--project jouvin.  
-        
- * default config file is : /etc/email2trac.conf
 
  * Commandline opions:
                 -h,--help
