@@ -644,6 +644,55 @@ class TicketEmailParser(object):
 
 ########## TRAC ticket functions  ###########################################################
 
+    def email2trac_workflow(self, tkt):
+        """
+        """
+        self.logger.debug('function email2trac_workflow: ') 
+        
+        req = Mock(authname=self.author, perm=MockPerm(), args={})
+        ticket_system = TicketSystem(self.env) 
+        
+        try:
+            workflow = self.parameters['workflow_%s' %tkt['status'].lower()] 
+
+        except KeyError: 
+            ## 
+            # fallback for compability (Will be deprecated)
+            # workflow can be none.
+            #
+            workflow = None
+            if tkt['status'] in ['closed']:
+                workflow = self.parameters.workflow
+
+        if workflow: 
+        
+            ## There can be several workflow implementations
+            #
+            for controller in ticket_system.action_controllers: 
+            
+                ## Not Needed anymore, 9 Aug 2011 BvdV, we already checked the permissions
+                #
+                #if self.parameters.ticket_permission_system:
+                #
+                #
+                #   try:
+                #     if not self.check_permission(tkt, controller.actions[workflow]['permissions'][0]): 
+                #            self.logger.info('Reporter: %s has no permission to trigger workflow' %self.author)
+                #            break
+                #    except AttributeError, detail:
+                #            self.logger.info('controller %s has no actions implementations' %(controller))
+                # 
+                
+                fields = controller.get_ticket_changes(req, tkt, workflow) 
+                for key in fields.keys():
+                    self.logger.debug('\t workflow %s %s : %s' %(controller, key, fields[key]))
+                    tkt[key] = fields[key]
+
+            return True
+
+        else:
+            return False
+
     def check_permission_participants(self, tkt, action):
         """
         Check if the mailer is allowed to update the ticket
@@ -859,49 +908,8 @@ class TicketEmailParser(object):
         #  We must use the ticket workflow framework
         #
         if self.parameters.email_triggers_workflow and (self.VERSION >= 0.11):
-            self.logger.debug('Workflow ticket update fields: ')
 
-            req = Mock(authname=self.author, perm=MockPerm(), args={})
-            ticket_system = TicketSystem(self.env)
-
-            try:
-                workflow = self.parameters['workflow_%s' %tkt['status'].lower()]
-
-            except KeyError: 
-                ## 
-                # fallback for compability (Will be deprecated)
-                # workflow can be none.
-                #
-                workflow = None
-                if tkt['status'] in ['closed']:
-                    workflow = self.parameters.workflow
-
-            if workflow:
-
-                ## There can be several workflow implementations
-                #
-                for controller in ticket_system.action_controllers:
-
-                    ## Not Needed anymore, 9 Aug 2011 BvdV, we already checked the permissions
-                    #
-                    #if self.parameters.ticket_permission_system:
-                    #
-                    #
-                    #   try:
-                    #     if not self.check_permission(tkt, controller.actions[workflow]['permissions'][0]):
-                    #            self.logger.info('Reporter: %s has no permission to trigger workflow' %self.author)
-                    #            break
-                    #    except AttributeError, detail:
-                    #            self.logger.info('controller %s has no actions implementations' %(controller))
-                    #
-
-                    fields = controller.get_ticket_changes(req, tkt, workflow)
-
-                    for key in fields.keys():
-                        self.logger.debug('\t workflow %s %s : %s' %(controller, key, fields[key]))
-                        tkt[key] = fields[key]
-                            
-            else:
+            if not self.email2trac_workflow(tkt):
 
                 if tkt['status'] in ['closed']:
                     tkt['status'] = 'reopened'
@@ -1187,6 +1195,10 @@ class TicketEmailParser(object):
             changed = True
             comment = '%s\n%s\n' %(comment, error_with_attachments)
 
+        if self.parameters.email_triggers_workflow and (self.VERSION >= 0.11):
+            if self.email2trac_workflow(tkt):
+                changed = True
+
         if changed:
             if self.parameters.dry_run:
                 print 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
@@ -1195,7 +1207,7 @@ class TicketEmailParser(object):
                 #print tkt.get_changelog(self.db, when)
 
         if not spam:
-            self.notify(tkt, True)
+            self.notify(tkt, True) 
 
 
     def attach_attachments(self, message_parts, update=False):
