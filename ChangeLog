@@ -1,4 +1,4 @@
-2.X.X 
+2.4.0 
   * Fixed an error in ticket_update_fields. Always check if given ticket
     field is a valid ticket field for trac. The error could be triggered
     by:
@@ -46,9 +46,11 @@
     Author: hju add jochenkuhl dot de
     Applied by: Bas van der Vlies
 
-  * Process all workflows not only the default trac workflow, 
-    eg: AdvancedTicketWorkflowPlugin, closes #226
+  * Process all workflows not only the default trac workflow. Workflow is now 
+    enabled for new tickets and ticket updates.
+    eg: AdvancedTicketWorkflowPlugin, closes #226,#252
     Reported by: Frédéric DUARTE <f dot duarte add akka dot eu>
+                 kofal002 att umn dot edu
     Fixed by: Bas van der Vlies
 
   * permission check fails when PrivateTicketsPlugin is installed, closes #262

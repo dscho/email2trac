@@ -644,10 +644,10 @@ class TicketEmailParser(object):
 
 ########## TRAC ticket functions  ###########################################################
 
-    def email2trac_workflow(self, tkt):
+    def mail_workflow(self, tkt):
         """
         """
-        self.logger.debug('function email2trac_workflow: ') 
+        self.logger.debug('function mail_workflow: ') 
         
         req = Mock(authname=self.author, perm=MockPerm(), args={})
         ticket_system = TicketSystem(self.env) 
@@ -909,7 +909,7 @@ class TicketEmailParser(object):
         #
         if self.parameters.email_triggers_workflow and (self.VERSION >= 0.11):
 
-            if not self.email2trac_workflow(tkt):
+            if not self.mail_workflow(tkt):
 
                 if tkt['status'] in ['closed']:
                     tkt['status'] = 'reopened'
@@ -1196,7 +1196,7 @@ class TicketEmailParser(object):
             comment = '%s\n%s\n' %(comment, error_with_attachments)
 
         if self.parameters.email_triggers_workflow and (self.VERSION >= 0.11):
-            if self.email2trac_workflow(tkt):
+            if self.mail_workflow(tkt):
                 changed = True
 
         if changed:
