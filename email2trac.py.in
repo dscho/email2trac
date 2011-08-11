@@ -460,7 +460,8 @@ class TicketEmailParser(object):
                 print 'DRY_RUN: NOT saving attachments'
                 continue
 
-            part_file = util.text.unicode_quote(part_file)
+            #part_file = util.text.unicode_quote(part_file)
+            #part_file = repr(part_file)
 
             fx = open(part_file, 'wb')
             text = part.get_payload(decode=1)
@@ -1224,10 +1225,9 @@ class TicketEmailParser(object):
                 
             (original, filename, part) = item
 
-            ## We have to determine the size so we use this temporary solution. we must escape it
-            #  else we get UnicodeErrors. 
+            ## We have to determine the size so we use this temporary solution. 
             #
-            path, fd =  util.create_unique_file(os.path.join(self.parameters.tmpdir, util.text.unicode_quote(filename)))
+            path, fd =  util.create_unique_file(os.path.join(self.parameters.tmpdir, 'email2trac_tmp.att'))
             text = part.get_payload(decode=1)
             if not text:
                 text = '(None)'
@@ -1257,7 +1257,8 @@ class TicketEmailParser(object):
                 att = attachment.Attachment(self.env, 'discussion', 'topic/%s'
                   % (self.id,))
             else:
-                self.logger.debug('Attach %s to ticket %d' %(util.text.unicode_quote(filename), self.id))
+                s = 'Attach %s to ticket %d' %(filename, self.id)
+                self.print_unicode(s)
                 att = attachment.Attachment(self.env, 'ticket', self.id)
   
             ## This will break the ticket_update system, the body_text is vaporized
@@ -1891,17 +1892,24 @@ class TicketEmailParser(object):
             #
             if not content_type in ['text/plain']:
 
+                filename = part.get_filename()
                 if self.parameters.debug:
-                    s = '\t Filename: %s' % part.get_filename()
+                    s = '\t unicode filename: %s' %(filename)
                     self.print_unicode(s)
+                    self.logger.debug('\t raw filename: %s' %repr(filename))
 
+                # 11 Aug 2011 -> Obsolete code
                 ## First try to use email header function to convert filename.
                 #  If this fails the use the plain filename 
                 #
-                try:
-                    filename = self.email_to_unicode(part.get_filename())
-                except UnicodeEncodeError, detail:
-                    filename = part.get_filename()
+                #name = part.get_filename()
+                #try:
+                #    print repr(name), len(name)
+                #    filename = self.email_to_unicode(part.get_filename())
+                #    print "Bas: ", repr(filename), len(filename)
+                #except UnicodeEncodeError, detail:
+                #    print "Bas", repr(detail)
+                #    filename = part.get_filename()
 
                 message_parts.append((filename, part))
 
