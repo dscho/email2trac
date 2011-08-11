@@ -634,7 +634,8 @@ class TicketEmailParser(object):
 
     def check_filename_length(self, name):
         """
-        check if the filename lenght is not larger the OS limit
+        To bypass a bug in Trac
+        check if the filename lenght is not larger then OS limit.
           yes : return truncated filename
           no  : return unmodified filename
         """
