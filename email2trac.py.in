@@ -632,6 +632,51 @@ class TicketEmailParser(object):
 
         return parsed_data
 
+    def check_filename_length(self, name):
+        """
+        check if the filename lenght is not larger the OS limit
+          yes : return truncated filename
+          no  : return unmodified filename
+        """
+        self.logger.debug('function check_filename_length: ') 
+        
+        dummy_filename, ext = os.path.splitext(name)
+
+        ## Trac uses this format
+        #
+        quote_format = util.text.unicode_quote(dummy_filename)
+
+        ## Determine max filename lenght
+        # 
+        filemax_length = os.pathconf('/', os.pathconf_names['PC_NAME_MAX'])
+
+        if len(quote_format) <= filemax_length:
+            return name
+
+        else:
+            ## Truncate file to filemax_length and reserve room for extension
+            #  We must break on a boundry 
+            #
+            length = filemax_length - 6
+
+            for i in range(0,10):
+
+                truncated = quote_format[ : (length - i)] 
+
+                try:
+                    unqoute_truncated = util.text.unicode_unquote(truncated)
+                    unqoute_truncated = unqoute_truncated + ext
+
+                    self.print_unicode('\t ' + unqoute_truncated)
+
+                    break
+
+                except UnicodeDecodeError, detail:
+                    continue
+
+
+            return unqoute_truncated
+
 ########## TRAC ticket functions  ###########################################################
 
     def mail_workflow(self, tkt):
@@ -784,11 +829,10 @@ class TicketEmailParser(object):
         ## Check user supplied fields an compare them with the
         #  system one's
         #
-        for field,value in user_dict.items():
-
-            if self.parameters.debug:
-                s = 'user_field\t %s = %s' %(field,value) 
-                self.print_unicode(s)
+        for field,value in user_dict.items(): 
+        
+            s = 'user_field\t %s = %s' %(field,value) 
+            self.print_unicode(s)
 
             if not field in sys_dict.keys():  
                 self.logger.debug('%s is not a valid field for tickets' %(field))
@@ -827,9 +871,8 @@ class TicketEmailParser(object):
                 #   ticket[field] = value
                 ticket[field] = value
 
-            if self.parameters.debug:
-                s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
-                self.print_unicode(s)
+            s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
+            self.print_unicode(s)
 
     def ticket_update(self, m, id, spam):
         """
@@ -984,18 +1027,17 @@ class TicketEmailParser(object):
                 if value and options and (value not in options):
                      value = options[int(value)]
     
-            if self.parameters.debug:
-                s = 'trac[%s] = %s' %(name, value)
-                self.print_unicode(s)
+            s = 'trac[%s] = %s' %(name, value)
+            self.print_unicode(s)
 
             ## email2trac.conf settings
             #
             prefix = self.parameters.ticket_prefix
             try:
                 value = self.parameters['%s_%s' %(prefix, name)]
-                if self.parameters.debug:
-                    s = 'email2trac[%s] = %s ' %(name, value)
-                    self.print_unicode(s)
+
+                s = 'email2trac[%s] = %s ' %(name, value)
+                self.print_unicode(s)
 
             except KeyError, detail:
                 pass
@@ -1268,6 +1310,9 @@ class TicketEmailParser(object):
                 att.author = self.author
                 att.description = self.email_to_unicode('Added by email2trac')
 
+            ## Pseudo code to determine max filename lenght
+            # os.pathconf('/', os.pathconf_name['PC_NAME_MAX'])
+
             try:
                 self.logger.debug('Insert atachment')
                 att.insert(filename, fd, file_size)
@@ -1538,7 +1583,7 @@ class TicketEmailParser(object):
 
         ## Attach attachments.
         #
-        self.id = message['topic']
+
         self.attach_attachments(context.content_parts, True)
 
         ## Notify change listeners.
@@ -1893,10 +1938,10 @@ class TicketEmailParser(object):
             if not content_type in ['text/plain']:
 
                 filename = part.get_filename()
-                if self.parameters.debug:
-                    s = '\t unicode filename: %s' %(filename)
-                    self.print_unicode(s)
-                    self.logger.debug('\t raw filename: %s' %repr(filename))
+                
+                s = '\t unicode filename: %s' %(filename)
+                self.print_unicode(s)
+                self.logger.debug('\t raw filename: %s' %repr(filename))
 
                 # 11 Aug 2011 -> Obsolete code
                 ## First try to use email header function to convert filename.
@@ -1911,7 +1956,7 @@ class TicketEmailParser(object):
                 #    print "Bas", repr(detail)
                 #    filename = part.get_filename()
 
-                message_parts.append((filename, part))
+                message_parts.append( (self.check_filename_length(filename), part) )
 
                 ## We van only convert html messages
                 #
@@ -2044,9 +2089,8 @@ class TicketEmailParser(object):
                 num += 1
                 unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
                 
-            if self.parameters.debug:
-                s = 'Attachment with filename %s will be saved as %s' % (filename, unique_filename)
-                self.print_unicode(s)
+            s = 'Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+            self.print_unicode(s)
 
             attachment_names.add(unique_filename)
 
@@ -2057,9 +2101,10 @@ class TicketEmailParser(object):
             
     def attachment_exists(self, filename):
 
-        if self.parameters.debug:
-            s = 'attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
-            self.print_unicode(s)
+        self.logger.debug("function attachment_exists")
+
+        s = '\t check if attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
+        self.print_unicode(s)
 
         ## We have no valid ticket id
         #
