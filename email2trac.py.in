@@ -639,6 +639,9 @@ class TicketEmailParser(object):
           no  : return unmodified filename
         """
         self.logger.debug('function check_filename_length: ') 
+
+        if not name:
+            return 'None'
         
         dummy_filename, ext = os.path.splitext(name)
 
@@ -1044,9 +1047,9 @@ class TicketEmailParser(object):
         
             if value:
                 user_dict[name] = value
-                if self.parameters.debug:
-                    s = 'used %s = %s' %(name, value)
-                    self.print_unicode(s)
+
+                s = 'used %s = %s' %(name, value)
+                self.print_unicode(s)
 
         self.update_ticket_fields(ticket, user_dict, new=1)
 
@@ -2046,7 +2049,7 @@ class TicketEmailParser(object):
             #
             if filename in [ 'None']:
                 filename = 'untitled-part'
-                self.logger.info('Rename filename "None" to: %s' %filename)
+                self.logger.info('\t Rename filename "None" to: %s' %filename)
 
                 ## Guess the extension from the content type, use non strict mode
                 #  some additional non-standard but commonly used MIME types 
@@ -2089,7 +2092,7 @@ class TicketEmailParser(object):
                 num += 1
                 unique_filename = "%s-%s%s" % (dummy_filename, num, ext)
                 
-            s = 'Attachment with filename %s will be saved as %s' % (filename, unique_filename)
+            s = '\t Attachment with filename %s will be saved as %s' % (filename, unique_filename)
             self.print_unicode(s)
 
             attachment_names.add(unique_filename)
