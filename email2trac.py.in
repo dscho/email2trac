@@ -349,7 +349,7 @@ class TicketEmailParser(object):
         self.logger.debug('function set_reply_fields')
 
         ## Only use name or email adress
-        #ticket['reporter'] = self.email_from
+        #
         ticket['reporter'] = self.author
 
 
@@ -371,7 +371,7 @@ class TicketEmailParser(object):
             #for n,e in to_addrs:
             #   to_list.append(e)
                 
-            # Always Remove reporter email address from cc-list 
+            ## Always Remove reporter email address from cc-list 
             #
             try:
                 cc_addrs.remove((self.author, self.email_addr))
@@ -382,8 +382,6 @@ class TicketEmailParser(object):
         
                 ## Prevent mail loop
                 #
-                #if addr in to_list:
-
                 if addr == self.trac_smtp_from:
                     self.logger.debug("Skipping %s mail address for CC-field" %(addr))
                     continue
@@ -418,7 +416,6 @@ class TicketEmailParser(object):
                 message_body = '(None)'
 
         message_body = message_body.encode('utf-8')
-        #message_body = unicode(message_body, 'iso-8859-15')
 
         fx.write(message_body)
         fx.close()
@@ -434,7 +431,9 @@ class TicketEmailParser(object):
         
         n = 0
         for item in message_parts:
-            # Skip inline text parts
+
+            ## Skip inline text parts
+            #
             if not isinstance(item, tuple):
                 continue
                 
@@ -460,6 +459,7 @@ class TicketEmailParser(object):
                 print 'DRY_RUN: NOT saving attachments'
                 continue
 
+            # trac error with long filenames support
             #part_file = util.text.unicode_quote(part_file)
             #part_file = repr(part_file)
 
@@ -487,7 +487,6 @@ class TicketEmailParser(object):
             (fd, msg_file) = tempfile.mkstemp('.%s.email2trac' %project_name)
             fx = os.fdopen(fd, 'wb')
         else:
-            #msg_file = '/var/tmp/msg.txt' 
             msg_file = os.path.join(self.parameters.tmpdir, 'msg.%s.email2trac' %project_name)
             fx = open(msg_file, 'wb')
 
@@ -545,7 +544,6 @@ class TicketEmailParser(object):
             else:
                 s = '%s' %temp
 
-        #s = s.encode('utf-8')
         return s
 
     def str_to_dict(self, s):
@@ -695,9 +693,8 @@ class TicketEmailParser(object):
             workflow = self.parameters['workflow_%s' %tkt['status'].lower()] 
 
         except KeyError: 
-            ## 
-            # fallback for compability (Will be deprecated)
-            # workflow can be none.
+            ## fallback for compability (Will be deprecated)
+            #  workflow can be none.
             #
             workflow = None
             if tkt['status'] in ['closed']:
@@ -869,10 +866,7 @@ class TicketEmailParser(object):
                         value = self.get_config('ticket', 'default_%s' %(field) )
 
             else:
-                ## Only set if we have a value
-                #
-                #if value:
-                #   ticket[field] = value
+
                 ticket[field] = value
 
             s = 'ticket_field\t %s = %s' %(field,  ticket[field]) 
@@ -936,7 +930,6 @@ class TicketEmailParser(object):
 
         ## How many changes has this ticket
         #
-        # cnum = len(tkt.get_changelog())
         grouped = TicketModule(self.env).grouped_changelog_entries(tkt, self.db)
         cnum = sum(1 for e in grouped) + 1
 
@@ -1124,7 +1117,7 @@ class TicketEmailParser(object):
                         found_id = '#%d' % found_id
                         return (found_id, orig_subject)
                    
-                    # obesolete !??
+                    # obsolete !?? 12 Aug 2011
                     #subject = orig_subject
 
         return (found_id, subject)
@@ -1240,7 +1233,6 @@ class TicketEmailParser(object):
                 print 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
             else:
                 tkt.save_changes(tkt['reporter'], comment)
-                #print tkt.get_changelog(self.db, when)
 
         if not spam:
             self.notify(tkt, True) 
@@ -1300,8 +1292,7 @@ class TicketEmailParser(object):
             # 
             fd = open(path, 'rb')
             if self.system == 'discussion':
-                att = attachment.Attachment(self.env, 'discussion', 'topic/%s'
-                  % (self.id,))
+                att = attachment.Attachment(self.env, 'discussion', 'topic/%s' % (self.id,))
             else:
                 s = 'Attach %s to ticket %d' %(filename, self.id)
                 self.print_unicode(s)
@@ -1314,13 +1305,13 @@ class TicketEmailParser(object):
                 att.author = self.author
                 att.description = self.email_to_unicode('Added by email2trac')
 
-            ## Pseudo code to determine max filename lenght
-            # os.pathconf('/', os.pathconf_name['PC_NAME_MAX'])
-
             try:
+
                 self.logger.debug('Insert atachment')
                 att.insert(filename, fd, file_size)
+
             except OSError, detail:
+
                 self.logger.info('%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail))
                 status = '%s\nFilename %s could not be saved, problem: %s' %(status, filename, detail)
 
@@ -1734,11 +1725,15 @@ class TicketEmailParser(object):
                     self.discussion_message_reply(m, subject[result.end('message'):])
 
         else:
+
             self.system = 'ticket'
             (matched_id, subject) = self.ticket_update_by_subject(subject)
+
             if matched_id:
+
                 if not self.ticket_update(m, matched_id, spam_msg):
                     self.new_ticket(m, subject, spam_msg)
+
             else:
                 ## No update by subject, so just create a new ticket
                 #
@@ -1931,6 +1926,7 @@ class TicketEmailParser(object):
             ## Drop HTML message
             #
             if ALTERNATIVE_MULTIPART and self.parameters.drop_alternative_html_version:
+
                 if content_type == 'text/html':
                     self.logger.debug('\t Skipping alternative HTML message')
                     ALTERNATIVE_MULTIPART = False
@@ -2064,7 +2060,6 @@ class TicketEmailParser(object):
 
             ## Discard relative paths for windows/unix in attachment names
             #
-            #filename = filename.replace('\\', '/').replace(':', '/') 
             filename = filename.replace('\\', '_')
             filename = filename.replace('/', '_') 
 
@@ -2110,20 +2105,24 @@ class TicketEmailParser(object):
         s = '\t check if attachment already exists: Id : %s, Filename : %s' %(self.id, filename)
         self.print_unicode(s)
 
-        ## We have no valid ticket id
+        ## Do we have a valid ticket id
         #
         if not self.id:
             return False
 
         try:
             if self.system == 'discussion':
-                att = attachment.Attachment(self.env, 'discussion', 'ticket/%s'
-                  % (self.id,), filename)
+
+                att = attachment.Attachment(self.env, 'discussion', 'ticket/%s' % (self.id,), filename)
+
             else:
-                att = attachment.Attachment(self.env, 'ticket', self.id,
-                  filename)
+
+                att = attachment.Attachment(self.env, 'ticket', self.id, filename)
+
             return True
+
         except attachment.ResourceNotFound:
+
             return False
 
 ########## TRAC Ticket Text ###########################################################
@@ -2155,16 +2154,22 @@ class TicketEmailParser(object):
                 continue
             
             if part.get_content_maintype() == 'image' and inline:
+
                 if self.system != 'discussion':
                     s = 'wiki image link for: %s' %(filename)
                     self.print_unicode(s)
                     body_text.append('[[Image(%s)]]' % filename)
+
                 body_text.append("")
+
             else:
+
                 if self.system != 'discussion':
+
                     s = 'wiki attachment link for: %s' %(filename)
                     self.print_unicode(s)
                     body_text.append('[attachment:"%s"]' % filename)
+
                 body_text.append("")
 
         ## Convert list body_texts to string
