@@ -61,7 +61,14 @@
     Reported by: simeonov add gmail dot com 
     Fixed by: Bas van der Vlies
 
-
+  * Problem with long attachment's filenames on native language. This is a trac
+    bug, see: 
+      * http://trac.edgewall.org/ticket/10313,
+    The email2trac solution is to truncate the filename if it is longer then
+    the allow NAME_MAX for the os (usually 255), closes #247.
+    Reported by: Sergey V.Levin <slevin add adriver dot ru >
+    Fixed by: Bas van der Vlies & Sergey V.Levin
+   
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
     functions.  closes #242.
