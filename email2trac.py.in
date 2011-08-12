@@ -2514,66 +2514,25 @@ if __name__ == '__main__':
             from trac import config as trac_config
             from trac.core import TracError
 
-        elif version == '0.11':
+        elif version in ['0.11', '0.12', '0.13']:
             from trac import attachment 
-            from trac.env import Environment
-            from trac.ticket import Ticket
-            from trac.web.href import Href
             from trac import config as trac_config
             from trac import util
             from trac.core import TracError
+            from trac.env import Environment
             from trac.perm import PermissionSystem
             from trac.perm import PermissionCache
-            from trac.ticket.web_ui import TicketModule
-            from trac.ticket.api import TicketSystem
             from trac.test import Mock, MockPerm
+            from trac.ticket import Ticket
+            from trac.ticket.api import TicketSystem
+            from trac.ticket.web_ui import TicketModule
+            from trac.web.href import Href
 
             #
             # return  util.text.to_unicode(str)
             #
             # see http://projects.edgewall.com/trac/changeset/2799
             from trac.ticket.notification import TicketNotifyEmail
-
-        elif version == '0.12':
-            from trac import attachment 
-            from trac.env import Environment
-            from trac.ticket import Ticket
-            from trac.web.href import Href
-            from trac import config as trac_config
-            from trac import util
-            from trac.core import TracError
-            from trac.perm import PermissionSystem
-            from trac.perm import PermissionCache
-            from trac.ticket.web_ui import TicketModule
-            from trac.ticket.api import TicketSystem
-            from trac.test import Mock, MockPerm
-
-            #
-            # return  util.text.to_unicode(str)
-            #
-            # see http://projects.edgewall.com/trac/changeset/2799
-            from trac.ticket.notification import TicketNotifyEmail
-
-        elif version == '0.13':
-            from trac import attachment 
-            from trac.env import Environment
-            from trac.ticket import Ticket
-            from trac.web.href import Href
-            from trac import config as trac_config
-            from trac import util
-            from trac.core import TracError
-            from trac.perm import PermissionSystem
-            from trac.perm import PermissionCache
-            from trac.ticket.web_ui import TicketModule
-            from trac.ticket.api import TicketSystem
-            from trac.test import Mock, MockPerm
-
-            #
-            # return  util.text.to_unicode(str)
-            #
-            # see http://projects.edgewall.com/trac/changeset/2799
-            from trac.ticket.notification import TicketNotifyEmail
-
 
         else:
             logger.error('TRAC version %s is not supported' %version)
