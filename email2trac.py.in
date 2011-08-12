@@ -399,19 +399,19 @@ class TicketEmailParser(object):
 
 ########## DEBUG functions  ###########################################################
 
-    def debug_body(self, message_body, temporary_file=False):
-        if temporary_file:
-            (fd, body_file) = tempfile.mkstemp('.body_email2trac')
-            fx = os.fdopen(fd, 'wb')
-        else:
-            body_file = os.path.join(self.parameters.tmpdir, 'body.txt')
-            fx = open(body_file, 'wb') 
+    def debug_body(self, message_body, temp_file):
+        """
+        """
+        self.logger.debug('function debug_body:')
+
+        body_file = "%s.body" %(temp_file)
+        fx = open(body_file, 'wb') 
 
         if self.parameters.dry_run:
-            print 'DRY-RUN: not saving body to %s' %(body_file)
+            self.logger.debug('DRY-RUN: not saving body to %s' %(body_file))
             return
 
-        print 'writing body to %s' %(body_file)
+        self.logger.debug('writing body to %s' %(body_file))
         if not message_body:
                 message_body = '(None)'
 
@@ -424,7 +424,7 @@ class TicketEmailParser(object):
         except OSError:
             pass
 
-    def debug_attachments(self, message_parts):
+    def debug_attachments(self, message_parts, temp_file):
         """
         """
         self.logger.debug('function debug_attachments')
@@ -438,30 +438,29 @@ class TicketEmailParser(object):
                 continue
                 
             (original, filename, part) = item
+            self.logger.debug('\t part%d: Content-Type: %s' % (n, part.get_content_type()) )
+
+            dummy_filename, ext = os.path.splitext(filename)
 
             n = n + 1
-            print 'part%d: Content-Type: %s' % (n, part.get_content_type())
-        
-            s = 'part%d: filename: %s' %(n, filename)
+            part_name = 'part%d%s' %(n, ext)
+            part_file = "%s.%s" %(temp_file, part_name)
+
+            s = 'writing %s: filename: %s' %(part_file, filename)
             self.print_unicode(s)
-    
-            ## Forbidden chars
+
+            ## Forbidden chars, just write part files instead of names
             #
-            filename = filename.replace('\\', '_')
-            filename = filename.replace('/', '_') 
-            filename = filename + '.att_email2trac'
-    
-            part_file = os.path.join(self.parameters.tmpdir, filename)
-            s = 'writing part%d (%s)' % (n,part_file)
-            self.print_unicode(s)
+            #filename = filename.replace('\\', '_')
+            #filename = filename.replace('/', '_') 
+            #filename = filename + '.att_email2trac'
+            # part_file = os.path.join(self.parameters.tmpdir, filename)
+            #part_file = util.text.unicode_quote(part_file)
+            #self.print_unicode(part_file)
 
             if self.parameters.dry_run:
                 print 'DRY_RUN: NOT saving attachments'
                 continue
-
-            # trac error with long filenames support
-            #part_file = util.text.unicode_quote(part_file)
-            #part_file = repr(part_file)
 
             fx = open(part_file, 'wb')
             text = part.get_payload(decode=1)
@@ -480,31 +479,31 @@ class TicketEmailParser(object):
     def save_email_for_debug(self, message, project_name, create_tempfile=False):
 
         if self.parameters.dry_run:
-            print 'DRY_RUN: NOT saving email message'
+            self.logger.debug('DRY_RUN: NOT saving email message')
             return
 
         if create_tempfile:
-            (fd, msg_file) = tempfile.mkstemp('.%s.email2trac' %project_name)
+            (fd, tmp_file) = tempfile.mkstemp('.%s.email2trac' %project_name)
             fx = os.fdopen(fd, 'wb')
         else:
-            msg_file = os.path.join(self.parameters.tmpdir, 'msg.%s.email2trac' %project_name)
-            fx = open(msg_file, 'wb')
+            tmp_file = os.path.join(self.parameters.tmpdir, 'msg.%s.email2trac' %project_name)
+            fx = open(tmp_file, 'wb')
 
 
-        print 'saving email to %s' %(msg_file)
+        self.logger.debug('saving email to %s' %(tmp_file))
         fx.write('%s' % message)
         fx.close() 
         
         try:
-            os.chmod(msg_file,S_IRWXU|S_IRWXG|S_IRWXO)
+            os.chmod(tmp_file, S_IRWXU|S_IRWXG|S_IRWXO)
         except OSError:
             pass
 
         message_parts = self.get_message_parts(message)
         message_parts = self.unique_attachment_names(message_parts)
         body_text = self.get_body_text(message_parts)
-        self.debug_body(body_text, True)
-        self.debug_attachments(message_parts)
+        self.debug_body(body_text, tmp_file)
+        self.debug_attachments(message_parts, tmp_file)
 
 ########## Conversion functions  ###########################################################
 
@@ -1245,7 +1244,7 @@ class TicketEmailParser(object):
         self.logger.debug('function attach_attachments()')
 
         if self.parameters.dry_run:
-            print "DRY_RUN: no attachments attached to tickets"
+            self.logger.debug("DRY_RUN: no attachments attached to tickets")
             return ''
 
         count = 0
