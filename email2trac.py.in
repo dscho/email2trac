@@ -700,10 +700,24 @@ class TicketEmailParser(object):
                 workflow = self.parameters.workflow
 
         if workflow: 
-        
+
+            tkt_module = TicketModule(self.env)
+            field_changes, problems = tkt_module.get_ticket_changes(req, tkt, workflow)
+
+            for field in field_changes.keys():
+
+                ## We have already processed these fields
+                #
+                if not field in ['reporter', 'summary', 'description']:
+                    s = 'workflow : %s, field %s : %s, by %s' \
+                       %(workflow, field, field_changes[field]['new'],field_changes[field]['by'] )
+                    self.logger.debug(s)
+
+                    tkt[field] = field_changes[field]['new']
+
             ## There can be several workflow implementations
             #
-            for controller in ticket_system.action_controllers: 
+            #for controller in ticket_system.action_controllers: 
             
                 ## Not Needed anymore, 9 Aug 2011 BvdV, we already checked the permissions
                 #
@@ -718,10 +732,10 @@ class TicketEmailParser(object):
                 #            self.logger.info('controller %s has no actions implementations' %(controller))
                 # 
                 
-                fields = controller.get_ticket_changes(req, tkt, workflow) 
-                for key in fields.keys():
-                    self.logger.debug('\t workflow %s %s : %s' %(controller, key, fields[key]))
-                    tkt[key] = fields[key]
+                #fields = controller.get_ticket_changes(req, tkt, workflow) 
+                #for key in fields.keys():
+                #    self.logger.debug('\t workflow %s %s : %s' %(controller, key, fields[key]))
+                #    tkt[key] = fields[key]
 
             return True
 
