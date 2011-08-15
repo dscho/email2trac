@@ -49,6 +49,7 @@
   * Process all workflows not only the default trac workflow. Workflow is now 
     enabled for new tickets and ticket updates.
     eg: AdvancedTicketWorkflowPlugin, closes #226,#252
+    Suggestion by: Holger Jürgs <hjuergs add jochenkuhl dot de>
     Reported by: Frédéric DUARTE <f dot duarte add akka dot eu>
                  kofal002 att umn dot edu
     Fixed by: Bas van der Vlies

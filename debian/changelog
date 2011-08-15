@@ -1,3 +1,9 @@
+email2trac (2.4.0-3) stable; urgency=low
+
+  * changed workflow implementation 
+
+ -- Bas van der Vlies <basv@sara.nl>  Mon, 15 Aug 2011 12:52:57 +0200
+
 email2trac (2.4.0-2) stable; urgency=low
 
   * See Changelog 
