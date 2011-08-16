@@ -710,7 +710,7 @@ class TicketEmailParser(object):
 
                 ## We have already processed these fields
                 #
-                if not field in ['reporter', 'summary', 'description']:
+                if not field in ['summary', 'description']:
                     s = 'workflow : %s, field %s : %s, by %s' \
                        %(workflow, field, field_changes[field]['new'],field_changes[field]['by'] )
                     self.logger.debug(s)
