@@ -408,7 +408,7 @@ class TicketEmailParser(object):
         fx = open(body_file, 'wb') 
 
         if self.parameters.dry_run:
-            self.logger.debug('DRY-RUN: not saving body to %s' %(body_file))
+            self.logger.info('DRY-RUN: not saving body to %s' %(body_file))
             return
 
         self.logger.debug('writing body to %s' %(body_file))
@@ -459,7 +459,7 @@ class TicketEmailParser(object):
             #self.print_unicode(part_file)
 
             if self.parameters.dry_run:
-                print 'DRY_RUN: NOT saving attachments'
+                self.logger.info('DRY_RUN: NOT saving attachments')
                 continue
 
             fx = open(part_file, 'wb')
@@ -613,7 +613,7 @@ class TicketEmailParser(object):
             self.logger.debug('\t html2text conversion %s'%(cmd)) 
     
             if self.parameters.dry_run:
-                print 'DRY_RUN: html2text conversion command: %s\n' %(cmd)
+                self.logger.info('DRY_RUN: html2text conversion command: %s\n' %(cmd))
 
             else: 
                 f.write(data)
@@ -974,7 +974,8 @@ class TicketEmailParser(object):
         if body_text.strip() or update_fields or self.properties: 
 
             if self.parameters.dry_run:
-                print 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) ', self.author, cnum
+                s = 'DRY_RUN: tkt.save_changes(self.author, body_text, ticket_change_number) %s %s' %(self.author, cnum)
+                self.logger.info(s)
 
             else:
                 if error_with_attachments:
@@ -1185,7 +1186,7 @@ class TicketEmailParser(object):
             when = datetime.now(util.datefmt.utc)
 
         if self.parameters.dry_run:
-            print 'DRY_RUN: tkt.insert()'
+            self.logger.info('DRY_RUN: tkt.insert()')
         else:
             self.id = tkt.insert()
     
@@ -1223,7 +1224,9 @@ class TicketEmailParser(object):
 
         if changed:
             if self.parameters.dry_run:
-                print 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
+                s = 'DRY_RUN: tkt.save_changes(%s, comment) real reporter = %s' %( tkt['reporter'], self.author)
+                self.logger.info(s)
+
             else:
                 tkt.save_changes(tkt['reporter'], comment)
 
@@ -2217,7 +2220,7 @@ class TicketEmailParser(object):
             Email2TracNotification.Notify.notify = AlwaysNotifyReporter
 
         if self.parameters.dry_run  :
-                print 'DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter']
+                self.logger.info('DRY_RUN: self.notify(tkt, True) reporter = %s' %tkt['reporter'])
                 return
         try:
 
@@ -2266,6 +2269,8 @@ def AlwaysNotifyReporter(self, resid):
     notification.
     """
     (torcpts, ccrcpts) = self.get_recipients(resid)
+
+    #print torcpts, ccrcpts, sender_email
 
     if not tktparser.email_header_acl('notify_reporter_black_list', sender_email, False):
         ## additionally append sender (regardeless of settings in trac.ini)
