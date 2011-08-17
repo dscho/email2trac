@@ -2221,11 +2221,7 @@ class TicketEmailParser(object):
                 return
         try:
 
-            #from trac.ticket.web_ui import TicketModule
             #from trac.ticket.notification import TicketNotificationSystem
-            #ticket_sys = TicketNotificationSystem(self.env)
-            #a = TicketModule(self.env)
-            #print a.__dict__
             #tn_sys = TicketNotificationSystem(self.env)
             #print tn_sys
             #print tn_sys.__dict__
