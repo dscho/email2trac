@@ -1634,11 +1634,11 @@ class TicketEmailParser(object):
         if not m['Subject']:
             subject  = 'No Subject'
         else:
-            ## Bug in python logging module <2.6
-            #subject  = self.email_to_unicode(m['Subject'])
-            subject  = repr(m['Subject'])
+            subject  = self.email_to_unicode(m['Subject'])
 
-        self.logger.info('subject: %s' %subject)
+        ## Bug in python logging module <2.6
+        #
+        self.logger.info('subject: %s' %repr(subject))
 
         ## [hic] #1529: Re: LRZ
         #  [hic] #1529?owner=bas,priority=medium: Re: LRZ
