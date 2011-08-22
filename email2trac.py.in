@@ -1634,7 +1634,9 @@ class TicketEmailParser(object):
         if not m['Subject']:
             subject  = 'No Subject'
         else:
-            subject  = self.email_to_unicode(m['Subject'])
+            ## Bug in python logging module <2.6
+            #subject  = self.email_to_unicode(m['Subject'])
+            subject  = repr(m['Subject'])
 
         self.logger.info('subject: %s' %subject)
 
@@ -2270,7 +2272,7 @@ def AlwaysNotifyReporter(self, resid):
     """
     (torcpts, ccrcpts) = self.get_recipients(resid)
 
-    #print torcpts, ccrcpts, sender_email
+    print torcpts, ccrcpts, sender_email
 
     if not tktparser.email_header_acl('notify_reporter_black_list', sender_email, False):
         ## additionally append sender (regardeless of settings in trac.ini)

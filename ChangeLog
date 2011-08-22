@@ -69,6 +69,11 @@
     the allow NAME_MAX for the os (usually 255), closes #247.
     Reported by: Sergey V.Levin <slevin add adriver dot ru >
     Fixed by: Bas van der Vlies & Sergey V.Levin
+
+  * Replaced printing of subject line to repr() instead of unicode string.
+    Some versions if python logging module could crash, closes #267
+    Reported by: hju add jochenkuhl dot de
+    Fixed by: Bas van der Vlies
    
 2.1.0 (2011-6-6)
   * Convert all email addresses and author names to lower case in compare 
