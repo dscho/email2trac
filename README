@@ -6,14 +6,16 @@ we use to convert emails to trac tickets. The initial setup was made by
 Daniel Lundin from Edgewall Software. SARA has extend the initial setup,  
 with the following extensions:
 
-  - HTML messages
+  - HTML message conversion
   - Attachments
-  - Use commandline options
-  - Config file is used to control the behaviour of the email2trac software 
-  - Unicode support for special characters in the headers of an email
-    message
-  - Ticket updates via mail
-
+  - Tickets can be updated via email
+  - Use command-line options
+  - Configuration file to control the behavior.
+  - Unicode support
+  - SPAM detection
+  - Workflow support
+  - FullBlogPlugin support
+  - DiscussionPlugin support 
 
 See INSTALL for the how to setup the utilities
 
