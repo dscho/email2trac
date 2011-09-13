@@ -1917,7 +1917,8 @@ class TicketEmailParser(object):
                 self.logger.debug("\t Skipping multipart container")
                 continue
             
-            ## Check if this is an inline part. It's inline if there is co Cont-Disp header, or if there is one and it says "inline"
+            ## Check if this is an inline part. It's inline if there is co Cont-Disp header, 
+            #  or if there is one and it says "inline"
             #
             inline = self.inline_part(part)
 
@@ -1930,40 +1931,31 @@ class TicketEmailParser(object):
                     ALTERNATIVE_MULTIPART = False
                     continue
 
+            filename = part.get_filename() 
+            s = '\t unicode filename: %s' %(filename) 
+            self.print_unicode(s) 
+            self.logger.debug('\t raw filename: %s' %repr(filename))
+
+            filename = self.check_filename_length(filename)
 
             ## Save all non plain text message as attachment
             #
             if not content_type in ['text/plain']:
 
-                filename = part.get_filename()
-                
-                s = '\t unicode filename: %s' %(filename)
-                self.print_unicode(s)
-                self.logger.debug('\t raw filename: %s' %repr(filename))
+                message_parts.append( (filename, part) )
 
-                # 11 Aug 2011 -> Obsolete code
-                ## First try to use email header function to convert filename.
-                #  If this fails the use the plain filename 
-                #
-                #name = part.get_filename()
-                #try:
-                #    print repr(name), len(name)
-                #    filename = self.email_to_unicode(part.get_filename())
-                #    print "Bas: ", repr(filename), len(filename)
-                #except UnicodeEncodeError, detail:
-                #    print "Bas", repr(detail)
-                #    filename = part.get_filename()
-
-                message_parts.append( (self.check_filename_length(filename), part) )
-
-                ## We van only convert html messages
+                ## We only convert html messages
                 #
                 if not content_type == 'text/html':
-                    self.logger.debug('\t Appending content_type = %s' %(content_type))
+                    self.logger.debug('\t Appending %s (%s)' %(repr(filename), content_type))
                     continue
 
+
+            ## We have an text or html message
+            #
             if not inline:
-                    self.logger.debug('\t Skipping %s, not an inline messsage part' %(content_type))
+                    self.logger.debug('\t Appending %s (%s), not an inline messsage part' %(repr(filename), content_type))
+                    message_parts.append( (filename, part) )
                     continue
                 
             ## Try to decode message part. We have a html or plain text messafe
@@ -2270,9 +2262,9 @@ def AlwaysNotifyReporter(self, resid):
     Copy of def notify() to manipulate recipents to always include reporter for the
     notification.
     """
+    #print sender_email, resid
     (torcpts, ccrcpts) = self.get_recipients(resid)
-
-    print torcpts, ccrcpts, sender_email
+    #print "get_recipients finished"
 
     if not tktparser.email_header_acl('notify_reporter_black_list', sender_email, False):
         ## additionally append sender (regardeless of settings in trac.ini)
