@@ -1,3 +1,14 @@
+2.4.2 
+  * Fixed an error for text/plain attachments that are not specified as 
+    inline. These attachments were not attached to the ticket and were
+    skipped, closes #270
+    Reported by: hju add jochenkuhl dot de
+    Fixed by: Bas van der Vlies
+
+  * Use all 'to-field' addresses in message for recipient_list instead of only one, closes #268
+    Reported by: anonymous
+    Fixed by: Bas van der Vlies
+
 2.4.0 
   * Fixed an error in ticket_update_fields. Always check if given ticket
     field is a valid ticket field for trac. The error could be triggered

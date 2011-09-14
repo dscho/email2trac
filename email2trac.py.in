@@ -306,8 +306,14 @@ class TicketEmailParser(object):
         Get the default author name and email address from the message
         """ 
 
-        self.email_to = self.email_to_unicode(message['to']) 
-        self.to_name, self.to_email_addr = email.Utils.parseaddr (self.email_to) 
+        to_addrs = email.Utils.getaddresses( message.get_all('to', []) )
+        self.email_to_addrs = list()
+
+        for n,e in to_addrs:
+            self.email_to_addrs.append(e)
+
+        self.email_to_addrs = ','.join(self.email_to_addrs)
+
 
         self.email_from = self.email_to_unicode(message['from'])
         self.email_name, self.email_addr  = email.Utils.parseaddr(self.email_from)
@@ -1617,8 +1623,8 @@ class TicketEmailParser(object):
             self.logger.info('Message rejected : %s in black list' %(self.email_addr))
             return False
 
-        if not self.email_header_acl('recipient_list', self.to_email_addr, True):
-            self.logger.info('Message rejected : %s not in recipient list' %(self.to_email_addr))
+        if not self.email_header_acl('recipient_list', self.email_to_addrs, True):
+            self.logger.info('Message rejected : %s not in recipient list' %(self.email_to_addrs))
             return False
 
         ## If spam drop the message
