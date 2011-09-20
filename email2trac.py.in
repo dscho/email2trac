@@ -256,7 +256,7 @@ class TicketEmailParser(object):
 
             return False
 
-    def email_header_acl(self, keyword, header_field, default):
+    def email_header_acl(self, keyword, message_field, default):
         """
         This function wil check if the email address is allowed or denied
         to send mail to the ticket list
@@ -272,18 +272,30 @@ class TicketEmailParser(object):
                 return default 
 
         except KeyError, detail:
-            self.logger.debug('%s not defined, all messages are allowed.' %(keyword))
+            self.logger.debug('\t %s not defined, all messages are allowed.' %(keyword))
 
             return default 
 
         mail_addresses = string.split(mail_addresses, ',')
+        message_addresses = string.split(message_field, ',')
 
         for entry in mail_addresses:
             entry = entry.strip()
             TO_RE = re.compile(entry, re.VERBOSE|re.IGNORECASE)
-            result =  TO_RE.search(header_field)
-            if result:
-                return True
+
+            for addr in message_addresses:
+                addr = addr.strip()
+
+                if self.parameters.compare_function_list in [ 'matches', 'match']:
+                    s = '\t%s matches %s' %(addr, entry)
+                    result =  TO_RE.match(addr) 
+                else: 
+                    s = '\t%s contains %s' %(addr, entry)
+                    result =  TO_RE.search(addr) 
+
+                if result:
+                    self.logger.debug(s)
+                    return True
 
         return False
 
