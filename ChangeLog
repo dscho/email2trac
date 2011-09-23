@@ -1,3 +1,12 @@
+2.4.X 
+  * Allow regular expressions for recipient_list (multiple to-addresses), white_list 
+    and black_list. Each address is checked againt this regular expression, closes #272
+    examples:
+     * recipient_list : sara.nl (to-address contains sara.nl)
+     * recipient_list : ^basv@sara.nl$ (to-address equals basv@sara.nl)
+  Reported by: anonymous
+  Fixed by: Bas van der Vlies
+
 2.4.2 
   * Fixed an error for text/plain attachments that are not specified as 
     inline. These attachments were not attached to the ticket and were
