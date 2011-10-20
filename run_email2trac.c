@@ -26,6 +26,9 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
 #
 */
+#include "config.h"
+
+#include <sys/types.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pwd.h>
@@ -33,6 +36,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#ifdef HAVE_INITGROUPS
+#include <grp.h>
+#endif
 
 #include "run_email2trac.h"
 
@@ -106,16 +112,22 @@ int main(int argc, char** argv) {
     return -2;     /* 254 : Invalid caller */
   }
   
-  /* set UID/GID to Trac (or apache) user */
+  /* set UID/GID and supplementary groups to be Trac (or apache) user */
   check_username(TRAC_USER);
   if ( TRAC = getpwnam(TRAC_USER) ) {
+#ifdef HAVE_INITGROUPS
+    if (initgroups(TRAC_USER, TRAC->pw_gid)) {
+      if ( DEBUG ) printf("initgroups failed\n");
+      return -7;    /* 249 : Can't set supplementary groups */
+    }
+#endif
     if (setgid(TRAC->pw_gid) || setuid(TRAC->pw_uid)) {
       if ( DEBUG ) printf("setgid or setuid failed\n");
-      return -5;
+      return -5;   /* 251: Can't set gid or uid */
     }
   } else {
     if ( DEBUG ) printf("Invalid Trac user (%s)\n",TRAC_USER);
-    return -3;     /* 253 : Trac user not found */
+    return -6;     /* 250 : Trac user not found */
   }
 	 
   /* Check that script exists */

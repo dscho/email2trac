@@ -6,6 +6,7 @@
 #
 #
 AC_INIT(email2trac.py.in)
+AC_CONFIG_HEADER(config.h)
 AC_SUBST(prefix)
 AC_SUBST(exec_prefix)
 AC_SUBST(pyexecdir)
@@ -85,9 +86,12 @@ AC_DEFINE_UNQUOTED(SYSTEM_EMAIL2TRAC_CONF, "$email2trac_conf",
 AC_SUBST(email2trac_conf)
 AC_SUBST(SYSTEM_EMAIL2TRAC_CONF)
 
+dnl ##### Check for presence of initgroups() function
+AC_CHECK_FUNCS([initgroups])
+
 
 AC_OUTPUT(
         Makefile
-	email2trac.py
-	delete_spam.py
-	)
+        email2trac.py
+        delete_spam.py
+)
