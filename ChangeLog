@@ -1,4 +1,4 @@
-2.4.X 
+2.4.5 
   * Allow regular expressions for recipient_list (multiple to-addresses), 
     white_list and black_list. Each address is checked againt this regular 
     expression, closes #272
@@ -14,7 +14,12 @@
     closes #274
     Author: Dennis McRitchie <dmcr add Princeton dot EDU >
     Applied by: Bas van der Vlies
- 
+
+  * Fixed an error in parsing the From address. Email address was wrong if
+    email name contained a charset definition. There error was triggered 
+    if 'mailto_link: 1' is set. Resulting in an unicode error.
+    Author: Bas van der Vlies
+
 2.4.2 
   * Fixed an error for text/plain attachments that are not specified as 
     inline. These attachments were not attached to the ticket and were

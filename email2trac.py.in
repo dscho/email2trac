@@ -317,6 +317,7 @@ class TicketEmailParser(object):
         """
         Get the default author name and email address from the message
         """ 
+        self.logger.debug('function get_sender_info')
 
         to_addrs = email.Utils.getaddresses( message.get_all('to', []) )
         self.email_to_addrs = list()
@@ -327,8 +328,14 @@ class TicketEmailParser(object):
         self.email_to_addrs = ','.join(self.email_to_addrs)
 
 
-        self.email_from = self.email_to_unicode(message['from'])
-        self.email_name, self.email_addr  = email.Utils.parseaddr(self.email_from)
+        self.email_name, self.email_addr  = email.Utils.parseaddr(message['from'])
+
+        ## decode email name can contain charset
+        #
+        self.email_name = self.email_to_unicode(self.email_name)
+
+        dstr = '\t email name: %s, email address: %s' %(self.email_name, self.email_addr)  
+        self.logger.debug(dstr)
 
         ## Trac can not handle author's name that contains spaces
         #
@@ -2190,6 +2197,7 @@ class TicketEmailParser(object):
         This function returns a HTML mailto tag with the ticket id and author email address
         """
         self.logger.debug("function html_mailto_link")
+
         if not self.author:
             author = self.email_addr
         else:   
