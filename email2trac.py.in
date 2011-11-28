@@ -228,6 +228,7 @@ class TicketEmailParser(object):
         spam = False
         if message.has_key(self.parameters.spam_header):
             spam_l = string.split(message[self.parameters.spam_header])
+            #self.logger.info('Spam header: %s' %(message[self.parameters.spam_header]))
 
             try:
                 number = spam_l[0].count('*')
@@ -1347,7 +1348,7 @@ class TicketEmailParser(object):
 
 ########## Fullblog functions  #################################################
 
-    def blog(self, id): 
+    def blog(self, msg, subject, id): 
         """
         The blog create/update function
         """
@@ -1368,9 +1369,12 @@ class TicketEmailParser(object):
             comment = BlogComment(self.env, id)
             comment.author = self.author
 
-            message_parts = self.get_message_parts(m)
+            message_parts = self.get_message_parts(msg)
             comment.comment = self.get_body_text(message_parts)
 
+            if self.parameters.dry_run:
+                self.logger.info('DRY-RUN: not adding comment for blog entry "%s"' % id)
+                return
             blog.create_comment(req, comment)
 
         else:
@@ -1382,11 +1386,14 @@ class TicketEmailParser(object):
             #post = BlogPost(self.env, blog._get_default_postname(self.env)) 
             
             post.author = self.author
-            post.title = self.email_to_unicode(m['Subject'])
+            post.title = subject.strip()
 
-            message_parts = self.get_message_parts(m)
+            message_parts = self.get_message_parts(msg)
             post.body = self.get_body_text(message_parts)
             
+            if self.parameters.dry_run:
+                self.logger.info('DRY-RUN: not creating blog entry "%s"' % post.title)
+                return
             blog.create_post(req, post, self.author, u'Created by email2trac', False)
 
 
@@ -1723,7 +1730,7 @@ class TicketEmailParser(object):
             if blog_enabled: 
                 if result.group('blog'):
                     self.system = 'blog'
-                    self.blog(result.group('blog_id'))
+                    self.blog(m, subject[result.end('blog'):], result.group('blog_id'))
 
             if discussion_enabled:
                 ## New topic.
