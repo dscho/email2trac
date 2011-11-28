@@ -1,3 +1,9 @@
+2.4.X 
+  * Some blog improvements. Removes 'blog:' from subject line and honors the 
+    -n/--dry-run flag, closes #235 
+    Author: Thomas Moschny
+    Applied by: Bas van der Vlies
+
 2.4.5 
   * Allow regular expressions for recipient_list (multiple to-addresses), 
     white_list and black_list. Each address is checked againt this regular 
