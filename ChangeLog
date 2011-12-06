@@ -3,6 +3,12 @@
     -n/--dry-run flag, closes #235 
     Author: Thomas Moschny
     Applied by: Bas van der Vlies
+  
+  * Added Astaro firewall spam handling. Check X-Spam-Flag and X-Spam-Result
+    message header flags. see:
+     * http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=644916
+    Author: W. Martin Borgert" <debacle at debian dot org>
+    Applied by: Bas van der Vlies
 
 2.4.5 
   * Allow regular expressions for recipient_list (multiple to-addresses), 

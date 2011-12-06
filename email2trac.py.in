@@ -225,6 +225,8 @@ class TicketEmailParser(object):
         # X-Spam-Score: *** (3.255) BAYES_50,DNS_FROM_AHBL_RHSBL,HTML_
         # Note if Spam_level then '*' are included
         """
+        self.logger.debug('function spam')
+
         spam = False
         if message.has_key(self.parameters.spam_header):
             spam_l = string.split(message[self.parameters.spam_header])
@@ -238,12 +240,17 @@ class TicketEmailParser(object):
             if number >= self.parameters.spam_level:
                 spam = True
                 
-        # treat virus mails as spam
+        ## treat virus mails as spam
         #
         elif message.has_key('X-Virus-found'):          
             spam = True
 
-        # How to handle SPAM messages
+        ## Astaro firewall spam handling
+        #
+        elif message.get('X-Spam-Flag') == "YES" and message.get('X-Spam-Result') == "Spam":
+            spam = True
+
+        ## How to handle SPAM messages
         #
         if self.parameters.drop_spam and spam:
 
