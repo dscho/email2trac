@@ -1238,7 +1238,9 @@ class TicketEmailParser(object):
         if self.parameters.mailto_link:
             changed = True
             comment = u'\nadded mailto line\n'
-            mailto = self.html_mailto_link( m['Subject'])
+	
+            #mailto = self.html_mailto_link( m['Subject'])
+            mailto = self.html_mailto_link(subject)
 
             tkt['description'] = u'%s\r\n%s%s\r\n' \
                 %(head, mailto, body_text)
