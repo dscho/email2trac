@@ -10,6 +10,11 @@
     Author: W. Martin Borgert" <debacle at debian dot org>
     Applied by: Bas van der Vlies
 
+  * mailto link contained the wrong encoded subject line, charset was not 
+    stripped.
+    Reported by: Walter Lioen (SARA)
+    Fixed by: Bas van der Vlies
+
 2.4.5 
   * Allow regular expressions for recipient_list (multiple to-addresses), 
     white_list and black_list. Each address is checked againt this regular 

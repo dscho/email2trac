@@ -2222,6 +2222,11 @@ class TicketEmailParser(object):
         if not self.parameters.mailto_cc:
             self.parameters.mailto_cc = ''
 
+	## Bug in urllib.quote function
+	#
+	if isinstance(subject, unicode):
+		subject = subject.encode('utf-8')
+
         ## use urllib to escape the chars
         #
         s = '%s?Subject=%s&cc=%s' %( 
