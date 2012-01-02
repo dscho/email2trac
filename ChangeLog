@@ -1,4 +1,4 @@
-2.4.X 
+2.4.7 
   * Some blog improvements. Removes 'blog:' from subject line and honors the 
     -n/--dry-run flag, closes #235 
     Author: Thomas Moschny

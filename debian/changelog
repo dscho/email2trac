@@ -1,3 +1,9 @@
+email2trac (2.4.7-1) stable; urgency=low
+
+  * New release 2.4.7, see ChangeLog
+
+ -- Bas van der Vlies <bas@sara.nl>  Mon, 02 Jan 2012 09:41:19 +0100
+
 email2trac (2.4.6-2) stable; urgency=low
 
   *  See Changelog
