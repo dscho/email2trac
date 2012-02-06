@@ -1324,6 +1324,8 @@ class TicketEmailParser(object):
             fd = open(path, 'rb')
             if self.system == 'discussion':
                 att = attachment.Attachment(self.env, 'discussion', 'topic/%s' % (self.id,))
+            elif self.system == 'blog':
+                att = attachment.Attachment(self.env, 'blog', '%s' % (self.id,))
             else:
                 s = 'Attach %s to ticket %d' %(filename, self.id)
                 self.print_unicode(s)
@@ -1357,7 +1359,7 @@ class TicketEmailParser(object):
 
 ########## Fullblog functions  #################################################
 
-    def blog(self, msg, subject, id): 
+    def blog(self, msg, subject, id, params): 
         """
         The blog create/update function
         """
@@ -1371,39 +1373,69 @@ class TicketEmailParser(object):
         blog = FullBlogCore(self.env)
         req = Mock(authname='anonymous', perm=MockPerm(), args={})
 
-        if id: 
+        ## parameters from the subject
+        #
+        params = self.str_to_dict((params or '').lstrip('?'))
 
-            ## update blog
+        ## preferably get the time from the email date header, or else
+        #  use current date and time
+        date = email.Utils.parsedate_tz(msg.get('date'))
+        if date:
+            dt = util.datefmt.to_datetime(email.Utils.mktime_tz(date), util.datefmt.utc)
+        else:
+            self.logger.warn("No valid date header found")
+            dt = util.datefmt.to_datetime(None, util.datefmt.utc)
+
+        ## blog entry affected
+        #
+        self.id = id or util.datefmt.format_datetime(dt, "%Y%m%d%H%M%S", util.datefmt.utc)
+
+        ## check wether a blog post exists
+        #
+        post = BlogPost(self.env, self.id)
+        force_update = self.properties.get('update', params.get('update'))
+
+        ## message parts
+        #
+        message_parts = self.get_message_parts(msg)
+        message_parts = self.unique_attachment_names(message_parts)
+
+        if post.get_versions() and not force_update:
+
+            ## add comment to blog entry
             #
-            comment = BlogComment(self.env, id)
-            comment.author = self.author
-
-            message_parts = self.get_message_parts(msg)
+            comment = BlogComment(self.env, self.id)
+            comment.author = self.properties.get('author', params.get('author', self.author))
             comment.comment = self.get_body_text(message_parts)
+            comment.time = dt
 
             if self.parameters.dry_run:
                 self.logger.info('DRY-RUN: not adding comment for blog entry "%s"' % id)
                 return
-            blog.create_comment(req, comment)
+            warnings = blog.create_comment(req, comment)
 
         else:
-            ## create blog
+            ## create or update blog entry
             #
-            import time
-            post = BlogPost(self.env, 'blog_'+time.strftime("%Y%m%d%H%M%S", time.gmtime()))
-
-            #post = BlogPost(self.env, blog._get_default_postname(self.env)) 
-            
-            post.author = self.author
+            post.author = self.properties.get('author', params.get('author', self.author))
+            post.categories = self.properties.get('categories', params.get('categories', ''))
             post.title = subject.strip()
-
-            message_parts = self.get_message_parts(msg)
+            post.publish_time = dt
             post.body = self.get_body_text(message_parts)
             
             if self.parameters.dry_run:
                 self.logger.info('DRY-RUN: not creating blog entry "%s"' % post.title)
                 return
-            blog.create_post(req, post, self.author, u'Created by email2trac', False)
+            warnings = blog.create_post(req, post, self.author, u'Created by email2trac', False)
+
+        ## check for problems
+        #
+        if warnings:
+            raise TracError(', '.join('blog:%s:%s' % (w[0], w[1]) for w in warnings))
+        
+        ## all seems well, attach attachments
+        #
+        self.attach_attachments(message_parts)
 
 
 ########## Discussion functions  ##############################################
@@ -1695,7 +1727,7 @@ class TicketEmailParser(object):
         if self.get_config('components', 'tracfullblog.*') in ['enabled']:
             self.logger.debug('Trac BLOG support enabled')
             blog_enabled = True
-            blog_regex = '''|(?P<blog>blog:(?P<blog_id>\w*))'''
+            blog_regex = '''|(?P<blog>blog(?P<blog_params>[?][^:]*)?:(?P<blog_id>\S*))'''
 
 
         ## Check if DiscussionPlugin is installed
@@ -1739,7 +1771,7 @@ class TicketEmailParser(object):
             if blog_enabled: 
                 if result.group('blog'):
                     self.system = 'blog'
-                    self.blog(m, subject[result.end('blog'):], result.group('blog_id'))
+                    self.blog(m, subject[result.end('blog'):], result.group('blog_id'), result.group('blog_params'))
 
             if discussion_enabled:
                 ## New topic.
@@ -2145,6 +2177,10 @@ class TicketEmailParser(object):
             if self.system == 'discussion':
 
                 att = attachment.Attachment(self.env, 'discussion', 'ticket/%s' % (self.id,), filename)
+
+            elif self.system == 'blog':
+
+                att = attachment.Attachment(self.env, 'blog', '%s' % (self.id,), filename)
 
             else:
 
