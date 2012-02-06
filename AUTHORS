@@ -5,6 +5,10 @@ The email2trac package is written by:
 DiscussionPlugin support:
   Blackhex <ibarton at fit dot vutbr dot cz> 
 
+FullBlogPlugin support:
+  initial support         : lucas dot eisenzimmer at t-systems-mms dot com
+  improvements and patches:    Thomas Moschny < thomas dot moschny add gmx dot de>
+
 regular patch contributor(s):
    Ben Artin <ben at fetchsoftworks dot com>
 
