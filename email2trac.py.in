@@ -148,6 +148,10 @@ class TicketEmailParser(object):
         self.email_from = None
         self.author     = None
         self.id         = None
+
+        ## Will be set to True if the user has ben registered
+        #
+        self.allow_registered_user = False
         
         self.STRIP_CONTENT_TYPES = list()
 
@@ -372,8 +376,12 @@ class TicketEmailParser(object):
             ]
 
         if len(users) >= 1:
-            self.email_from = users[0][0]
+            self.email_from = users[0][2]
             self.author = users[0][0]
+
+            if self.parameters.white_list_registered_users:
+                self.allow_registered_user = True
+                    
 
     def set_reply_fields(self, ticket, message):
         """
@@ -1682,7 +1690,10 @@ class TicketEmailParser(object):
         self.db = self.env.get_db_cnx()
         self.get_sender_info(m)
 
-        if not self.email_header_acl('white_list', self.email_addr, True):
+        #
+
+        if not ( self.email_header_acl('white_list', self.email_addr, True) or self.allow_registered_user ) :
+
             self.logger.info('Message rejected : %s not in white list' %(self.email_addr))
             return False
 
