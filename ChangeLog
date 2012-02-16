@@ -21,12 +21,12 @@
      - white_list_file
   
    white_list_registered_users:  
-    This will allow registered user to create or update an ticket even
+    This will allow registered user to create or update a ticket even
     when they are not added to the 'white_list' in the configuration 
     file.
 
    white_list_file:
-    This will read allowed users from a file. One email address per line
+    This will read allowed users from a file. One email address per line.
 
    Suggested by: randy add psg dot com, closes ticket #288
    Author: Bas van der Vlies
