@@ -16,6 +16,21 @@
     Author: Thomas Moschny
     Applied by: Bas van der Vlies
 
+  * Added new parameters:
+     - white_list_registered_users
+     - white_list_file
+  
+   white_list_registered_users:  
+    This will allow registered user to create or update an ticket even
+    when they are not added to the 'white_list' in the configuration 
+    file.
+
+   white_list_file:
+    This will read allowed users from a file. One email address per line
+
+   Suggested by: randy add psg dot com, closes ticket #288
+   Author: Bas van der Vlies
+
 2.4.7 
   * Some blog improvements. Removes 'blog:' from subject line and honors the 
     -n/--dry-run flag, closes #235 

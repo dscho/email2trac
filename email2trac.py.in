@@ -438,6 +438,25 @@ class TicketEmailParser(object):
                 ticket['cc'] = self.email_to_unicode(email_cc)
 
 
+    def acl_list_from_file(self, f, keyword):
+        """
+        Read the email address from a file
+        """ 
+        self.logger.debug('function acl_list_from_file %s : %s' %(f, keyword)) 
+        
+        if  not os.path.isfile(f):
+            self.logger.error('%s_file: %s does not exists' %(keyword, f) )
+        else:
+            ## read whole file and replace '\n' with ''
+            #
+            addr_l = open(f, 'r').readlines()
+            s = ','.join(addr_l).replace('\n','')
+
+            try:
+                self.parameters[keyword] = "%s,%s" %(self.parameters[keyword], s)
+            except KeyError, detail:
+                self.parameters[keyword] = s
+
 ########## DEBUG functions  ###########################################################
 
     def debug_body(self, message_body, temp_file):
@@ -1690,7 +1709,9 @@ class TicketEmailParser(object):
         self.db = self.env.get_db_cnx()
         self.get_sender_info(m)
 
-        #
+
+        if self.parameters.white_list_file:
+            self.acl_list_from_file(self.parameters.white_list_file, 'white_list')
 
         if not ( self.email_header_acl('white_list', self.email_addr, True) or self.allow_registered_user ) :
 
