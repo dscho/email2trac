@@ -379,7 +379,10 @@ class TicketEmailParser(object):
             self.email_from = users[0][2]
             self.author = users[0][0]
 
+            self.logger.debug('\tget_sender_info: found registered user: %s' %(self.author) )
+
             if self.parameters.white_list_registered_users:
+                self.logger.debug('\tget_sender_info: added registered user to white list')
                 self.allow_registered_user = True
                     
 
