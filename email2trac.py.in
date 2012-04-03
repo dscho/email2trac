@@ -1268,7 +1268,7 @@ class TicketEmailParser(object):
         if self.parameters.mailto_link:
             changed = True
             comment = u'\nadded mailto line\n'
-	
+
             #mailto = self.html_mailto_link( m['Subject'])
             mailto = self.html_mailto_link(subject)
 
@@ -2292,11 +2292,11 @@ class TicketEmailParser(object):
 
         if not self.parameters.mailto_cc:
             self.parameters.mailto_cc = ''
-
-	## Bug in urllib.quote function
-	#
-	if isinstance(subject, unicode):
-		subject = subject.encode('utf-8')
+            
+        ## Bug in urllib.quote function
+        # 
+        if isinstance(subject, unicode):
+            subject = subject.encode('utf-8')
 
         ## use urllib to escape the chars
         #
