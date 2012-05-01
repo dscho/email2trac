@@ -2,7 +2,7 @@ Summary: Utilities for converting emails to trac tickets
 Name: email2trac
 Version: 2.5.0
 Release: 1
-License: GPL
+License: Apache License 2.0
 Group: Applications/Internet
 URL: https://subtrac.sara.nl/oss/email2trac
 

@@ -10,4 +10,4 @@ Section: misc
 Architecture: any
 Depends: ${slibs:Depends}, python, cdbs
 Description: Converts email to a trac ticket
-	Name says it All
+    Name says it All
