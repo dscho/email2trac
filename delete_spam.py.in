@@ -19,7 +19,7 @@
 #       limitations under the License.
 #
 # vi:
-#	set ts=4
+#   set ts=4
 """
 Author: Bas van der Vlies
 Date  : 29 September 2205
@@ -27,10 +27,10 @@ Desc. : Delete Spam tickets from database. Else we get an lot of
         tickets
 
 Usage :
-	delete_spam [ -f/--file <configfile>  -n/--dry-run -p/--project <name> -v/--verbose]
+    delete_spam [ -f/--file <configfile>  -n/--dry-run -p/--project <name> -v/--verbose]
 
 defaults:
-	configfile = /etc/email2trac.conf
+    configfile = /etc/email2trac.conf
 
 SVN Info:
         $Id$
@@ -45,139 +45,139 @@ import ConfigParser
 from trac import __version__ as trac_version
 
 def ReadConfig(file, name):
-	"""
-	Parse the config file
-	"""
+    """
+    Parse the config file
+    """
 
-	if not os.path.isfile(file):
-		print 'File %s does not exists' %file
-		sys.exit(1)
+    if not os.path.isfile(file):
+        print 'File %s does not exists' %file
+        sys.exit(1)
 
-	config = ConfigParser.ConfigParser()
-	try:
-		config.read(file)
-	except ConfigParser.MissingSectionHeaderError,detail:
-		print detail
-	  	sys.exit(1)
+    config = ConfigParser.ConfigParser()
+    try:
+        config.read(file)
+    except ConfigParser.MissingSectionHeaderError,detail:
+        print detail
+        sys.exit(1)
 
-  	# Use given project name else use defaults
-  	#
-	if name:
-		if not config.has_section(name):
-			print "Not an valid project name: %s" %name
-			print "Valid names: %s" %config.sections()
-			sys.exit(1)
+    # Use given project name else use defaults
+    #
+    if name:
+        if not config.has_section(name):
+            print "Not an valid project name: %s" %name
+            print "Valid names: %s" %config.sections()
+            sys.exit(1)
 
-		project =  dict()
-		for option in  config.options(name):
-			project[option] = config.get(name, option) 
+        project =  dict()
+        for option in  config.options(name):
+            project[option] = config.get(name, option) 
 
-	else:
-		project = config.defaults()
+    else:
+        project = config.defaults()
 
-	return project
+    return project
 
 
 
 def new_delete_spam(parameters):
-	"""
-	This only works for trac versions higher or equal then 0.10
-	"""
+    """
+    This only works for trac versions higher or equal then 0.10
+    """
 
-	debug = int(parameters['debug'])
-	DRY_RUN = parameters['DRY_RUN']
-	VERBOSE = parameters['VERBOSE']
+    debug = int(parameters['debug'])
+    DRY_RUN = parameters['DRY_RUN']
+    VERBOSE = parameters['VERBOSE']
 
-	project = parameters['project']
+    project = parameters['project']
 
 
-	env = Environment(project, create=0)
-	db = env.get_db_cnx()
+    env = Environment(project, create=0)
+    db = env.get_db_cnx()
 
-	cursor = db.cursor()
-	cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
-	while 1: 
-		row = cursor.fetchone()
-		if not row:
-			break 
+    cursor = db.cursor()
+    cursor.execute("SELECT id FROM ticket WHERE  component = 'Spam';") 
+    while 1: 
+        row = cursor.fetchone()
+        if not row:
+            break 
 
-		spam_id =  row[0]
+        spam_id =  row[0]
 
-		if debug or DRY_RUN or VERBOSE:
-			print "Deleting ticket %s" %spam_id
+        if debug or DRY_RUN or VERBOSE:
+            print "Deleting ticket %s" %spam_id
 
-		try:
-			tkt = Ticket(env, spam_id, db)
-		except util.TracError, detail:
-		        print detail
-			continue
+        try:
+            tkt = Ticket(env, spam_id, db)
+        except util.TracError, detail:
+                print detail
+            continue
 
-		if DRY_RUN:
-			print 'DRY_RUN: tkt.delete()'
-		else:
-			tkt.delete()
+        if DRY_RUN:
+            print 'DRY_RUN: tkt.delete()'
+        else:
+            tkt.delete()
 
 if __name__ == '__main__':
-	# Default config file
-	#
-	configfile = '@email2trac_conf@'
+    # Default config file
+    #
+    configfile = '@email2trac_conf@'
 
 
-	try:
-		 opts, args = getopt.getopt(sys.argv[1:], 'hf:np:v', ['help', 'file=', 'dry-run', 'project=', 'verbose'])
-	except getopt.error,detail:
-		print __doc__
-		print detail
-		sys.exit(1)
+    try:
+         opts, args = getopt.getopt(sys.argv[1:], 'hf:np:v', ['help', 'file=', 'dry-run', 'project=', 'verbose'])
+    except getopt.error,detail:
+        print __doc__
+        print detail
+        sys.exit(1)
 
-	DRY_RUN = False
-	VERBOSE = False
-	project_name = None
+    DRY_RUN = False
+    VERBOSE = False
+    project_name = None
 
-	for opt,value in opts:
-		if opt in [ '-h', '--help']:
-			print __doc__ 
-			sys.exit(0) 
-		elif opt in ['-f', '--file']:
-			configfile = value
-		elif opt in ['-n', '--dry-run']:
-			DRY_RUN = True
-		elif opt in ['-p', '--project']:
-			project_name = value
-		elif opt in ['-v', '--verbose']:
-			VERBOSE = True
+    for opt,value in opts:
+        if opt in [ '-h', '--help']:
+            print __doc__ 
+            sys.exit(0) 
+        elif opt in ['-f', '--file']:
+            configfile = value
+        elif opt in ['-n', '--dry-run']:
+            DRY_RUN = True
+        elif opt in ['-p', '--project']:
+            project_name = value
+        elif opt in ['-v', '--verbose']:
+            VERBOSE = True
 
-	# Determine major trac version used to be in email2trac.conf
-	# Quick hack for 0.12
-	#
-	version = '0.%s' %(trac_version.split('.')[1])
-	if version.startswith('0.12'):
-		version = '0.12'
+    # Determine major trac version used to be in email2trac.conf
+    # Quick hack for 0.12
+    #
+    version = '0.%s' %(trac_version.split('.')[1])
+    if version.startswith('0.12'):
+        version = '0.12'
 
-	if VERBOSE:
-		print "Found trac version: %s" %version
+    if VERBOSE:
+        print "Found trac version: %s" %version
 
-	## We only support versions 0.11 and 0.12
-	#
-	if not version in ['0.11', '0.12']:
-		print 'Trac version %s is not suported' %(version)
+    ## We only support versions 0.11 and 0.12
+    #
+    if not version in ['0.11', '0.12']:
+        print 'Trac version %s is not suported' %(version)
 
-	settings = ReadConfig(configfile, project_name)
-	if not settings.has_key('project'):
-		print __doc__
-		print 'No project defined in config file, eg:\n\t project: /data/trac/bas'
-		sys.exit(1)
+    settings = ReadConfig(configfile, project_name)
+    if not settings.has_key('project'):
+        print __doc__
+        print 'No project defined in config file, eg:\n\t project: /data/trac/bas'
+        sys.exit(1)
 
-	settings['DRY_RUN'] = DRY_RUN
-	settings['VERBOSE'] = VERBOSE
+    settings['DRY_RUN'] = DRY_RUN
+    settings['VERBOSE'] = VERBOSE
 
-	from trac.env import Environment
-	from trac.ticket import Ticket
-	from trac import util
+    from trac.env import Environment
+    from trac.ticket import Ticket
+    from trac import util
 
 
 
-	new_delete_spam(settings)
+    new_delete_spam(settings)
 
-	print 'Spam is deleted succesfully..' 
+    print 'Spam is deleted succesfully..' 
 # EOB
