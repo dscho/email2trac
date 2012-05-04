@@ -389,15 +389,11 @@ class TicketEmailParser(object):
                 self.allow_registered_user = True
                     
 
-    def set_reply_fields(self, ticket, message):
+    def set_cc_fields(self, ticket, message, update=False):
         """
         Set all the right fields for a new ticket
         """
-        self.logger.debug('function set_reply_fields')
-
-        ## Only use name or email adress
-        #
-        ticket['reporter'] = self.author
+        self.logger.debug('function set_cc_fields')
 
 
         # Put all CC-addresses in ticket CC field
@@ -417,30 +413,32 @@ class TicketEmailParser(object):
             #to_list = list()
             #for n,e in to_addrs:
             #   to_list.append(e)
-                
-            ## Always Remove reporter email address from cc-list 
-            #
-            try:
-                cc_addrs.remove((self.author, self.email_addr))
-            except ValueError, detail:
-                pass
+
+            if update:
+                self.logger.debug("\tupdate cc-fields")
 
             for name,addr in cc_addrs:
         
                 ## Prevent mail loop
                 #
                 if addr == self.trac_smtp_from:
-                    self.logger.debug("Skipping %s mail address for CC-field" %(addr))
+                    self.logger.debug("\tSkipping %s email address for CC-field, same as smtp_from address in trac.ini " %(addr))
                     continue
 
-                if email_cc:
-                    email_cc = '%s, %s' %(email_cc, addr)
+                ## Alwyas remove reporter email address
+                #
+                elif addr == self.email_addr:
+                    self.logger.debug("\tSkipping reporter email address for CC-field")
+                    continue
+
                 else:
-                    email_cc = addr
+                    if email_cc:
+                        email_cc = '%s, %s' %(email_cc, addr)
+                    else:
+                        email_cc = addr
 
             if email_cc:
-                self.logger.debug('set_reply_fields: %s' %email_cc)
-
+                self.logger.debug('\tCC fields: %s' %email_cc)
                 ticket['cc'] = self.email_to_unicode(email_cc)
 
 
@@ -961,7 +959,7 @@ class TicketEmailParser(object):
             #
             self.id = int(id[1:])
 
-        self.logger.debug("ticket_update id %s" %id)
+        self.logger.debug("\tticket id: %s" %id)
 
         ## When is the change committed
         # 
@@ -1008,27 +1006,33 @@ class TicketEmailParser(object):
         # 
         elif self.parameters.email_triggers_workflow:
 
-            self.logger.debug('email triggers workflow pre trac 0.11')
+            self.logger.debug('\temail triggers workflow pre trac 0.11')
 
             if tkt['status'] in ['closed']:
                 tkt['status'] = 'reopened'
                 tkt['resolution'] = ''
 
         else:
-            self.logger.debug('email triggers workflow disabled')
+            self.logger.debug('\temail triggers workflow disabled')
 
         ## Must we update some ticket fields properties via subject line
         #
         if update_fields:
             self.update_ticket_fields(tkt, update_fields)
 
+
         message_parts = self.get_message_parts(m)
         message_parts = self.unique_attachment_names(message_parts)
 
-        ## Must we update some ticket fields properties via body_text
+        ## Must we update some ticket fields properties via inline comments
+        # in body_text
         #
         if self.properties:
                 self.update_ticket_fields(tkt, self.properties)
+
+        ## Must we update the CC ticket field
+        #
+        self.set_cc_fields(tkt, m, update=True)
 
         if self.parameters.email_header:
             message_parts.insert(0, self.email_header_txt(m))
@@ -1047,7 +1051,7 @@ class TicketEmailParser(object):
                 if error_with_attachments:
                     body_text = '%s\\%s' %(error_with_attachments, body_text)
 
-                self.logger.debug('tkt.save_changes(%s, %d)' %(self.author, cnum))
+                self.logger.debug('\ttkt.save_changes(%s, %d)' %(self.author, cnum))
                 tkt.save_changes(self.author, body_text, when, None, str(cnum))
             
         if not spam:
@@ -1191,7 +1195,11 @@ class TicketEmailParser(object):
 
         tkt = Ticket(self.env)
 
-        self.set_reply_fields(tkt, msg)
+        ## self.author can be email address of an username
+        #
+        tkt['reporter'] = self.author
+
+        self.set_cc_fields(tkt, msg)
 
         self.set_ticket_fields(tkt)
 
