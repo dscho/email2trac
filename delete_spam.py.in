@@ -110,7 +110,7 @@ def new_delete_spam(parameters):
             tkt = Ticket(env, spam_id, db)
         except util.TracError, detail:
                 print detail
-            continue
+                continue
 
         if DRY_RUN:
             print 'DRY_RUN: tkt.delete()'
