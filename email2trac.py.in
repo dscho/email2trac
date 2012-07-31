@@ -1077,8 +1077,12 @@ class TicketEmailParser(object):
             #
             if not field.get('custom'):
                 value = self.get_config('ticket', 'default_%s' %(name) )
-                if (name in ['resolution']) and (value in ['fixed']):
+
+                ## skip this field can only be set by email2trac.conf
+                #
+                if name in ['resolution']:
                     value = None 
+
             else:
                 ##  Else get the default value for reporter
                 #
