@@ -20,6 +20,11 @@
     when reply_all was set.
     Author:  Bas van der Vlies
 
+  * Default setting for resolution can only be set in email2trac.conf. Skip the trac default
+    setting, closes #299
+    Reported by: ruediger dot kupper add gmail dot com
+    Fixed by: Bas van der Vlies
+
 2.5.0 
   * BLOG improvements by Thomas Moschny, closes #287,#235,#175:
    - Tries to use the 'Date:' email header to set the date of the blog
