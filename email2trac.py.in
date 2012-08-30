@@ -713,7 +713,10 @@ class TicketEmailParser(object):
 
         ## Determine max filename lenght
         # 
-        filemax_length = os.pathconf('/', os.pathconf_names['PC_NAME_MAX'])
+        try:
+            filemax_length = os.pathconf('/', 'PC_NAME_MAX')
+        except AttributeError, detail:
+            filemax_lenght = 240
 
         if len(quote_format) <= filemax_length:
             return name
