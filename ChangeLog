@@ -30,6 +30,11 @@
     Reported by: Anonymous
     Fixed by: Bas van der Vlies
 
+  * Added a new option 'only_strip_on_update', default value is False. Only call the functions
+    strip_quotes and strip_signature for ticket updates, closes #192
+    Requested by, Patch:  Konstantin Ryabitsev <icon add mricon dot com>
+    Appplied by: Bas van der Vlies
+
 2.5.0 
   * BLOG improvements by Thomas Moschny, closes #287,#235,#175:
    - Tries to use the 'Date:' email header to set the date of the blog

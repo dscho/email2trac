@@ -219,6 +219,11 @@ class TicketEmailParser(object):
         else:
             self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
 
+        #if self.parameters.only_strip_on_update == None:
+        #    self.parameters.only_strip_on_update == False:
+        #else:
+        #    self.parameters.only_strip_on_update == True:
+
         self.trac_smtp_from = self.get_config('notification', 'smtp_from')
         self.smtp_default_domain = self.get_config('notification', 'smtp_default_domain')
 
@@ -978,6 +983,7 @@ class TicketEmailParser(object):
 
             ## Not a valid ticket
             #
+            self.logger.info("\tCreating a new ticket, ticket id: %s does not exists" %id)
             self.id = None
             return False
 
@@ -1239,7 +1245,7 @@ class TicketEmailParser(object):
                 self.update_ticket_fields(tkt, update_fields)
 
 
-        message_parts = self.get_message_parts(msg)
+        message_parts = self.get_message_parts(msg, True)
 
         ## Must we update some ticket fields properties via body_text
         #
@@ -2007,7 +2013,7 @@ class TicketEmailParser(object):
 
         return part.get_param('inline', None, 'Content-Disposition') == '' or not part.has_key('Content-Disposition')
 
-    def get_message_parts(self, msg):
+    def get_message_parts(self, msg, new_email=False):
         """
         parses the email message and returns a list of body parts and attachments
         body parts are returned as strings, attachments are returned as tuples of (filename, Message object)
@@ -2103,12 +2109,15 @@ class TicketEmailParser(object):
 
             if self.parameters.reflow and not self.parameters.verbatim_format and format == 'flowed':
                 body_text = self.reflow(body_text, delsp == 'yes')
-    
-            if self.parameters.strip_signature:
-                body_text = self.strip_signature(body_text)
 
-            if self.parameters.strip_quotes: 
-                body_text = self.strip_quotes(body_text)
+            if new_email and self.parameters.only_strip_on_update:
+                self.logger.debug('Skip signature/quote stripping for new messages')
+            else:
+                if self.parameters.strip_signature:
+                    body_text = self.strip_signature(body_text)
+
+                if self.parameters.strip_quotes: 
+                    body_text = self.strip_quotes(body_text)
 
             if self.parameters.inline_properties: 
                 body_text = self.inline_properties(body_text)
