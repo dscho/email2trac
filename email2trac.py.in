@@ -219,11 +219,6 @@ class TicketEmailParser(object):
         else:
             self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
 
-        #if self.parameters.only_strip_on_update == None:
-        #    self.parameters.only_strip_on_update == False:
-        #else:
-        #    self.parameters.only_strip_on_update == True:
-
         self.trac_smtp_from = self.get_config('notification', 'smtp_from')
         self.smtp_default_domain = self.get_config('notification', 'smtp_default_domain')
 
