@@ -36,11 +36,17 @@
     Appplied by: Bas van der Vlies
 
   * Added a new option 'strip_signature_regex', default value: 
-      * '^-----Original Message-----$|^-- $'
+      * strip_signature_regex : ^-----Original Message-----$|^-- $
     This will strip signatures form the email messages. People can set their own regular
     expressions, closes #296, #155
     Author: steverweber add gmail dot com
-    Appplied by: Bas van der Vlies
+    Applied by: Bas van der Vlies
+
+  * email_quote can now handle regular expresions, default is:
+ 	email_quote : ^> .*
+    We now use the re.match function instead of line.startswith, closes #173
+    Suggested/Patch by: samuel add hoffstaetter dot com
+    Applied by: Bas van der Vlies
 
 2.5.0 
   * BLOG improvements by Thomas Moschny, closes #287,#235,#175:

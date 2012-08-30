@@ -181,7 +181,7 @@ class TicketEmailParser(object):
             self.parameters.spam_header = 'X-Spam-Score'
 
         if not self.parameters.email_quote:
-            self.parameters.email_quote = '> '
+            self.parameters.email_quote = '^> .*'
 
         if not self.parameters.ticket_update_by_subject_lookback:
             self.parameters.ticket_update_by_subject_lookback = 30
@@ -1875,7 +1875,7 @@ class TicketEmailParser(object):
         """
         Strip signature from message, inspired by Mailman software
         """
-        self.logger.debug('function strip_signature')
+        self.logger.debug('function strip_signature: %s' %self.parameters.strip_signature_regex)
 
         body = []
 
@@ -1937,19 +1937,28 @@ class TicketEmailParser(object):
         """
         Strip quotes from message by Nicolas Mendoza
         """
-        self.logger.debug('function strip_quotes')
+        self.logger.debug('function strip_quotes: %s' %self.parameters.email_quote)
 
         body = [] 
+
+        STRIP_RE = re.compile( self.parameters.email_quote )
+
         for line in text.splitlines():
+
             try:
 
-                if line.startswith(self.parameters.email_quote): 
+                match = STRIP_RE.match(line)
+                if match:
+                    print line
                     continue
 
             except UnicodeDecodeError:
 
                 tmp_line = self.email_to_unicode(line) 
-                if tmp_line.startswith(self.parameters.email_quote): 
+
+                match = STRIP_RE.match(tmp_line)
+                if match:
+                    print line
                     continue
                 
             body.append(line)
