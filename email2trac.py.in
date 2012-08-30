@@ -219,6 +219,10 @@ class TicketEmailParser(object):
         else:
             self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
 
+        if not self.parameters.strip_signature_regex:
+            self.parameters.strip_signature_regex = '^-----Original Message-----$|^-- $'
+
+
         self.trac_smtp_from = self.get_config('notification', 'smtp_from')
         self.smtp_default_domain = self.get_config('notification', 'smtp_default_domain')
 
@@ -1874,9 +1878,15 @@ class TicketEmailParser(object):
         self.logger.debug('function strip_signature')
 
         body = []
+
+        STRIP_RE = re.compile( self.parameters.strip_signature_regex )
         for line in text.splitlines():
-            if line == '-- ':
+
+            match = STRIP_RE.match(line)
+            if match:
+                self.logger.debug('\t"%s "  matched, skiping rest of message' %line)
                 break 
+
             body.append(line)
 
         return ('\n'.join(body))
