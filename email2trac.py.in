@@ -220,7 +220,7 @@ class TicketEmailParser(object):
             self.parameters.subject_field_separator = self.parameters.subject_field_separator.strip()
 
         if not self.parameters.strip_signature_regex:
-            self.parameters.strip_signature_regex = '^-----Original Message-----$|^-- $'
+            self.parameters.strip_signature_regex = '^-- $'
 
 
         self.trac_smtp_from = self.get_config('notification', 'smtp_from')
