@@ -2641,6 +2641,8 @@ if __name__ == '__main__':
         version = '0.12'
     elif version.startswith('0.13'):
         version = '0.13'
+    elif trac_version.startwith("1.0"):
+        version = '1.0'
 
     logger.debug("Found trac version: %s" %(version))
     
@@ -2661,7 +2663,7 @@ if __name__ == '__main__':
             from trac import config as trac_config
             from trac.core import TracError
 
-        elif version in ['0.11', '0.12', '0.13']:
+        elif version in ['0.11', '0.12', '0.13', '1.0']:
             from trac import attachment 
             from trac import config as trac_config
             from trac import util
