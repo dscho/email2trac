@@ -1,3 +1,10 @@
+2.X.X
+  * Removed '--Orignal message---' from strip_signature_regex. It is not a 
+    signature but a quote. Thanks to Walter Lioen (SARA)
+    Fixed by: Bas van der Vlies
+
+  * Added support fot trac 1.0, closes #302, #303
+
 2.6.0 (Dedicated to Ian Verhey (RIP) )
 
   * License changed from GNU Public License to Apache License, Version 2.0.
@@ -15,6 +22,7 @@
     field if there are cc-addresses in the email, closes #293
 
     Reported by: Sergey V.Levin <slevin add adriver dot ru >
+
     Fixed by: Bas van der Vlies
 
   * Reporter email address was not skipped and therefor added to cc field

@@ -1,3 +1,10 @@
+email2trac (2.6.1-1) stable; urgency=low
+
+  *  Removed --Orignal message--- from strip_signature_regex. It is not a 
+     signature but a quote. Thanks to Walter Lioen (SARA)
+
+ -- Bas van der Vlies <basv@sara.nl>  Fri, 21 Sep 2012 15:49:35 +0200
+
 email2trac (2.6.0-2) stable; urgency=low
 
   *  See Changelog

@@ -182,6 +182,7 @@ class TicketEmailParser(object):
 
         if not self.parameters.email_quote:
             self.parameters.email_quote = '^> .*'
+            self.parameters.skip_line_regex = '^> .*'
 
         if not self.parameters.ticket_update_by_subject_lookback:
             self.parameters.ticket_update_by_subject_lookback = 30
@@ -221,7 +222,7 @@ class TicketEmailParser(object):
 
         if not self.parameters.strip_signature_regex:
             self.parameters.strip_signature_regex = '^-- $'
-
+            self.parameters.cut_line_regex = '^-- $'
 
         self.trac_smtp_from = self.get_config('notification', 'smtp_from')
         self.smtp_default_domain = self.get_config('notification', 'smtp_default_domain')
@@ -2641,7 +2642,7 @@ if __name__ == '__main__':
         version = '0.12'
     elif version.startswith('0.13'):
         version = '0.13'
-    elif trac_version.startwith("1.0"):
+    elif trac_version.startswith("1.0"):
         version = '1.0'
 
     logger.debug("Found trac version: %s" %(version))
