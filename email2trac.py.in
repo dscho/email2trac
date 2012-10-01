@@ -2634,16 +2634,12 @@ if __name__ == '__main__':
     if component:
         settings['component'] = component
 
-    ## Determine major trac version used to be in email2trac.conf
-    # Quick hack for 0.12
+    ## We are only interested in the major versions
+    # 0.12.3 --> 0.12
+    # 1.0.2  --> 1.0
     #
-    version = '0.%s' %(trac_version.split('.')[1])
-    if version.startswith('0.12'):
-        version = '0.12'
-    elif version.startswith('0.13'):
-        version = '0.13'
-    elif trac_version.startswith("1.0"):
-        version = '1.0'
+    l = trac_version.split('.')
+    version = '.'.join(l[0:2])
 
     logger.debug("Found trac version: %s" %(version))
     

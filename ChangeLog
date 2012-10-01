@@ -1,9 +1,11 @@
-2.X.X
+2.6.2
   * Removed '--Orignal message---' from strip_signature_regex. It is not a 
     signature but a quote. Thanks to Walter Lioen (SARA)
     Fixed by: Bas van der Vlies
 
   * Added support fot trac 1.0, closes #302, #303
+    Reported by: thomas dot schabetsberger add webtek dot at
+    Fixed by: Bas van der Vlies
 
 2.6.0 (Dedicated to Ian Verhey (RIP) )
 
