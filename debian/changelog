@@ -1,3 +1,9 @@
+email2trac (2.6.3-1) stable; urgency=low
+
+  * See Changelog
+
+ -- Bas van der Vlies <basv@sara.nl>  Wed, 03 Oct 2012 13:44:57 +0200
+
 email2trac (2.6.2-1) stable; urgency=low
 
   *  Removed --Orignal message--- from strip_signature_regex. It is not a 
