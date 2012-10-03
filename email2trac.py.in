@@ -1733,7 +1733,11 @@ class TicketEmailParser(object):
         if self.parameters.debug:     # save the entire e-mail message text
             self.save_email_for_debug(m, self.parameters.project_name, True)
 
-        self.db = self.env.get_db_cnx()
+        if self.VERSION <= 0.11: 
+            self.db = self.env.get_db_cnx()
+        else:
+            self.db = self.env.get_read_db()
+
         self.get_sender_info(m)
 
 

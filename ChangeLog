@@ -1,3 +1,8 @@
+2.X.X
+  * use self.env.get_read_db for trac version > 0.11. self.env.get_db_cnx is obsolete. TRAC
+    api documentation.
+    Fixed by: Bas van der Vlies
+
 2.6.2
   * Removed '--Orignal message---' from strip_signature_regex. It is not a 
     signature but a quote. Thanks to Walter Lioen (SARA)
